@@ -1,3 +1,4 @@
 /Debug/
 /Release/
-/Heartbeat PE Debug.launch
+/.settings/*.xml
+/*.launch
