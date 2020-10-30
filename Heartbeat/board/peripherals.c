@@ -35,10 +35,56 @@ component:
 #include "peripherals.h"
 
 /***********************************************************************************************************************
+ * BOARD_InitPeripherals functional group
+ **********************************************************************************************************************/
+/***********************************************************************************************************************
+ * I2C0 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'I2C0'
+- type: 'i2c'
+- mode: 'freertos'
+- custom_name_enabled: 'false'
+- type_id: 'i2c_2566d7363e7e9aaedabb432110e372d7'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'I2C0'
+- config_sets:
+  - fsl_i2c:
+    - i2c_mode: 'kI2C_Master'
+    - clockSource: 'BusInterfaceClock'
+    - clockSourceFreq: 'GetFreq'
+    - rtos_handle:
+      - enable_custom_name: 'true'
+      - handle_custom_name: 'I2CA_rtosHandle'
+    - i2c_master_config:
+      - enableMaster: 'true'
+      - enableStopHold: 'false'
+      - baudRate_Bps: '100000'
+      - glitchFilterWidth: '0'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+i2c_rtos_handle_t I2CA_rtosHandle;
+const i2c_master_config_t I2C0_config = {
+  .enableMaster = true,
+  .enableStopHold = false,
+  .baudRate_Bps = 100000,
+  .glitchFilterWidth = 0
+};
+
+static void I2C0_init(void) {
+  /* Initialization function */
+  I2C_RTOS_Init(&I2CA_rtosHandle, I2C0_PERIPHERAL, &I2C0_config, I2C0_CLK_FREQ);
+}
+
+/***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
 void BOARD_InitPeripherals(void)
 {
+  /* Initialize components */
+  I2C0_init();
 }
 
 /***********************************************************************************************************************
