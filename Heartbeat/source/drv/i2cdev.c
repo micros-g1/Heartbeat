@@ -50,13 +50,13 @@ int i2cdevInit(i2c_handle_t *dev)
 	return true;
 }
 
-bool i2cdevReadByte(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
+bool i2cdevReadByte(i2c_handle_t *dev, uint8_t devAddress, uint16_t memAddress,
                     uint8_t *data)
 {
 	return i2cdevRead(dev, devAddress, memAddress,1,data);
 }
 
-bool i2cdevReadBit(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
+bool i2cdevReadBit(i2c_handle_t *dev, uint8_t devAddress, uint16_t memAddress,
                      uint8_t bitNum, uint8_t *data)
 {
 	uint8_t byte;
@@ -68,7 +68,7 @@ bool i2cdevReadBit(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
 	return status;
 }
 
-bool i2cdevReadBits(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
+bool i2cdevReadBits(i2c_handle_t *dev, uint8_t devAddress, uint16_t memAddress,
                     uint8_t bitStart, uint8_t length, uint8_t *data)
 {
 	bool status;
@@ -84,7 +84,7 @@ bool i2cdevReadBits(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
 	return status;
 }
 
-bool i2cdevRead(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
+bool i2cdevRead(i2c_handle_t *dev, uint8_t devAddress, uint16_t memAddress,
                uint16_t len, uint8_t *data)
 {
 	i2c_master_transfer_t xfer;
@@ -101,13 +101,13 @@ bool i2cdevRead(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
 	}
 	else
 	{
-		xfer.subaddress     = memAddress;
+		xfer.subaddress     = (uint8_t) memAddress;
 		xfer.subaddressSize = 1;
 	}
 	return I2C_RTOS_Transfer(dev, &xfer) == kStatus_Success;
 }
 
-bool i2cdevRead16(i2c_handle_t *dev, uint8_t devAddress, uint16_t memAddress,
+bool i2cdevRead16(i2c_handle_t *dev, uint8_t devAddress, uint32_t memAddress,
                uint16_t len, uint8_t *data)
 {
 	i2c_master_transfer_t xfer;
@@ -124,19 +124,19 @@ bool i2cdevRead16(i2c_handle_t *dev, uint8_t devAddress, uint16_t memAddress,
 	}
 	else
 	{
-		xfer.subaddress     = memAddress;
+		xfer.subaddress     = (uint16_t) memAddress;
 		xfer.subaddressSize = 2;
 	}
 	return I2C_RTOS_Transfer(dev, &xfer) == kStatus_Success;
 }
 
-bool i2cdevWriteByte(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
+bool i2cdevWriteByte(i2c_handle_t *dev, uint8_t devAddress, uint16_t memAddress,
                     uint8_t data)
 {
 	return i2cdevWrite(dev, devAddress, memAddress, 1, &data);
 }
 
-bool i2cdevWriteBit(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
+bool i2cdevWriteBit(i2c_handle_t *dev, uint8_t devAddress, uint16_t memAddress,
                     uint8_t bitNum, uint8_t data)
 {
 	uint8_t byte;
@@ -145,7 +145,7 @@ bool i2cdevWriteBit(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
 	return i2cdevWriteByte(dev, devAddress, memAddress, byte);
 }
 
-bool i2cdevWriteBits(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
+bool i2cdevWriteBits(i2c_handle_t *dev, uint8_t devAddress, uint16_t memAddress,
                      uint8_t bitStart, uint8_t length, uint8_t data)
 {
 	bool status;
@@ -163,7 +163,7 @@ bool i2cdevWriteBits(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
 	return status;
 }
 
-bool i2cdevWrite(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
+bool i2cdevWrite(i2c_handle_t *dev, uint8_t devAddress, uint16_t memAddress,
                 uint16_t len, uint8_t *data)
 {
 	i2c_master_transfer_t xfer;
@@ -180,13 +180,13 @@ bool i2cdevWrite(i2c_handle_t *dev, uint8_t devAddress, uint8_t memAddress,
 	}
 	else
 	{
-		xfer.subaddress     = memAddress;
+		xfer.subaddress     = (uint8_t) memAddress;
 		xfer.subaddressSize = 1;
 	}
 	return I2C_RTOS_Transfer(dev, &xfer) == kStatus_Success;
 }
 
-bool i2cdevWrite16(i2c_handle_t *dev, uint8_t devAddress, uint16_t memAddress,
+bool i2cdevWrite16(i2c_handle_t *dev, uint8_t devAddress, uint32_t memAddress,
                    uint16_t len, uint8_t *data)
 {
 	i2c_master_transfer_t xfer;
@@ -203,7 +203,7 @@ bool i2cdevWrite16(i2c_handle_t *dev, uint8_t devAddress, uint16_t memAddress,
 	}
 	else
 	{
-		xfer.subaddress     = memAddress;
+		xfer.subaddress     = (uint16_t) memAddress;
 		xfer.subaddressSize = 2;
 	}
 	return I2C_RTOS_Transfer(dev, &xfer) == kStatus_Success;
