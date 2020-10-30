@@ -50,6 +50,7 @@ max30100_state_t max30100_get_reset_ready(bool* ready);
 max30100_state_t max30100_wait_reset_ready();
 max30100_state_t max30100_trigger_temp_read();
 max30100_state_t max30100_get_temperature_ready(bool* ready);
+max30100_state_t max30100_wait_temperature_ready();
 max30100_state_t max30100_set_operating_mode(max30100_mode_t mode);
 max30100_state_t max30100_get_operating_mode(max30100_mode_t* mode);
 //SP02
