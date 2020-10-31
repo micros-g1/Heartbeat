@@ -60,6 +60,15 @@ max30100_state_t max30100_init()
 	return MAX30100_FAILURE;
 }
 
+max30100_state_t max30100_get_interrupt_flags(uint8_t* flags)
+{
+	if (!i2c) return MAX30100_FAILURE;
+	uint8_t val;
+	max30100_state_t ret_state = max30100_register_value_read(i2c, &val, MAX30100_INTERRUPT_STATUS_ADDR, 0, MAX30100_BITS_PER_REGISTER);
+	*flags = val & MAX30100_ALL_INTERRUPTS_FLAGS_MASK;
+	return ret_state;
+}
+
 max30100_state_t max30100_get_almost_full_flag(bool* flag)
 {
 	if (!i2c) return MAX30100_FAILURE;
