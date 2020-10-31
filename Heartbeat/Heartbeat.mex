@@ -916,7 +916,7 @@
                         <struct name="i2c_master_config">
                            <setting name="enableMaster" value="true"/>
                            <setting name="enableStopHold" value="false"/>
-                           <setting name="baudRate_Bps" value="100000"/>
+                           <setting name="baudRate_Bps" value="400000"/>
                            <setting name="glitchFilterWidth" value="0"/>
                         </struct>
                      </config_set>

@@ -19,9 +19,10 @@ typedef enum
 
 //TODO: Documentation
 max30100_state_t max30100_init();
-max30100_state_t max30100_get_almost_full_flag(bool* flag);
-max30100_state_t max30100_get_temp_ready_flag(bool* flag);
-max30100_state_t max30100_get_hr_ready_flag(bool* flag);
+max30100_state_t max30100_get_interrupt_flags(uint8_t* flags);
+max30100_state_t max30100_get_almost_full_interrupt_flag(bool* flag);
+max30100_state_t max30100_get_temp_ready_interrupt_flag(bool* flag);
+max30100_state_t max30100_get_hr_ready_interrupt_flag(bool* flag);
 max30100_state_t max30100_is_power_ready(bool* flag);
 max30100_state_t max30100_fifo_almost_full_interrupt(bool enable);
 max30100_state_t max30100_fifo_almost_full_get_interrupt_enabled(bool* is_enabled);
