@@ -22,10 +22,10 @@ typedef i2c_handle_t max30100_i2c_handler_t;
 
 static max30100_i2c_handler_t* i2c = NULL;
 
-uint32_t current_sample;
+static uint32_t current_sample;
 
 
-max30100_state_t max30100_register_value_read(max30100_i2c_handler_t* i2c, uint8_t* valuep, uint8_t reg_addr, uint8_t field_bit_offset, uint8_t field_bit_length)
+static max30100_state_t max30100_register_value_read(max30100_i2c_handler_t* i2c, uint8_t* valuep, uint8_t reg_addr, uint8_t field_bit_offset, uint8_t field_bit_length)
 {
 	if (!i2c) return MAX30100_FAILURE;
 	bool result = false;
@@ -36,7 +36,7 @@ max30100_state_t max30100_register_value_read(max30100_i2c_handler_t* i2c, uint8
 	return result? MAX30100_SUCCESS : MAX30100_FAILURE;
 }
 
-max30100_state_t max30100_register_value_write(max30100_i2c_handler_t* i2c, uint8_t value, uint8_t reg_addr, uint8_t field_bit_offset, uint8_t field_bit_length)
+static max30100_state_t max30100_register_value_write(max30100_i2c_handler_t* i2c, uint8_t value, uint8_t reg_addr, uint8_t field_bit_offset, uint8_t field_bit_length)
 {
 	if (!i2c) return MAX30100_FAILURE;
 	bool result = false;
@@ -45,6 +45,13 @@ max30100_state_t max30100_register_value_write(max30100_i2c_handler_t* i2c, uint
 		else
 			result = i2cdevWriteBits(i2c, MAX30100_I2C_ADDRESS, reg_addr, field_bit_offset+field_bit_length-1, field_bit_length, value);
 		return result? MAX30100_SUCCESS : MAX30100_FAILURE;
+}
+
+static max30100_state_t max30100_register_burst_read(max30100_i2c_handler_t* i2c, uint8_t* buffer, uint8_t reg_addr, size_t bytes)
+{
+	if (!i2c) return MAX30100_FAILURE;
+	result = i2cdevRead(i2c, MAX30100_I2C_ADDRESS, reg_addr, bytes, buffer);
+	return result? MAX30100_SUCCESS : MAX30100_FAILURE;
 }
 
 max30100_state_t max30100_init()
@@ -184,12 +191,8 @@ max30100_state_t max30100_fifo_read_next()
 {
 	if (!i2c) return MAX30100_FAILURE;
 	uint8_t* data = (uint8_t*) &current_sample;
-	max30100_state_t state = MAX30100_SUCCESS;
-	//This could be done in burst mode...
-	state = state == MAX30100_SUCCESS? max30100_register_value_read(i2c, &data[0], MAX30100_FIFO_DATA_REGISTER_ADDR, MAX30100_FIFO_DATA_BIT_OFFSET, MAX30100_FIFO_DATA_BIT_LENGTH) : state;
-	state = state == MAX30100_SUCCESS? max30100_register_value_read(i2c, &data[1], MAX30100_FIFO_DATA_REGISTER_ADDR, MAX30100_FIFO_DATA_BIT_OFFSET, MAX30100_FIFO_DATA_BIT_LENGTH) : state;
-	state = state == MAX30100_SUCCESS? max30100_register_value_read(i2c, &data[2], MAX30100_FIFO_DATA_REGISTER_ADDR, MAX30100_FIFO_DATA_BIT_OFFSET, MAX30100_FIFO_DATA_BIT_LENGTH) : state;
-	state = state == MAX30100_SUCCESS? max30100_register_value_read(i2c, &data[3], MAX30100_FIFO_DATA_REGISTER_ADDR, MAX30100_FIFO_DATA_BIT_OFFSET, MAX30100_FIFO_DATA_BIT_LENGTH) : state;
+	max30100_state_t state;
+	state = max30100_register_burst_read(i2c, data, MAX30100_FIFO_DATA_REGISTER_ADDR, sizeof(current_sample));
 	return state;
 }
 
