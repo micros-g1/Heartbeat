@@ -44,8 +44,8 @@ typedef enum
 }max30102_addr_t;
 
 #define MAX30102_MASK_GENERATE(BITSTART,LENGTH)  ( ( (1 << (LENGTH)) - 1 ) << (  (BITSTART) + 1 - (LENGTH)) )
-#define MAX30102_APPLY_BITSTART_LENGTH(DATA,BITSTART,LENGTH)  ( ( (DATA) << (BITSTART) ) & MAX30102_MASK_GENERATE(BITSTART,LENGTH) )
-#define MAX30102_RECOVER_BITSTART_LENGTH(DATA,BITSTART,LENGTH) ( ( (DATA) & MAX30102_MASK_GENERATE(BITSTART,LENGTH) ) >> BITSTART )
+#define MAX30102_APPLY_BITSTART_LENGTH(DATA,BITSTART,LENGTH)  ( ( (DATA) << (  (BITSTART) + 1 - (LENGTH)) ) & MAX30102_MASK_GENERATE(BITSTART,LENGTH) )
+#define MAX30102_RECOVER_BITSTART_LENGTH(DATA,BITSTART,LENGTH) ( ( (DATA) & MAX30102_MASK_GENERATE(BITSTART,LENGTH) ) >> (  (BITSTART) + 1 - (LENGTH)) )
 
 //Interrupt Status 1
 #define MAX30102_A_FULL_BIT_START 7
@@ -63,14 +63,14 @@ typedef enum
 typedef union
 {
 	struct{
-		unsigned int a_full : 1;
-		unsigned int prg_rdy : 1;
-		unsigned int alc_ovf : 1;
-		unsigned int : 4;
-		unsigned int pwr_rdy : 1;
-		unsigned int : 6;
-		unsigned int die_temp_rdy : 1;
 		unsigned int : 1;
+		unsigned int die_temp_rdy : 1;
+		unsigned int : 6;
+		unsigned int pwr_rdy : 1;
+		unsigned int : 4;
+		unsigned int alc_ovf : 1;
+		unsigned int prg_rdy : 1;
+		unsigned int a_full : 1;
 	};
 	uint8_t byte[2];
 	uint16_t val;
@@ -89,12 +89,12 @@ typedef union
 typedef union
 {
 	struct{
-		unsigned int a_full_en : 1;
-		unsigned int prg_rdy_en : 1;
-		unsigned int alc_ovf_en : 1;
-		unsigned int : 11;
-		unsigned int die_temp_rdy_en : 1;
 		unsigned int : 1;
+		unsigned int die_temp_rdy_en : 1;
+		unsigned int : 11;
+		unsigned int alc_ovf_en : 1;
+		unsigned int prg_rdy_en : 1;
+		unsigned int a_full_en : 1;
 	};
 	uint8_t byte[2];
 	uint16_t val;
@@ -127,9 +127,9 @@ typedef enum
 typedef union
 {
 	struct{
-		max30102_smp_ave_t smp_ave : 3;
-		unsigned int fifo_roll_over_en : 1;
 		unsigned int fifo_a_full : 4;
+		unsigned int fifo_roll_over_en : 1;
+		max30102_smp_ave_t smp_ave : 3;
 	};
 	uint8_t byte[1];
 	uint8_t val;
@@ -150,10 +150,10 @@ typedef union
 {
 	struct
 	{
-		unsigned int shdn : 1;
-		unsigned int reset : 1;
-		unsigned int : 3;
 		max30102_mode_t mode : 3;
+		unsigned int : 3;
+		unsigned int reset : 1;
+		unsigned int shdn : 1;
 	};
 	uint8_t byte[1];
 	uint8_t val;
@@ -194,10 +194,10 @@ typedef union
 {
 	struct
 	{
-		unsigned int : 1;
-		max30102_spo2_adc_resolution_t spo2_adc_rge : 2;
-		max30102_spo2_adc_resolution_t spo2_sr : 3;
 		max30102_led_pw_t led_pw : 2;
+		max30102_spo2_adc_resolution_t spo2_sr : 3;
+		max30102_spo2_adc_resolution_t spo2_adc_rge : 2;
+		unsigned int : 1;
 	};
 	uint8_t byte[1];
 	uint8_t val;
@@ -225,14 +225,14 @@ typedef union
 {
 	struct
 	{
-		unsigned int : 1;
-		max30102_slot_t slot2 : 3;
-		unsigned int : 1;
-		max30102_slot_t slot1 : 3;
+		max30102_slot_t slot3 : 3;
 		unsigned int : 1;
 		max30102_slot_t slot4 : 3;
 		unsigned int : 1;
-		max30102_slot_t slot3 : 3;
+		max30102_slot_t slot1 : 3;
+		unsigned int : 1;
+		max30102_slot_t slot2 : 3;
+		unsigned int : 1;
 	};
 	uint8_t byte[2];
 	uint8_t val;

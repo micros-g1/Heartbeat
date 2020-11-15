@@ -29,9 +29,11 @@
  */
  
 /**
- * @file    Heartbeat.c
+ * @file    heartbeat.c
  * @brief   Application entry point.
  */
+
+/* Default includes. */
 #include <stdio.h>
 #include "board.h"
 #include "peripherals.h"
@@ -39,13 +41,35 @@
 #include "clock_config.h"
 #include "MK64F12.h"
 #include "fsl_debug_console.h"
-/* TODO: insert other include files here. */
+/* other includes. */
+#include "drv/max30102.h"
 
-/* TODO: insert other definitions and declarations here. */
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+#define I2C_A_IRQn I2C0_IRQn
 
-/**
+/* Priorities at which the tasks are created.  */
+#define mainEXAMPLE_TASK_PRIORITY   (tskIDLE_PRIORITY + 1)
+#define M2T(X) ((unsigned int)((X)*(configTICK_RATE_HZ/1000.0)))
+
+/*******************************************************************************
+ * Prototypes
+ ******************************************************************************/
+/* Application API */
+static void example_task(void *pvParameters);
+
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
+
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
+/*
  * @brief   Application entry point.
  */
+
 int main(void) {
 
   	/* Init board hardware. */
@@ -56,17 +80,62 @@ int main(void) {
     /* Init FSL debug console. */
     BOARD_InitDebugConsole();
 #endif
+    NVIC_SetPriority(I2C_A_IRQn, 5);
 
-    PRINTF("Hello World!\n");
 
-    /* Force the counter to be placed into memory. */
-    volatile static int i = 0 ;
-    /* Enter an infinite loop, just incrementing a counter. */
-    while(1) {
-        i++ ;
-        /* 'Dummy' NOP to allow source level single stepping of
-            tight while() loop */
-        __asm volatile ("nop");
-    }
-    return 0 ;
+	/* RTOS Init Tasks. */
+	if (xTaskCreate(example_task, "example_task",
+	configMINIMAL_STACK_SIZE + 166, NULL, mainEXAMPLE_TASK_PRIORITY, NULL) != pdPASS) {
+		PRINTF("Example task creation failed!.\r\n");
+		while (1)
+			;
+	}
+	else {
+		setvbuf (stdout, NULL, _IONBF, 0);
+//		PRINTF("Empezo\n");
+	}
+	vTaskStartScheduler();
+	for (;;)
+		;
 }
+
+static float dummy;
+static void example_task(void *pvParameters) {
+	max30102_state_t state1 = max30102_init();
+	max30102_state_t state2 = max30102_trigger_temp_read();
+//	state = max30102_is_temp_read_ready(bool* rdy);
+//	max30102_state_t state3 = max30102_wait_temp_read_ready();
+	max30102_state_t state4 = max30102_get_temperature_c(&dummy);
+	max30102_state_t state3 = max30102_wait_temp_read_ready();
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+
+	uint8_t part_id = 0;
+	max30102_get_part_id(&part_id);
+	state2 = max30102_trigger_temp_read();
+//	state = max30102_is_temp_read_ready(bool* rdy);
+	state3 = max30102_wait_temp_read_ready();
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	state4 = max30102_get_temperature_c(&dummy);
+	for (;;) {
+
+		vTaskSuspend(NULL);
+	}
+
+}
+

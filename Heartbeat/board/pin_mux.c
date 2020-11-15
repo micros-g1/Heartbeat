@@ -142,6 +142,8 @@ BOARD_InitPins:
 - options: {callFromInitBoot: 'true', prefix: BOARD_, coreID: core0, enableClock: 'true'}
 - pin_list:
   - {pin_num: '36', peripheral: TPIU, signal: SWO, pin_signal: PTA2/UART0_TX/FTM0_CH7/JTAG_TDO/TRACE_SWO/EZP_DO, drive_strength: low, pull_select: down, pull_enable: disable}
+  - {pin_num: '31', peripheral: I2C0, signal: SCL, pin_signal: ADC0_SE17/PTE24/UART4_TX/I2C0_SCL/EWM_OUT_b, identifier: ''}
+  - {pin_num: '32', peripheral: I2C0, signal: SDA, pin_signal: ADC0_SE18/PTE25/UART4_RX/I2C0_SDA/EWM_IN, identifier: ''}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -156,6 +158,8 @@ void BOARD_InitPins(void)
 {
     /* Port A Clock Gate Control: Clock enabled */
     CLOCK_EnableClock(kCLOCK_PortA);
+    /* Port E Clock Gate Control: Clock enabled */
+    CLOCK_EnableClock(kCLOCK_PortE);
 
     /* PORTA2 (pin 36) is configured as TRACE_SWO */
     PORT_SetPinMux(PORTA, 2U, kPORT_MuxAlt7);
@@ -174,6 +178,12 @@ void BOARD_InitPins(void)
                      /* Drive Strength Enable: Low drive strength is configured on the corresponding pin, if pin
                       * is configured as a digital output. */
                      | PORT_PCR_DSE(kPORT_LowDriveStrength));
+
+    /* PORTE24 (pin 31) is configured as I2C0_SCL */
+    PORT_SetPinMux(PORTE, 24U, kPORT_MuxAlt5);
+
+    /* PORTE25 (pin 32) is configured as I2C0_SDA */
+    PORT_SetPinMux(PORTE, 25U, kPORT_MuxAlt5);
 }
 
 /* clang-format off */

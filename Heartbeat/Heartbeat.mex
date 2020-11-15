@@ -17,10 +17,7 @@
    </preferences>
    <tools>
       <pins name="Pins" version="8.0" enabled="true" update_project_code="true">
-         <generated_project_files>
-            <file path="board/pin_mux.c" update_enabled="true"/>
-            <file path="board/pin_mux.h" update_enabled="true"/>
-         </generated_project_files>
+         <generated_project_files/>
          <pins_profile>
             <processor_version>8.0.1</processor_version>
             <pin_labels>
@@ -141,6 +138,11 @@
                         <data>true</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="Peripheral" resourceId="I2C0" description="Peripheral I2C0 is not initialized" problem_level="1" source="Pins:BOARD_InitPins">
+                     <feature name="initialized" evaluation="equal">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
                   <dependency resourceType="SWComponent" resourceId="platform.drivers.common" description="Pins initialization requires the COMMON Driver in the project." problem_level="2" source="Pins:BOARD_InitPins">
                      <feature name="enabled" evaluation="equal" configuration="core0">
                         <data>true</data>
@@ -158,6 +160,16 @@
                         <pin_feature name="drive_strength" value="low"/>
                         <pin_feature name="pull_select" value="down"/>
                         <pin_feature name="pull_enable" value="disable"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="I2C0" signal="SCL" pin_num="31" pin_signal="ADC0_SE17/PTE24/UART4_TX/I2C0_SCL/EWM_OUT_b">
+                     <pin_features>
+                        <pin_feature name="identifier" value=""/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="I2C0" signal="SDA" pin_num="32" pin_signal="ADC0_SE18/PTE25/UART4_RX/I2C0_SDA/EWM_IN">
+                     <pin_features>
+                        <pin_feature name="identifier" value=""/>
                      </pin_features>
                   </pin>
                </pins>
@@ -916,7 +928,7 @@
                         <struct name="i2c_master_config">
                            <setting name="enableMaster" value="true"/>
                            <setting name="enableStopHold" value="false"/>
-                           <setting name="baudRate_Bps" value="400000"/>
+                           <setting name="baudRate_Bps" value="100000"/>
                            <setting name="glitchFilterWidth" value="0"/>
                         </struct>
                      </config_set>

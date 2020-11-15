@@ -25,5 +25,10 @@ max30102_state_t max30102_get_revision_id(uint8_t* rev_id);
 max30102_state_t max30102_get_part_id(uint8_t* part_id);
 
 
+//temperature readings
+max30102_state_t max30102_trigger_temp_read();
+max30102_state_t max30102_is_temp_read_ready(bool* rdy);
+max30102_state_t max30102_wait_temp_read_ready();
+max30102_state_t max30102_get_temperature_c(float* temp);
 
 #endif /* DRV_MAX30102_H_ */

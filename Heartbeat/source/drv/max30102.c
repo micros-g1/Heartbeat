@@ -60,7 +60,7 @@ max30102_state_t max30102_wait_temp_read_ready()
 	do
 	{
 		state = max30102_is_temp_read_ready(&ready);
-	}while(ready && state == MAX30102_SUCCESS);
+	}while(!ready && state == MAX30102_SUCCESS);
 	return state;
 }
 
@@ -110,7 +110,7 @@ max30102_state_t max30102_wait_reset_ready()
 	do
 	{
 		state = max30102_is_reset_ready(&ready);
-	}while(ready && state == MAX30102_SUCCESS);
+	}while(!ready && state == MAX30102_SUCCESS);
 	return state;
 }
 
