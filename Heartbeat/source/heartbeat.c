@@ -101,37 +101,19 @@ int main(void) {
 
 static float dummy;
 static void example_task(void *pvParameters) {
-	max30102_state_t state1 = max30102_init();
+	max30102_state_t state1 = max30102_init(MAX30102_SPO2_MODE);
+
 	max30102_state_t state2 = max30102_trigger_temp_read();
-//	state = max30102_is_temp_read_ready(bool* rdy);
-//	max30102_state_t state3 = max30102_wait_temp_read_ready();
-	max30102_state_t state4 = max30102_get_temperature_c(&dummy);
 	max30102_state_t state3 = max30102_wait_temp_read_ready();
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
+	max30102_state_t state4 = max30102_get_temperature_c(&dummy);
+
+	while(state4 == MAX30102_FAILURE){
+		state4 = MAX30102_FAILURE;
+	}
 
 	uint8_t part_id = 0;
 	max30102_get_part_id(&part_id);
-	state2 = max30102_trigger_temp_read();
-//	state = max30102_is_temp_read_ready(bool* rdy);
-	state3 = max30102_wait_temp_read_ready();
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
-	state4 = max30102_get_temperature_c(&dummy);
+
 	for (;;) {
 
 		vTaskSuspend(NULL);
