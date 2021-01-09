@@ -10,6 +10,8 @@
  * Included files
  **********************************************************************************************************************/
 #include "fsl_common.h"
+#include "fsl_gpio.h"
+#include "fsl_port.h"
 #include "fsl_i2c.h"
 #include "fsl_i2c_freertos.h"
 
@@ -21,6 +23,14 @@ extern "C" {
  * Definitions
  **********************************************************************************************************************/
 /* Definitions for BOARD_InitPeripherals functional group */
+/* Alias for GPIOB peripheral */
+#define GPIOB_GPIO GPIOB
+/* Alias for PORTB */
+#define GPIOB_PORT PORTB
+/* GPIOB interrupt vector ID (number). */
+#define GPIOB_IRQN PORTB_IRQn
+/* GPIOB interrupt handler identifier. */
+#define GPIOB_IRQHANDLER PORTB_IRQHandler
 /* BOARD_InitPeripherals defines for I2C0 */
 /* Definition of peripheral ID */
 #define I2C0_PERIPHERAL I2C0

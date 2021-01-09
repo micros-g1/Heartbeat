@@ -50,8 +50,8 @@ typedef enum
 //Interrupt Status 1
 #define MAX30102_A_FULL_BIT_START 7
 #define MAX30102_A_FULL_BIT_LENGTH 1
-#define MAX30102_PRG_RDY_BIT_START 6
-#define MAX30102_PRG_RDY_BIT_LENGTH 1
+#define MAX30102_ppg_RDY_BIT_START 6
+#define MAX30102_ppg_RDY_BIT_LENGTH 1
 #define MAX30102_ALC_OVF_BIT_START 5
 #define MAX30102_ALC_OVF_BIT_LENGTH 1
 #define MAX30102_PWR_RDY_BIT_START 0
@@ -69,7 +69,7 @@ typedef union
 		unsigned int pwr_rdy : 1;
 		unsigned int : 4;
 		unsigned int alc_ovf : 1;
-		unsigned int prg_rdy : 1;
+		unsigned int ppg_rdy : 1;
 		unsigned int a_full : 1;
 	};
 	uint8_t byte[2];
@@ -78,8 +78,8 @@ typedef union
 //Interrupt Enable 1
 #define MAX30102_A_FULL_EN_BIT_START 7
 #define MAX30102_A_FULL_EN_BIT_LENGTH 1
-#define MAX30102_PRG_RDY_EN_BIT_START 6
-#define MAX30102_PRG_RDY_EN_BIT_LENGTH 1
+#define MAX30102_ppg_RDY_EN_BIT_START 6
+#define MAX30102_ppg_RDY_EN_BIT_LENGTH 1
 #define MAX30102_ALC_OVF_EN_BIT_START 5
 #define MAX30102_ALC_OVF_EN_BIT_LENGTH 1
 //Interrupt Enable 2
@@ -93,7 +93,7 @@ typedef union
 		unsigned int die_temp_rdy_en : 1;
 		unsigned int : 11;
 		unsigned int alc_ovf_en : 1;
-		unsigned int prg_rdy_en : 1;
+		unsigned int ppg_rdy_en : 1;
 		unsigned int a_full_en : 1;
 	};
 	uint8_t byte[2];
@@ -146,6 +146,7 @@ typedef enum
 	MAX30102_HEART_RATE_MODE = 0b010,
 	MAX30102_SPO2_MODE = 0b011
 }max30102_mode_t;
+
 typedef union
 {
 	struct
@@ -195,7 +196,7 @@ typedef union
 	struct
 	{
 		max30102_led_pw_t led_pw : 2;
-		max30102_spo2_adc_resolution_t spo2_sr : 3;
+		max30102_spo2_sample_rate_t spo2_sr : 3;
 		max30102_spo2_adc_resolution_t spo2_adc_rge : 2;
 		unsigned int : 1;
 	};

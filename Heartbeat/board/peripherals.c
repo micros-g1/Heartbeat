@@ -38,6 +38,37 @@ component:
  * BOARD_InitPeripherals functional group
  **********************************************************************************************************************/
 /***********************************************************************************************************************
+ * GPIOB initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'GPIOB'
+- type: 'gpio'
+- mode: 'GPIO'
+- custom_name_enabled: 'false'
+- type_id: 'gpio_5920c5e026e8e974e6dc54fbd5e22ad7'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'GPIOB'
+- config_sets:
+  - fsl_gpio:
+    - enable_irq: 'true'
+    - port_interrupt:
+      - IRQn: 'PORTB_IRQn'
+      - enable_interrrupt: 'noInit'
+      - enable_priority: 'false'
+      - priority: '0'
+      - enable_custom_name: 'false'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+
+static void GPIOB_init(void) {
+  /* Make sure, the clock gate for port B is enabled (e. g. in pin_mux.c) */
+  /* Interrupt PORTB_IRQn request in the NVIC is not initialized (disabled by default). */
+  /* It can be enabled later by EnableIRQ(PORTB_IRQn); function call. */
+}
+
+/***********************************************************************************************************************
  * I2C0 initialization code
  **********************************************************************************************************************/
 /* clang-format off */
@@ -84,6 +115,7 @@ static void I2C0_init(void) {
 void BOARD_InitPeripherals(void)
 {
   /* Initialize components */
+  GPIOB_init();
   I2C0_init();
 }
 
