@@ -118,7 +118,7 @@ bool i2c_write_byte_addr8_mask(i2c_handle_t *dev, uint8_t devAddress, uint8_t su
 	if(success)
 	{
 		//Apply mask to incoming data, and or it with old data
-		newdata |= (~mask & new_data)(data & mask);
+		newdata |= data & mask;
 		//write
 		success = i2c_write_byte_addr8(dev, devAddress, subAddr, newdata);
 	}

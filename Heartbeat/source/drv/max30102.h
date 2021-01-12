@@ -64,13 +64,13 @@ max30102_state_t max30102_wait_temp_read_ready();
 max30102_state_t max30102_get_temperature_c(float* temp);
 
 //spO2 config
-max30102_state_t max30102_set_spo2_config(max30102_spo2_configuration_t *config);
-max30102_state_t max30102_set_spo2_adc_rge(max30102_spo2_adc_resolution_t spo2_adc_rge);
-max30102_state_t max30102_set_sr(max30102_spo2_sample_rate_t spo2_sample_rate);
-max30102_state_t max30102_set_led_pw(max30102_led_pw_t led_pw);
+max30102_state_t max30102_set_spo2_config(max30102_spo2_configuration_t *config);			//checked
+max30102_state_t max30102_set_spo2_adc_rge(max30102_spo2_adc_resolution_t spo2_adc_rge);	//checked
+max30102_state_t max30102_set_sr(max30102_spo2_sample_rate_t spo2_sample_rate);				//checked
+max30102_state_t max30102_set_led_pw(max30102_led_pw_t led_pw);								//checked
 
 //spO2 readings
-max30102_state_t max30102_trigger_spo2_read();
+max30102_state_t max30102_trigger_spo2_reads();												//checked
 uint8_t max30102_get_num_available_samples();
 max30102_sample_t* max30102_read_n_samples(uint8_t n_samples, uint8_t *m_success);
 

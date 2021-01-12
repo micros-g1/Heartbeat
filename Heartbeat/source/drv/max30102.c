@@ -262,32 +262,33 @@ max30102_state_t max30102_set_spo2_config(max30102_spo2_configuration_t *config)
 					MAX30102_SUCCESS : MAX30102_FAILURE;
 }
 
-
 max30102_state_t max30102_set_spo2_adc_rge(max30102_spo2_adc_resolution_t spo2_adc_rge){
 	if(!i2c) return MAX30102_FAILURE;
 	max30102_spo2_configuration_t new_conf;
 	memset(&new_conf, 0, sizeof(new_conf));
 	new_conf.spo2_adc_rge = spo2_adc_rge;
 	uint8_t mask = MAX30102_MASK_GENERATE(MAX30102_SPO2_ADC_RGE_BIT_START, MAX30102_SPO2_ADC_RGE_BIT_LENGTH);
-	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_SPO2_CONFIGURATION_ADDR, mask, config.val)?
+	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_SPO2_CONFIGURATION_ADDR, mask, new_conf.val)?
 						MAX30102_SUCCESS : MAX30102_FAILURE;
 }
+
 max30102_state_t max30102_set_sr(max30102_spo2_sample_rate_t spo2_sample_rate){
 	if(!i2c) return MAX30102_FAILURE;
 	max30102_spo2_configuration_t new_conf;
 	memset(&new_conf, 0, sizeof(new_conf));
 	new_conf.spo2_sr = spo2_sample_rate;
 	uint8_t mask = MAX30102_MASK_GENERATE(MAX30102_SPO2_SR_BIT_START, MAX30102_SPO2_SR_BIT_LENGTH);
-	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_SPO2_CONFIGURATION_ADDR, mask, config.val)?
+	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_SPO2_CONFIGURATION_ADDR, mask, new_conf.val)?
 						MAX30102_SUCCESS : MAX30102_FAILURE;
 }
+
 max30102_state_t max30102_set_led_pw(max30102_led_pw_t led_pw){
 	if(!i2c) return MAX30102_FAILURE;
 	max30102_spo2_configuration_t new_conf;
 	memset(&new_conf, 0, sizeof(new_conf));
 	new_conf.led_pw = led_pw;
 	uint8_t mask = MAX30102_MASK_GENERATE(MAX30102_LED_PW_BIT_START, MAX30102_LED_PW_BIT_LENGTH);
-	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_SPO2_CONFIGURATION_ADDR, mask, config.val)?
+	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_SPO2_CONFIGURATION_ADDR, mask, new_conf.val)?
 						MAX30102_SUCCESS : MAX30102_FAILURE;
 }
 
@@ -329,13 +330,9 @@ uint8_t max30102_get_num_available_samples(){
 }
 
 
-max30102_state_t max30102_trigger_spo2_read(){
+max30102_state_t max30102_trigger_spo2_reads(){
 	if(!i2c) return MAX30102_FAILURE;
-
-	max30102_interrupt_enable_t enables;
-	memset(&enables, 0, sizeof(enables));
-	enables.ppg_rdy_en = true;
-	return max30102_enable_interrupts(&enables, MAX30102_INTERRUPT_ENABLE_1_ADDR);
+	return max30102_set_ppg_rdy_en(true);
 }
 
 

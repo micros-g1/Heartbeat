@@ -101,6 +101,9 @@ int main(void) {
 }
 
 static float dummy;
+static bool pwr_rdy_flag=false, ppg_rdy_flag=false, alc_ovf_flag=false;
+static bool die_temp_rdy_flag=false, a_full_flag=false;
+
 static void example_task(void *pvParameters) {
 
 	max30102_state_t state = max30102_init(MAX30102_SPO2_MODE);
@@ -127,7 +130,40 @@ static void example_task(void *pvParameters) {
 
 	NVIC_EnableIRQ(PORTB_IRQn);
 
-	max30102_trigger_spo2_read();
+	max30102_trigger_spo2_reads();
+
+	while(true){
+		if(pwr_rdy_flag){
+			pwr_rdy_flag = false;
+			// no action necessary as the pwr_rdy flag is cleared when read.
+			// "The interrupts are cleared whenever the interrupt status register is read,
+			// or when the register that triggered the interrupt is read".
+		}
+		if(ppg_rdy_flag){
+			ppg_rdy_flag = false;
+			max30102_set_ppg_rdy_en(false);
+			max30102_set_a_full_en(false);
+			uint8_t n_available_samples = max30102_get_num_available_samples();
+			uint8_t m_read_samples = 0;
+			max30102_sample_t *samples = max30102_read_n_samples(n_available_samples, &m_read_samples);
+			for(int i =0; i < m_read_samples; i++)
+				PRINTF("%d , ", samples[i]);
+			max30102_set_ppg_rdy_en(true);
+			max30102_set_a_full_en(true);
+		}
+		if(alc_ovf_flag){
+			alc_ovf_flag = false;
+
+		}
+		if(die_temp_rdy_flag){
+			die_temp_rdy_flag = false;
+
+		}
+
+		if(a_full_flag){
+			a_full_flag = false;
+		}
+	}
 
 	for (;;) {
 		vTaskSuspend(NULL);
@@ -145,31 +181,11 @@ void GPIOB_IRQHANDLER(void) {
 		  if(i == BOARD_MAX30102_INT_PIN_PIN){
 			  max30102_interrupt_status_t status;
 			  max30102_get_interrupt_status(&status);
-			  if(status.pwr_rdy){
-				  // no action necessary as the pwr_rdy flag is cleared when read.
-				  // "The interrupts are cleared whenever the interrupt status register is read,
-				  // or when the register that triggered the interrupt is read".
-			  }
-			  if(status.ppg_rdy){
-				  max30102_set_ppg_rdy_en(false);
-				  max30102_set_a_full_en(false);
-				  uint8_t n_available_samples = max30102_get_num_available_samples();
-				  uint8_t m_read_samples = 0;
-				  max30102_sample_t *samples = max30102_read_n_samples(n_available_samples, &m_read_samples);
-				  for(int i =0; i < m_read_samples; i++)
-					  PRINTF("%d , ", samples[i]);
-				  max30102_set_ppg_rdy_en(true);
-				  max30102_set_a_full_en(true);
-			  }
-			  if(status.alc_ovf){
-
-			  }
-			  if(status.die_temp_rdy){
-
-			  }
-			  if(status.a_full){
-
-			  }
+			  if(status.pwr_rdy) pwr_rdy_flag = status.pwr_rdy;
+			  if(status.ppg_rdy) ppg_rdy_flag = status.ppg_rdy;
+			  if(status.alc_ovf) alc_ovf_flag = status.alc_ovf;
+			  if(status.die_temp_rdy) die_temp_rdy_flag = status.die_temp_rdy;
+			  if(status.a_full) a_full_flag = status.a_full;
 		  }
 	  }
   }
