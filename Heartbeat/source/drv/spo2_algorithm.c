@@ -31,7 +31,7 @@
 * ownership rights.
 *******************************************************************************
 */
-#include "algorithm_by_RF.h"
+#include "spo2_algorithm.h"
 #include <math.h>
 #include<stdbool.h>
 #include<stdint.h>
