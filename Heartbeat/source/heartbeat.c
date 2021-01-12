@@ -146,7 +146,9 @@ void GPIOB_IRQHANDLER(void) {
 			  max30102_interrupt_status_t status;
 			  max30102_get_interrupt_status(&status);
 			  if(status.pwr_rdy){
-
+				  // no action necessary as the pwr_rdy flag is cleared when read.
+				  // "The interrupts are cleared whenever the interrupt status register is read,
+				  // or when the register that triggered the interrupt is read".
 			  }
 			  if(status.ppg_rdy){
 				  max30102_set_ppg_rdy_en(false);
@@ -163,6 +165,9 @@ void GPIOB_IRQHANDLER(void) {
 
 			  }
 			  if(status.die_temp_rdy){
+
+			  }
+			  if(status.a_full){
 
 			  }
 		  }

@@ -262,6 +262,35 @@ max30102_state_t max30102_set_spo2_config(max30102_spo2_configuration_t *config)
 					MAX30102_SUCCESS : MAX30102_FAILURE;
 }
 
+
+max30102_state_t max30102_set_spo2_adc_rge(max30102_spo2_adc_resolution_t spo2_adc_rge){
+	if(!i2c) return MAX30102_FAILURE;
+	max30102_spo2_configuration_t new_conf;
+	memset(&new_conf, 0, sizeof(new_conf));
+	new_conf.spo2_adc_rge = spo2_adc_rge;
+	uint8_t mask = MAX30102_MASK_GENERATE(MAX30102_SPO2_ADC_RGE_BIT_START, MAX30102_SPO2_ADC_RGE_BIT_LENGTH);
+	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_SPO2_CONFIGURATION_ADDR, mask, config.val)?
+						MAX30102_SUCCESS : MAX30102_FAILURE;
+}
+max30102_state_t max30102_set_sr(max30102_spo2_sample_rate_t spo2_sample_rate){
+	if(!i2c) return MAX30102_FAILURE;
+	max30102_spo2_configuration_t new_conf;
+	memset(&new_conf, 0, sizeof(new_conf));
+	new_conf.spo2_sr = spo2_sample_rate;
+	uint8_t mask = MAX30102_MASK_GENERATE(MAX30102_SPO2_SR_BIT_START, MAX30102_SPO2_SR_BIT_LENGTH);
+	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_SPO2_CONFIGURATION_ADDR, mask, config.val)?
+						MAX30102_SUCCESS : MAX30102_FAILURE;
+}
+max30102_state_t max30102_set_led_pw(max30102_led_pw_t led_pw){
+	if(!i2c) return MAX30102_FAILURE;
+	max30102_spo2_configuration_t new_conf;
+	memset(&new_conf, 0, sizeof(new_conf));
+	new_conf.led_pw = led_pw;
+	uint8_t mask = MAX30102_MASK_GENERATE(MAX30102_LED_PW_BIT_START, MAX30102_LED_PW_BIT_LENGTH);
+	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_SPO2_CONFIGURATION_ADDR, mask, config.val)?
+						MAX30102_SUCCESS : MAX30102_FAILURE;
+}
+
 max30102_state_t max30102_set_led_current(uint8_t curr_lvl, max30102_addr_t led_addr){
 	if(!i2c) return MAX30102_FAILURE;
 	if(led_addr != MAX30102_LED_PULSE_AMPLITUDE_ADDR_1 && led_addr != MAX30102_LED_PULSE_AMPLITUDE_ADDR_2) return MAX30102_FAILURE;
@@ -286,7 +315,6 @@ max30102_sample_t* max30102_read_n_samples(uint8_t n_samples, uint8_t *m_success
 
 	*m_success = n_samples;
 	return max30102_acc_samples;
-
 }
 
 uint8_t max30102_get_num_available_samples(){
