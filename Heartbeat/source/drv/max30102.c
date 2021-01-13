@@ -17,7 +17,7 @@
 #define MAX30100_CALCULATE_TEMP_C(tint,tfrac) ((float)(MAX30100_TINT_SETP_C*((int8_t)(tint)) + MAX30100_TFRAC_STEP_C*((uint8_t)(tfrac))))
 #define MAX30100_SAMPLE_N_BYTES 3
 
-i2c_handle_t* i2c = NULL;
+static i2c_handle_t* i2c = NULL;
 static max30102_sample_t max30102_acc_samples[MAX30102_FIFO_MAX_SAMPLES];
 static uint8_t wr_ptr = 0;
 static uint8_t rd_ptr = 0;

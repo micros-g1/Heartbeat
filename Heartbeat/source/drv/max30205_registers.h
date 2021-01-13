@@ -1,0 +1,31 @@
+/*
+ * max30205_registers.h
+ *
+ *  Created on: 13 ene. 2021
+ *      Author: Tomas
+ */
+
+#ifndef DRV_MAX30205_REGISTERS_H_
+#define DRV_MAX30205_REGISTERS_H_
+
+// Information from 'MAX30205 Human Body Temperature Sensor' Rev. Oct 24, 2016
+// https://datasheets.maximintegrated.com/en/ds/MAX30205.pdf
+
+//WRITE ADDRESS: 0x90 = 1001 0000, READ ADDRESS: 1001 0001 (A0 & A1 & A2 to GND)
+//ADDR: 1010111x: 0100 1000 = 0x48
+#define MAX30205_I2C_ADDRESS 0x48
+
+#define MAX30205_MASK_GENERATE(BITSTART,LENGTH)  ( ( (1 << (LENGTH)) - 1 ) << (  (BITSTART) + 1 - (LENGTH)) )
+#define MAX30205_APPLY_BITSTART_LENGTH(DATA,BITSTART,LENGTH)  ( ( (DATA) << (  (BITSTART) + 1 - (LENGTH)) ) & MAX30102_MASK_GENERATE(BITSTART,LENGTH) )
+#define MAX30205_RECOVER_BITSTART_LENGTH(DATA,BITSTART,LENGTH) ( ( (DATA) & MAX30205_MASK_GENERATE(BITSTART,LENGTH) ) >> (  (BITSTART) + 1 - (LENGTH)) )
+
+typedef enum
+{
+	MAX30205_TEMP_ADDR = 0x00,
+	MAX30205_CONFIG_ADDR = 0x01,
+	MAX30205_THYS_ADDR = 0x02,
+	MAX30205_TOS_ADDR = 0x03
+}max30205_addr_t;
+
+
+#endif /* DRV_MAX30205_REGISTERS_H_ */
