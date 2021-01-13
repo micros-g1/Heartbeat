@@ -6,7 +6,10 @@
  */
 
 #include "max30205.h"
+#include "max30205_registers.h"
+#include <peripherals.h>
 #include "i2c.h"
+
 #define MAX30205_TEMP_N_BYTES 2
 
 static i2c_handle_t* i2c = NULL;
@@ -22,7 +25,7 @@ max30205_state_t max30205_init(){
 		 * Timeout enabled for MAX30205
 	 */
 
-//	i2c = &I2CA_rtosHandle;
+	i2c = &I2CB_rtosHandle;
 	i2c_init(i2c);
 	return MAX30205_SUCCESS;
 }
