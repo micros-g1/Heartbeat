@@ -38,8 +38,7 @@ max30205_state_t max30205_set_os_polarity(bool smp_ave);
 max30205_state_t max30205_not_comparator_interrupt(bool smp_ave);
 max30205_state_t max30205_shutdown(bool smp_ave);
 
+//max30205 temp reads
 max30205_state_t max30205_temp_read(float *temp);
-
-
 
 #endif /* DRV_MAX30205_H_ */

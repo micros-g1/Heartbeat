@@ -50,7 +50,6 @@ typedef union
 	uint8_t val;
 }__attribute__((__packed__, aligned(1))) max30205_config_t;
 
-
 typedef enum
 {
 	MAX30205_FAULT_QUEUE_0 = 0b00,
