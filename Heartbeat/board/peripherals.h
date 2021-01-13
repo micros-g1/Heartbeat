@@ -38,21 +38,12 @@ extern "C" {
 #define I2C0_CLOCK_SOURCE I2C0_CLK_SRC
 /* Definition of the clock source frequency */
 #define I2C0_CLK_FREQ CLOCK_GetFreq(I2C0_CLOCK_SOURCE)
-/* BOARD_InitPeripherals defines for I2C1 */
-/* Definition of peripheral ID */
-#define I2C1_PERIPHERAL I2C1
-/* Definition of the clock source */
-#define I2C1_CLOCK_SOURCE I2C1_CLK_SRC
-/* Definition of the clock source frequency */
-#define I2C1_CLK_FREQ CLOCK_GetFreq(I2C1_CLOCK_SOURCE)
 
 /***********************************************************************************************************************
  * Global variables
  **********************************************************************************************************************/
 extern i2c_rtos_handle_t I2CA_rtosHandle;
 extern const i2c_master_config_t I2C0_config;
-extern i2c_rtos_handle_t I2CB_rtosHandle;
-extern const i2c_master_config_t I2C1_config;
 
 /***********************************************************************************************************************
  * Initialization functions
