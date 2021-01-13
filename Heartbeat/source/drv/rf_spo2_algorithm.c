@@ -31,20 +31,10 @@
 * ownership rights.
 *******************************************************************************
 */
-#include "spo2_algorithm.h"
+#include <drv/rf_spo2_algorithm.h>
 #include <math.h>
 #include<stdbool.h>
 #include<stdint.h>
-
-
-
-
-
-
-
-
-
-
 
 
 const float sum_X2 = 83325;

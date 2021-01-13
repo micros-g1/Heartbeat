@@ -34,6 +34,7 @@
  */
 
 /* Default includes. */
+#include <drv/rf_spo2_algorithm.h>
 #include <stdio.h>
 #include "board.h"
 #include "peripherals.h"
@@ -100,38 +101,24 @@ int main(void) {
 		;
 }
 
-static float dummy;
+//static float dummy;
 static bool pwr_rdy_flag=false, ppg_rdy_flag=false, alc_ovf_flag=false;
 static bool die_temp_rdy_flag=false, a_full_flag=false;
 
-static void example_task(void *pvParameters) {
+static max30102_led_data_t ir_led_samples[RF_SAMPLES];
+static max30102_led_data_t red_led_samples[RF_SAMPLES];
 
-	max30102_state_t state = max30102_init(MAX30102_SPO2_MODE);
-//	state = state == MAX30102_SUCCESS ? max30102_trigger_temp_read(): state;
-//	state = state == MAX30102_SUCCESS ? max30102_wait_temp_read_ready(): state;
-//	state = state == MAX30102_SUCCESS ? max30102_get_temperature_c(&dummy): state;
+static uint32_t curr_buffer_n_samples = 0;
 
-	max30102_state_t state3 = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
-	max30102_state_t state4 = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
+static uint32_t curr_heart_rate = 0;
+static bool curr_hr_valid = false;
+static float curr_spo2 = 0;
+static bool curr_spo2_valid = false;
+static float curr_ratio = 0;
+static float curr_correl = 0;
 
-	max30102_fifo_configuration_t fifo_conf;
-	fifo_conf.val = 0;
-	fifo_conf.fifo_a_full = 0xF;
-	fifo_conf.fifo_roll_over_en = true;
-	fifo_conf.smp_ave = MAX30102_SMP_AVE_1;
-	max30102_state_t state1 = max30102_set_fifo_config(&fifo_conf);
-
-	max30102_spo2_configuration_t spo2_conf;
-	spo2_conf.val = 0;
-	spo2_conf.led_pw = MAX30102_LED_PW_411US_ADC_18_BITS;
-	spo2_conf.spo2_sr = MAX30102_SPO2_SAMPLE_RATE_100HZ;
-	spo2_conf.spo2_adc_rge = MAX30102_SPO2_ADC_RESOLUTION_4096NA;
-	max30102_state_t state2 = max30102_set_spo2_config(&spo2_conf);
-
-	NVIC_EnableIRQ(PORTB_IRQn);
-
-	max30102_trigger_spo2_reads();
-
+//just for debugging
+static void handle_max_interrupts(){
 	while(true){
 		if(pwr_rdy_flag){
 			pwr_rdy_flag = false;
@@ -143,11 +130,18 @@ static void example_task(void *pvParameters) {
 			ppg_rdy_flag = false;
 			max30102_set_ppg_rdy_en(false);
 			max30102_set_a_full_en(false);
+
 			uint8_t n_available_samples = max30102_get_num_available_samples();
-			uint8_t m_read_samples = 0;
-			max30102_sample_t *samples = max30102_read_n_samples(n_available_samples, &m_read_samples);
-			for(int i =0; i < m_read_samples; i++)
-				PRINTF("%d , ", samples[i]);
+
+			curr_buffer_n_samples += max30102_read_n_samples(n_available_samples, ir_led_samples, red_led_samples);
+
+			//is the buffer full ? (should the accumulated samples be processed?)
+			if(curr_buffer_n_samples >= RF_SAMPLES){
+				rf_heart_rate_and_oxygen_saturation((uint32_t*)ir_led_samples, RF_SAMPLES, (uint32_t*)red_led_samples,
+						&curr_spo2, (int8_t*) &curr_spo2_valid, &curr_heart_rate, (int8_t*)&curr_hr_valid, &curr_ratio, &curr_correl);
+				curr_buffer_n_samples = 0;
+			}
+
 			max30102_set_ppg_rdy_en(true);
 			max30102_set_a_full_en(true);
 		}
@@ -164,12 +158,45 @@ static void example_task(void *pvParameters) {
 			a_full_flag = false;
 		}
 	}
+}
+
+static void example_task(void *pvParameters) {
+
+	max30102_state_t state = max30102_init(MAX30102_SPO2_MODE);
+//	state = state == MAX30102_SUCCESS ? max30102_trigger_temp_read(): state;
+//	state = state == MAX30102_SUCCESS ? max30102_wait_temp_read_ready(): state;
+//	state = state == MAX30102_SUCCESS ? max30102_get_temperature_c(&dummy): state;
+
+	max30102_state_t state3 = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
+	max30102_state_t state4 = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
+
+	max30102_fifo_configuration_t fifo_conf;
+	fifo_conf.val = 0;
+	fifo_conf.fifo_a_full = 0xF;
+	fifo_conf.fifo_roll_over_en = true;
+	fifo_conf.smp_ave = MAX30102_SMP_AVE_4;
+	max30102_state_t state1 = max30102_set_fifo_config(&fifo_conf);
+
+	max30102_spo2_configuration_t spo2_conf;
+	spo2_conf.val = 0;
+	spo2_conf.led_pw = MAX30102_LED_PW_411US_ADC_18_BITS;
+	spo2_conf.spo2_sr = MAX30102_SPO2_SAMPLE_RATE_100HZ;
+	spo2_conf.spo2_adc_rge = MAX30102_SPO2_ADC_RESOLUTION_4096NA;
+	max30102_state_t state2 = max30102_set_spo2_config(&spo2_conf);
+
+	NVIC_EnableIRQ(PORTB_IRQn);
+
+	max30102_trigger_spo2_reads();
+
+	handle_max_interrupts();
 
 	for (;;) {
 		vTaskSuspend(NULL);
 	}
 
 }
+
+
 
 /* PORTB_IRQn interrupt handler */
 void GPIOB_IRQHANDLER(void) {
