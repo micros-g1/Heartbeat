@@ -22,7 +22,7 @@ max30205_state_t max30205_init(){
 		 * Timeout enabled for MAX30205
 	 */
 
-//	i2c = &I2CA_rtosHandle;
+	i2c = &I2CA_rtosHandle;
 	i2c_init(i2c);
 	return MAX30205_SUCCESS;
 }
