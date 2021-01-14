@@ -10,12 +10,12 @@
  * Included files
  **********************************************************************************************************************/
 #include "fsl_common.h"
+#include "fsl_adc16.h"
 #include "fsl_gpio.h"
 #include "fsl_port.h"
 #include "fsl_i2c.h"
 #include "fsl_i2c_freertos.h"
 #include "fsl_pit.h"
-#include "fsl_adc16.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -25,6 +25,12 @@ extern "C" {
  * Definitions
  **********************************************************************************************************************/
 /* Definitions for BOARD_InitPeripherals functional group */
+/* Alias for ADC0 peripheral */
+#define ADC0_PERIPHERAL ADC0
+/* ADC0 interrupt vector ID (number). */
+#define ADC0_IRQN ADC0_IRQn
+/* ADC0 interrupt handler identifier. */
+#define ADC0_IRQHANDLER ADC0_IRQHandler
 /* Alias for GPIOB peripheral */
 #define GPIOB_GPIO GPIOB
 /* Alias for PORTB */
@@ -48,27 +54,21 @@ extern "C" {
 /* Definition of clock source frequency. */
 #define PIT_CLK_FREQ 60000000UL
 /* Definition of ticks count for channel 0 - deprecated. */
-#define PIT_0_TICKS 29999U
+#define PIT_0_TICKS 333299U
 /* Definition of channel number for channel 0. */
 #define PIT_CHANNEL_0 kPIT_Chnl_0
 /* Definition of ticks count for channel 0. */
-#define PIT_CHANNEL_0_TICKS 29999U
-/* Alias for ADC0 peripheral */
-#define ADC0_PERIPHERAL ADC0
-/* ADC0 interrupt vector ID (number). */
-#define ADC0_IRQN ADC0_IRQn
-/* ADC0 interrupt handler identifier. */
-#define ADC0_IRQHANDLER ADC0_IRQHandler
+#define PIT_CHANNEL_0_TICKS 333299U
 
 /***********************************************************************************************************************
  * Global variables
  **********************************************************************************************************************/
-extern i2c_rtos_handle_t I2CA_rtosHandle;
-extern const i2c_master_config_t I2C0_config;
-extern const pit_config_t PIT_config;
 extern const adc16_config_t ADC0_config;
 extern const adc16_channel_mux_mode_t ADC0_muxMode;
 extern const adc16_hardware_average_mode_t ADC0_hardwareAverageMode;
+extern i2c_rtos_handle_t I2CA_rtosHandle;
+extern const i2c_master_config_t I2C0_config;
+extern const pit_config_t PIT_config;
 
 /***********************************************************************************************************************
  * Initialization functions
