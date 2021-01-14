@@ -7,23 +7,26 @@
 
 #include "ad8232.h"
 #include <stddef.h>
+#include "drivers/fsl_pit.h"
+#include "board/peripherals.h"
 
 static unsigned int curr_buffer_len = 0;
 static float buffer[AD8232_MAX_SAMPLES];
 
 ad8232_state_t ad8232_init(){
-	//init PIT but don't start triggering events
-
+	//Both PIT and ADC are already initialized (peripherals.c)
 	return AD8232_SUCCESS;
 }
 
 ad8232_state_t ad8232_trigger_reads(){
 	//start PIT to trigger the ADC and empty the samples' buffer
+	PIT_StartTimer(PIT_PERIPHERAL, PIT_CHANNEL_0);
 	curr_buffer_len = 0;
 	return AD8232_SUCCESS;
 }
 ad8232_state_t ad8232_stop_reading(){
-	//stop PIT
+
+	PIT_StopTimer(PIT_PERIPHERAL, PIT_CHANNEL_0);
 	return AD8232_SUCCESS;
 }
 
