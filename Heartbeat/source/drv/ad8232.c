@@ -12,7 +12,8 @@ static unsigned int curr_buffer_len = 0;
 static float buffer[AD8232_MAX_SAMPLES];
 
 ad8232_state_t ad8232_init(){
-	//init ADC, init PIT but don't start triggering events
+	//init PIT but don't start triggering events
+
 	return AD8232_SUCCESS;
 }
 
@@ -48,4 +49,8 @@ uint8_t ad8232_get_n_samples(uint8_t n_samples, float *samples){
 	curr_buffer_len = (n_samples < curr_buffer_len) ? curr_buffer_len - n_samples : 0;
 
 	return n_samples;
+}
+
+ad8232_state_t ad8232_get_new_sample(float *sample){
+	return AD8232_SUCCESS;
 }

@@ -1030,7 +1030,7 @@
                               <setting name="channelNumber" value="SE.2"/>
                               <setting name="enableInterruptOnConversionCompleted" value="true"/>
                               <setting name="channelGroup" value="0"/>
-                              <setting name="initializeChannel" value="false"/>
+                              <setting name="initializeChannel" value="true"/>
                            </struct>
                         </array>
                      </config_set>

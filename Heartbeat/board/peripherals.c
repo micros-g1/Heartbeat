@@ -83,7 +83,7 @@ instance:
         - channelNumber: 'SE.2'
         - enableInterruptOnConversionCompleted: 'true'
         - channelGroup: '0'
-        - initializeChannel: 'false'
+        - initializeChannel: 'true'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 adc16_channel_config_t ADC0_channelsConfig[1] = {
@@ -116,6 +116,8 @@ static void ADC0_init(void) {
   ADC16_SetHardwareAverage(ADC0_PERIPHERAL, ADC0_hardwareAverageMode);
   /* Configure channel multiplexing mode */
   ADC16_SetChannelMuxMode(ADC0_PERIPHERAL, ADC0_muxMode);
+  /* Initialize channel */
+  ADC16_SetChannelConfig(ADC0_PERIPHERAL, ADC0_CH0_CONTROL_GROUP, &ADC0_channelsConfig[0]);
   /* Enable interrupt ADC0_IRQN request in the NVIC */
   EnableIRQ(ADC0_IRQN);
 }
