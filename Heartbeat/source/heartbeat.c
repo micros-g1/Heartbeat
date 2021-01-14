@@ -180,3 +180,19 @@ void GPIOB_IRQHANDLER(void) {
   #endif
 }
 
+
+/* ADC0_IRQn interrupt handler */
+void ADC0_IRQHANDLER(void) {
+  /*  Place your code here */
+	float new_sample;
+	if(ad8232_get_new_sample(&new_sample) == AD8232_SUCCESS){
+
+	}
+  /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
+     Store immediate overlapping exception return operation might vector to incorrect interrupt. */
+  #if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+  #endif
+}
+
+

@@ -31,6 +31,8 @@ extern "C" {
 #define ADC0_IRQN ADC0_IRQn
 /* ADC0 interrupt handler identifier. */
 #define ADC0_IRQHANDLER ADC0_IRQHandler
+/* Channel 0 (SE.2) conversion control group. */
+#define ADC0_CH0_CONTROL_GROUP 0
 /* Alias for GPIOB peripheral */
 #define GPIOB_GPIO GPIOB
 /* Alias for PORTB */
@@ -63,6 +65,7 @@ extern "C" {
 /***********************************************************************************************************************
  * Global variables
  **********************************************************************************************************************/
+extern adc16_channel_config_t ADC0_channelsConfig[1];
 extern const adc16_config_t ADC0_config;
 extern const adc16_channel_mux_mode_t ADC0_muxMode;
 extern const adc16_hardware_average_mode_t ADC0_hardwareAverageMode;

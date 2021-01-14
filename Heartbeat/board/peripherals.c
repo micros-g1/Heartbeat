@@ -70,16 +70,29 @@ instance:
     - trigger: 'true'
     - hardwareAverageConfiguration: 'kADC16_HardwareAverageDisabled'
     - enable_dma: 'false'
-    - enable_irq: 'false'
+    - enable_irq: 'true'
     - adc_interrupt:
       - IRQn: 'ADC0_IRQn'
       - enable_interrrupt: 'enabled'
       - enable_priority: 'false'
       - priority: '0'
       - enable_custom_name: 'false'
-    - adc16_channels_config: []
+    - adc16_channels_config:
+      - 0:
+        - enableDifferentialConversion: 'false'
+        - channelNumber: 'SE.2'
+        - enableInterruptOnConversionCompleted: 'true'
+        - channelGroup: '0'
+        - initializeChannel: 'false'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
+adc16_channel_config_t ADC0_channelsConfig[1] = {
+  {
+    .channelNumber = 2U,
+    .enableDifferentialConversion = false,
+    .enableInterruptOnConversionCompleted = true,
+  }
+};
 const adc16_config_t ADC0_config = {
   .referenceVoltageSource = kADC16_ReferenceVoltageSourceVref,
   .clockSource = kADC16_ClockSourceAlt0,
@@ -103,6 +116,8 @@ static void ADC0_init(void) {
   ADC16_SetHardwareAverage(ADC0_PERIPHERAL, ADC0_hardwareAverageMode);
   /* Configure channel multiplexing mode */
   ADC16_SetChannelMuxMode(ADC0_PERIPHERAL, ADC0_muxMode);
+  /* Enable interrupt ADC0_IRQN request in the NVIC */
+  EnableIRQ(ADC0_IRQN);
 }
 
 /***********************************************************************************************************************

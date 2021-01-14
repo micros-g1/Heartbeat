@@ -147,6 +147,7 @@ BOARD_InitPins:
   - {pin_num: '57', peripheral: GPIOB, signal: 'GPIO, 9', pin_signal: PTB9/SPI1_PCS1/UART3_CTS_b/FB_AD20, direction: INPUT, gpio_interrupt: kPORT_InterruptLogicZero,
     pull_select: up}
   - {peripheral: ADC0, signal: 'TRG, A', pin_signal: PIT_trigger_0}
+  - {pin_num: '19', peripheral: ADC0, signal: 'DM, 0', pin_signal: ADC0_DM0/ADC1_DM3}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */

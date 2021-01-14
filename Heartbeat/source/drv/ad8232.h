@@ -22,7 +22,6 @@ typedef enum
 ad8232_state_t ad8232_init();
 ad8232_state_t ad8232_trigger_reads();
 ad8232_state_t ad8232_stop_reading();
-uint8_t ad8232_get_num_available_samples();
-uint8_t ad8232_get_n_samples(uint8_t n_samples, float *samples);
+ad8232_state_t ad8232_get_new_sample(float *sample);
 
 #endif /* DRV_AD8232_H_ */
