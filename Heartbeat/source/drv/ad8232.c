@@ -7,14 +7,28 @@
 
 #include "ad8232.h"
 #include <stddef.h>
-#include "drivers/fsl_pit.h"
+#include <stdint.h>
+#include <stdbool.h>
 #include "board/peripherals.h"
+#include "drivers/fsl_pit.h"
+#include "drivers/fsl_adc16.h"
+
+#define VREF_BRD 3.300
+#define SE_12BIT 4096.0
 
 static unsigned int curr_buffer_len = 0;
 static float buffer[AD8232_MAX_SAMPLES];
 
 ad8232_state_t ad8232_init(){
 	//Both PIT and ADC are already initialized (peripherals.c)
+    if (!ADC16_DoAutoCalibration(ADC0_PERIPHERAL)) return AD8232_FAILURE;
+	return AD8232_SUCCESS;
+}
+
+ad8232_state_t ad8232_set_sampling_period(uint64_t micro_segs){
+
+	PIT_SetTimerPeriod(PIT_PERIPHERAL, PIT_CHANNEL_0,
+			(uint64_t)((micro_segs * CLOCK_GetFreq(BUS_CLK)) / 1000000U));
 	return AD8232_SUCCESS;
 }
 
@@ -55,5 +69,10 @@ uint8_t ad8232_get_n_samples(uint8_t n_samples, float *samples){
 }
 
 ad8232_state_t ad8232_get_new_sample(float *sample){
+	//<SDK_ROOT>/boards/<BOARD>/driver_examples/adc_etc for API example
+	uint32_t g_Adc16ConversionValue = ADC16_GetChannelConversionValue(ADC0_PERIPHERAL,
+			ADC0_CH0_CONTROL_GROUP);
+	*sample = (float)(g_Adc16ConversionValue * (VREF_BRD / SE_12BIT));
+
 	return AD8232_SUCCESS;
 }
