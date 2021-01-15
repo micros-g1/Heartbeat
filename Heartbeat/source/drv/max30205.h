@@ -8,6 +8,7 @@
 #ifndef DRV_MAX30205_H_
 #define DRV_MAX30205_H_
 #include <stdbool.h>
+#include <stdint.h>
 #include "max30205_registers.h"
 
 typedef enum
@@ -38,6 +39,11 @@ max30205_state_t max30205_set_os_polarity(bool smp_ave);
 max30205_state_t max30205_not_comparator_interrupt(bool smp_ave);
 max30205_state_t max30205_shutdown(bool smp_ave);
 
+max30205_state_t max30205_set_thyst(float thyst);
+max30205_state_t max30205_get_thyst(float *thyst);
+
+max30205_state_t max30205_set_tos(float tos);
+max30205_state_t max30205_get_tos(float *tos);
 //max30205 temp reads
 max30205_state_t max30205_temp_read(float *temp);
 

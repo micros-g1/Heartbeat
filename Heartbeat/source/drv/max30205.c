@@ -5,9 +5,14 @@
  *      Author: taomasgonzalez
  */
 
-#include "max30205.h"
-#include "i2c.h"
+#include "drv/max30205.h"
+#include "drv/i2c.h"
+#include "drv/max30205_registers.h"
+#include <peripherals.h>
+
 #define MAX30205_TEMP_N_BYTES 2
+#define MAX30205_TOS_N_BYTES 2
+#define MAX30205_THYST_N_BYTES 2
 
 static i2c_handle_t* i2c = NULL;
 max30205_state_t max30205_init(){
@@ -128,4 +133,69 @@ max30205_state_t max30205_shutdown(bool shutdown){
 	uint8_t mask = MAX30205_MASK_GENERATE(MAX30205_SHUTDOWN_BIT_START, MAX30205_SHUTDOWN_BIT_LENGTH);
 	return i2c_write_byte_addr8_mask(i2c, MAX30205_I2C_ADDRESS, MAX30205_CONFIG_ADDR, mask, config.val)?
 				MAX30205_SUCCESS : MAX30205_FAILURE;
+}
+
+
+max30205_state_t max30205_set_thyst(float thyst){
+	uint8_t data[MAX30205_TOS_N_BYTES];
+
+	if(thyst < 0){
+		data[0] = (uint8_t)(-thyst);
+		data[0] &= 0x7F;
+		data[1] = - thyst + (int16_t)(thyst);
+	}
+	else{
+		data[0] = thyst;
+		data[1] = thyst - (int16_t)(thyst);
+	}
+
+	return i2c_write_addr8(i2c, MAX30205_I2C_ADDRESS, MAX30205_THYS_ADDR, MAX30205_TOS_N_BYTES, data) ?
+			MAX30205_SUCCESS : MAX30205_FAILURE;
+}
+max30205_state_t max30205_get_thyst(float *thyst){
+	uint8_t data[MAX30205_THYST_N_BYTES];
+
+	max30205_state_t success = i2c_read_addr8(i2c, MAX30205_I2C_ADDRESS, MAX30205_THYS_ADDR,
+			MAX30205_TOS_N_BYTES, data) ? MAX30205_SUCCESS: MAX30205_FAILURE;
+
+	if(success == MAX30205_SUCCESS){
+		*thyst = (uint16_t) (data[0] & 0x07)  << 8 | data[1];
+		if(data[0] & 0x80)
+			*thyst = *thyst * -0.00390625;
+		else
+			*thyst = *thyst * 0.00390625;
+	}
+	return success;
+}
+
+max30205_state_t max30205_set_tos(float tos){
+	uint8_t data[MAX30205_TOS_N_BYTES];
+
+	if(tos < 0){
+		data[0] = (uint8_t)(-tos);
+		data[0] &= 0x7F;
+		data[1] = - tos + (int16_t)(tos);
+	}
+	else{
+		data[0] = tos;
+		data[1] = tos - (int16_t)(tos);
+	}
+
+	return i2c_write_addr8(i2c, MAX30205_I2C_ADDRESS, MAX30205_TOS_ADDR, MAX30205_TOS_N_BYTES, data) ?
+			MAX30205_SUCCESS : MAX30205_FAILURE;
+
+}
+max30205_state_t max30205_get_tos(float *tos){
+	uint8_t data[MAX30205_TOS_N_BYTES];
+	max30205_state_t success = i2c_read_addr8(i2c, MAX30205_I2C_ADDRESS, MAX30205_TOS_ADDR,
+			MAX30205_TOS_N_BYTES, data) ? MAX30205_SUCCESS: MAX30205_FAILURE;
+
+	if(success == MAX30205_SUCCESS){
+		*tos = (uint16_t) (data[0] & 0x7F)  << 8 | data[1];
+		if(data[0] & 0x80)
+			*tos = *tos * -0.00390625;
+		else
+			*tos = *tos * 0.00390625;
+	}
+	return success;
 }
