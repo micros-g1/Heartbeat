@@ -14,6 +14,8 @@
 #include "fsl_port.h"
 #include "fsl_i2c.h"
 #include "fsl_i2c_freertos.h"
+#include "fsl_uart.h"
+#include "fsl_clock.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -38,12 +40,26 @@ extern "C" {
 #define I2C0_CLOCK_SOURCE I2C0_CLK_SRC
 /* Definition of the clock source frequency */
 #define I2C0_CLK_FREQ CLOCK_GetFreq(I2C0_CLOCK_SOURCE)
+/* Definition of peripheral ID */
+#define UART0_PERIPHERAL UART0
+/* Definition of the clock source frequency */
+#define UART0_CLOCK_SOURCE CLOCK_GetFreq(UART0_CLK_SRC)
+/* Rx transfer buffer size. */
+#define UART0_RX_BUFFER_SIZE 10
+/* Tx transfer buffer size. */
+#define UART0_TX_BUFFER_SIZE 10
 
 /***********************************************************************************************************************
  * Global variables
  **********************************************************************************************************************/
 extern i2c_rtos_handle_t I2CA_rtosHandle;
 extern const i2c_master_config_t I2C0_config;
+extern const uart_config_t UART0_config;
+extern uart_handle_t UART0_handle;
+extern uint8_t UART0_rxBuffer[UART0_RX_BUFFER_SIZE];
+extern const uart_transfer_t UART0_rxTransfer;
+extern uint8_t UART0_txBuffer[UART0_TX_BUFFER_SIZE];
+extern const uart_transfer_t UART0_txTransfer;
 
 /***********************************************************************************************************************
  * Initialization functions

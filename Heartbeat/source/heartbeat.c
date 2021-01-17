@@ -104,10 +104,10 @@ int main(void) {
 
 //static float dummy;
 static max30102_interrupt_status_t max30102_interrupts;
-static volatile bool flag=false;
 
 static max30102_led_data_t ir_led_samples[RF_SAMPLES];
 static max30102_led_data_t red_led_samples[RF_SAMPLES];
+uint8_t samp1[9];
 
 static uint32_t curr_buffer_n_samples = 0;
 
@@ -134,12 +134,18 @@ static void handle_max_interrupts(){
 			uint32_t prev_buffer_n_samples = curr_buffer_n_samples;
 			curr_buffer_n_samples += max30102_read_n_samples(n_available_samples, ir_led_samples, red_led_samples);
 
-			//is the buffer full ? (should the accumulated samples be processed?)
-			if(curr_buffer_n_samples >= RF_SAMPLES){
-				rf_heart_rate_and_oxygen_saturation((uint32_t*)ir_led_samples, RF_SAMPLES, (uint32_t*)red_led_samples,
-						&curr_spo2, (int8_t*) &curr_spo2_valid, &curr_heart_rate, (int8_t*)&curr_hr_valid, &curr_ratio, &curr_correl);
-				curr_buffer_n_samples = 0;
+			for(int i = prev_buffer_n_samples; i < curr_buffer_n_samples; i++){
+				itoa((int) ir_led_samples[i].led_data, samp1, 10);
+				UART_WriteBlocking(UART0_PERIPHERAL, samp1, sizeof(samp1));
+				UART_WriteBlocking(UART0_PERIPHERAL, "\n", 1);
 			}
+
+			//is the buffer full ? (should the accumulated samples be processed?)
+//			if(curr_buffer_n_samples >= RF_SAMPLES){
+//				rf_heart_rate_and_oxygen_saturation((uint32_t*)ir_led_samples, RF_SAMPLES, (uint32_t*)red_led_samples,
+//						&curr_spo2, (int8_t*) &curr_spo2_valid, &curr_heart_rate, (int8_t*)&curr_hr_valid, &curr_ratio, &curr_correl);
+//				curr_buffer_n_samples = 0;
+//			}
 		}
 		if(max30102_interrupts.alc_ovf){
 			max30102_interrupts.alc_ovf = false;
@@ -160,6 +166,7 @@ static void example_task(void *pvParameters) {
 
 	max30102_state_t state = max30102_init(MAX30102_SPO2_MODE);
 	if(state == MAX30102_FAILURE) {
+		PRINTF("MAX30102 INITIALIZATION ERROR\n");
 		error_trap();
 	}
 
@@ -169,11 +176,13 @@ static void example_task(void *pvParameters) {
 
 	state = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
 	if(state == MAX30102_FAILURE) {
+		PRINTF("MAX30102 LED1 ERROR\n");
 		error_trap();
 	}
 
 	state = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
 	if(state == MAX30102_FAILURE){
+		PRINTF("MAX30102 LED2 ERROR\n");
 		error_trap();
 	}
 
@@ -213,7 +222,10 @@ void GPIOB_IRQHANDLER(void) {
 	  if(pin_flags & (1 << i)){
 		  if(i == BOARD_MAX30102_INT_PIN_PIN){
 			  max30102_state_t succ = max30102_get_interrupt_status(&max30102_interrupts);
-			  if(succ != MAX30102_SUCCESS) error_trap();
+			  if(succ != MAX30102_SUCCESS){
+//				  PRINTF("MAX30102 GET INTERRUPT STATUS ERROR\n");
+//				  error_trap();
+			  }
 			  break;
 		  }
 	  }

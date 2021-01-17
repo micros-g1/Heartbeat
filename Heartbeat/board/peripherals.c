@@ -110,6 +110,73 @@ static void I2C0_init(void) {
 }
 
 /***********************************************************************************************************************
+ * UART0 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'UART0'
+- type: 'uart'
+- mode: 'transfer'
+- custom_name_enabled: 'false'
+- type_id: 'uart_88ab1eca0cddb7ee407685775de016d5'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'UART0'
+- config_sets:
+  - uartConfig_t:
+    - uartConfig:
+      - clockSource: 'BusInterfaceClock'
+      - clockSourceFreq: 'GetFreq'
+      - baudRate_Bps: '9600'
+      - parityMode: 'kUART_ParityOdd'
+      - stopBitCount: 'kUART_OneStopBit'
+      - txFifoWatermark: '0'
+      - rxFifoWatermark: '1'
+      - idleType: 'kUART_IdleTypeStartBit'
+      - enableTx: 'true'
+      - enableRx: 'true'
+  - transferCfg:
+    - transfer:
+      - init_rx_transfer: 'true'
+      - rx_transfer:
+        - data_size: '10'
+      - init_tx_transfer: 'true'
+      - tx_transfer:
+        - data_size: '10'
+      - init_callback: 'false'
+      - callback_fcn: ''
+      - user_data: ''
+    - quick_selection: 'QuickSelection1'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const uart_config_t UART0_config = {
+  .baudRate_Bps = 9600UL,
+  .parityMode = kUART_ParityOdd,
+  .stopBitCount = kUART_OneStopBit,
+  .txFifoWatermark = 0U,
+  .rxFifoWatermark = 1U,
+  .idleType = kUART_IdleTypeStartBit,
+  .enableTx = true,
+  .enableRx = true
+};
+uart_handle_t UART0_handle;
+uint8_t UART0_rxBuffer[UART0_RX_BUFFER_SIZE];
+const uart_transfer_t UART0_rxTransfer = {
+  .data = UART0_rxBuffer,
+  .dataSize = UART0_RX_BUFFER_SIZE
+};
+uint8_t UART0_txBuffer[UART0_TX_BUFFER_SIZE];
+const uart_transfer_t UART0_txTransfer = {
+  .data = UART0_txBuffer,
+  .dataSize = UART0_TX_BUFFER_SIZE
+};
+
+static void UART0_init(void) {
+  UART_Init(UART0_PERIPHERAL, &UART0_config, UART0_CLOCK_SOURCE);
+  UART_TransferCreateHandle(UART0_PERIPHERAL, &UART0_handle, NULL, NULL);
+}
+
+/***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
 void BOARD_InitPeripherals(void)
@@ -117,6 +184,7 @@ void BOARD_InitPeripherals(void)
   /* Initialize components */
   GPIOB_init();
   I2C0_init();
+  UART0_init();
 }
 
 /***********************************************************************************************************************
