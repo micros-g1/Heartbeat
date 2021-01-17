@@ -49,7 +49,7 @@
  * Definitions
  ******************************************************************************/
 #define I2C_A_IRQn I2C0_IRQn
-
+#define UART_A_IRQn UART0_RX_TX_IRQn
 /* Priorities at which the tasks are created.  */
 #define mainEXAMPLE_TASK_PRIORITY   (tskIDLE_PRIORITY + 1)
 #define M2T(X) ((unsigned int)((X)*(configTICK_RATE_HZ/1000.0)))
@@ -83,6 +83,7 @@ int main(void) {
     BOARD_InitDebugConsole();
 #endif
     NVIC_SetPriority(I2C_A_IRQn, 5);
+    NVIC_SetPriority(UART_A_IRQn, 5);
     NVIC_SetPriority(PORTB_IRQn, 4);
 
 
@@ -131,13 +132,15 @@ static void handle_max_interrupts(){
 			max30102_interrupts.ppg_rdy = false;
 
 			uint8_t n_available_samples = max30102_get_num_available_samples();
+			if(n_available_samples == 31)
+				error_trap();
 			uint32_t prev_buffer_n_samples = curr_buffer_n_samples;
 			curr_buffer_n_samples += max30102_read_n_samples(n_available_samples, ir_led_samples, red_led_samples);
 
 			for(int i = prev_buffer_n_samples; i < curr_buffer_n_samples; i++){
-				itoa((int) ir_led_samples[i].led_data, samp1, 10);
-				UART_WriteBlocking(UART0_PERIPHERAL, samp1, sizeof(samp1));
-				UART_WriteBlocking(UART0_PERIPHERAL, "\n", 1);
+				itoa((int) ir_led_samples[i].led_data, samp1, 4);
+				UART_RTOS_Send(&UART0_rtos_handle, samp1, 4);
+				UART_RTOS_Send(&UART0_rtos_handle, "\n", 1);
 			}
 
 			//is the buffer full ? (should the accumulated samples be processed?)
@@ -224,7 +227,7 @@ void GPIOB_IRQHANDLER(void) {
 			  max30102_state_t succ = max30102_get_interrupt_status(&max30102_interrupts);
 			  if(succ != MAX30102_SUCCESS){
 //				  PRINTF("MAX30102 GET INTERRUPT STATUS ERROR\n");
-//				  error_trap();
+				  error_trap();
 			  }
 			  break;
 		  }

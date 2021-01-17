@@ -92,7 +92,7 @@ instance:
     - i2c_master_config:
       - enableMaster: 'true'
       - enableStopHold: 'false'
-      - baudRate_Bps: '100000'
+      - baudRate_Bps: '400000'
       - glitchFilterWidth: '0'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
@@ -100,7 +100,7 @@ i2c_rtos_handle_t I2CA_rtosHandle;
 const i2c_master_config_t I2C0_config = {
   .enableMaster = true,
   .enableStopHold = false,
-  .baudRate_Bps = 100000UL,
+  .baudRate_Bps = 400000UL,
   .glitchFilterWidth = 0U
 };
 
@@ -117,63 +117,39 @@ static void I2C0_init(void) {
 instance:
 - name: 'UART0'
 - type: 'uart'
-- mode: 'transfer'
+- mode: 'freertos'
 - custom_name_enabled: 'false'
 - type_id: 'uart_88ab1eca0cddb7ee407685775de016d5'
 - functional_group: 'BOARD_InitPeripherals'
 - peripheral: 'UART0'
 - config_sets:
-  - uartConfig_t:
-    - uartConfig:
+  - fsl_uart_freertos:
+    - uart_rtos_configuration:
       - clockSource: 'BusInterfaceClock'
       - clockSourceFreq: 'GetFreq'
-      - baudRate_Bps: '9600'
-      - parityMode: 'kUART_ParityOdd'
-      - stopBitCount: 'kUART_OneStopBit'
-      - txFifoWatermark: '0'
-      - rxFifoWatermark: '1'
-      - idleType: 'kUART_IdleTypeStartBit'
-      - enableTx: 'true'
-      - enableRx: 'true'
-  - transferCfg:
-    - transfer:
-      - init_rx_transfer: 'true'
-      - rx_transfer:
-        - data_size: '10'
-      - init_tx_transfer: 'true'
-      - tx_transfer:
-        - data_size: '10'
-      - init_callback: 'false'
-      - callback_fcn: ''
-      - user_data: ''
-    - quick_selection: 'QuickSelection1'
+      - baudrate: '115200'
+      - parity: 'kUART_ParityDisabled'
+      - stopbits: 'kUART_OneStopBit'
+      - buffer_size: '100'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
-const uart_config_t UART0_config = {
-  .baudRate_Bps = 9600UL,
-  .parityMode = kUART_ParityOdd,
-  .stopBitCount = kUART_OneStopBit,
-  .txFifoWatermark = 0U,
-  .rxFifoWatermark = 1U,
-  .idleType = kUART_IdleTypeStartBit,
-  .enableTx = true,
-  .enableRx = true
-};
-uart_handle_t UART0_handle;
-uint8_t UART0_rxBuffer[UART0_RX_BUFFER_SIZE];
-const uart_transfer_t UART0_rxTransfer = {
-  .data = UART0_rxBuffer,
-  .dataSize = UART0_RX_BUFFER_SIZE
-};
-uint8_t UART0_txBuffer[UART0_TX_BUFFER_SIZE];
-const uart_transfer_t UART0_txTransfer = {
-  .data = UART0_txBuffer,
-  .dataSize = UART0_TX_BUFFER_SIZE
+uart_rtos_handle_t UART0_rtos_handle;
+uart_handle_t UART0_uart_handle;
+uint8_t UART0_background_buffer[UART0_BACKGROUND_BUFFER_SIZE];
+uart_rtos_config_t UART0_rtos_config = {
+  .base = UART0_PERIPHERAL,
+  .baudrate = 115200UL,
+  .parity = kUART_ParityDisabled,
+  .stopbits = kUART_OneStopBit,
+  .buffer = UART0_background_buffer,
+  .buffer_size = UART0_BACKGROUND_BUFFER_SIZE
 };
 
 static void UART0_init(void) {
-  UART_Init(UART0_PERIPHERAL, &UART0_config, UART0_CLOCK_SOURCE);
-  UART_TransferCreateHandle(UART0_PERIPHERAL, &UART0_handle, NULL, NULL);
+  /* UART clock source initialization */
+  UART0_rtos_config.srcclk = UART0_CLOCK_SOURCE;
+  /* UART rtos initialization */
+  UART_RTOS_Init(&UART0_rtos_handle, &UART0_uart_handle, &UART0_rtos_config);
 }
 
 /***********************************************************************************************************************

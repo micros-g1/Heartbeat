@@ -954,11 +954,6 @@
                         <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="ClockOutput" resourceId="System_clock" description="System clock is inactive." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
-                     <feature name="frequency" evaluation="greaterThan">
-                        <data type="Frequency" unit="Hz">0</data>
-                     </feature>
-                  </dependency>
                   <dependency resourceType="PeripheralUnifiedSignal" resourceId="UART0.uart_tx" description="Signal TX of the peripheral UART0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="equal">
                         <data type="Boolean">true</data>
@@ -967,6 +962,21 @@
                   <dependency resourceType="PeripheralUnifiedSignal" resourceId="UART0.uart_rx" description="Signal RX of the peripheral UART0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="equal">
                         <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="SWComponent" resourceId="platform.drivers.uart_freertos" description="The fsl_uart_freertos driver is missing in the project (required for the FreeRTOS mode)." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="enabled" evaluation="equal">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="SWComponent" resourceId="platform.drivers.uart_freertos" description="The compatible version of the fsl_uart_freertos driver is not available in the project (required for the FreeRTOS mode)." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="version" evaluation="compatible">
+                        <data type="Version">2.2.0</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="System_clock" description="System clock is inactive." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
                </dependencies>
@@ -995,39 +1005,20 @@
                         <struct name="i2c_master_config">
                            <setting name="enableMaster" value="true"/>
                            <setting name="enableStopHold" value="false"/>
-                           <setting name="baudRate_Bps" value="100000"/>
+                           <setting name="baudRate_Bps" value="400000"/>
                            <setting name="glitchFilterWidth" value="0"/>
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="UART0" uuid="24935351-00e4-421f-b6b4-6d750a745838" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="transfer" peripheral="UART0" enabled="true" comment="" custom_name_enabled="false">
-                     <config_set name="uartConfig_t">
-                        <struct name="uartConfig">
+                  <instance name="UART0" uuid="24935351-00e4-421f-b6b4-6d750a745838" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="freertos" peripheral="UART0" enabled="true" comment="" custom_name_enabled="false">
+                     <config_set name="fsl_uart_freertos">
+                        <struct name="uart_rtos_configuration">
                            <setting name="clockSource" value="BusInterfaceClock"/>
                            <setting name="clockSourceFreq" value="GetFreq"/>
-                           <setting name="baudRate_Bps" value="9600"/>
-                           <setting name="parityMode" value="kUART_ParityOdd"/>
-                           <setting name="stopBitCount" value="kUART_OneStopBit"/>
-                           <setting name="txFifoWatermark" value="0"/>
-                           <setting name="rxFifoWatermark" value="1"/>
-                           <setting name="idleType" value="kUART_IdleTypeStartBit"/>
-                           <setting name="enableTx" value="true"/>
-                           <setting name="enableRx" value="true"/>
-                        </struct>
-                     </config_set>
-                     <config_set name="transferCfg" quick_selection="QuickSelection1">
-                        <struct name="transfer">
-                           <setting name="init_rx_transfer" value="true"/>
-                           <struct name="rx_transfer">
-                              <setting name="data_size" value="10"/>
-                           </struct>
-                           <setting name="init_tx_transfer" value="true"/>
-                           <struct name="tx_transfer">
-                              <setting name="data_size" value="10"/>
-                           </struct>
-                           <setting name="init_callback" value="false"/>
-                           <setting name="callback_fcn" value=""/>
-                           <setting name="user_data" value=""/>
+                           <setting name="baudrate" value="115200"/>
+                           <setting name="parity" value="kUART_ParityDisabled"/>
+                           <setting name="stopbits" value="kUART_OneStopBit"/>
+                           <setting name="buffer_size" value="100"/>
                         </struct>
                      </config_set>
                   </instance>
