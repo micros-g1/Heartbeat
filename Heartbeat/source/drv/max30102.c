@@ -339,11 +339,30 @@ max30102_state_t max30102_trigger_spo2_reads(){
 max30102_state_t max30102_get_interrupt_status(max30102_interrupt_status_t *status){
 	if(!i2c) return MAX30102_FAILURE;
 
-	max30102_state_t state;
-	state = i2c_read_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_INTERRUPT_STATUS_1_ADDR, &(status->byte[1]))?
-			MAX30102_SUCCESS : MAX30102_FAILURE;
-	state = state == MAX30102_SUCCESS?
-			i2c_read_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_INTERRUPT_STATUS_2_ADDR, &(status->byte[0])) : state;
+	i2c_master_transfer_t master_x_fer;
+	master_x_fer.slaveAddress = MAX30102_I2C_ADDRESS;
+	master_x_fer.direction = kI2C_Read;
+	master_x_fer.subaddress = MAX30102_INTERRUPT_STATUS_1_ADDR;
+	master_x_fer.subaddressSize = 1;
+	master_x_fer.data = &(status->byte[1]);
+	master_x_fer.dataSize = sizeof(status->byte[1]);
+	master_x_fer.flags = kI2C_TransferDefaultFlag;
 
-	return state;
+	if(I2C_MasterTransferBlocking(i2c->base, &master_x_fer) != kStatus_Success) return MAX30102_FAILURE;
+
+	master_x_fer.slaveAddress = MAX30102_I2C_ADDRESS;
+	master_x_fer.direction = kI2C_Read;
+	master_x_fer.subaddress = MAX30102_INTERRUPT_STATUS_2_ADDR;
+	master_x_fer.subaddressSize = 1;
+	master_x_fer.data = &(status->byte[0]);
+	master_x_fer.dataSize = sizeof(status->byte[0]);
+	master_x_fer.flags = kI2C_TransferDefaultFlag;
+	if(I2C_MasterTransferBlocking(i2c->base, &master_x_fer) != kStatus_Success) return MAX30102_FAILURE;
+
+//	state = i2c_read_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_INTERRUPT_STATUS_1_ADDR, &(status->byte[1]))?
+//			MAX30102_SUCCESS : MAX30102_FAILURE;
+//	state = state == MAX30102_SUCCESS?
+//			i2c_read_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_INTERRUPT_STATUS_2_ADDR, &(status->byte[0])) : state;
+
+	return MAX30102_SUCCESS;
 }

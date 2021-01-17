@@ -46,6 +46,7 @@ max30102_state_t max30102_set_ppg_rdy_en(bool ppg_rdy_en);								//checked
 max30102_state_t max30102_set_a_full_en(bool a_full_en);								//checked
 
 //interrupt status
+//blocking function, to be called inside ISR
 max30102_state_t max30102_get_interrupt_status(max30102_interrupt_status_t *status);
 
 //spo2 fifo config

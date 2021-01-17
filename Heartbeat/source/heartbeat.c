@@ -67,6 +67,7 @@ static void example_task(void *pvParameters);
 /*******************************************************************************
  * Code
  ******************************************************************************/
+static void error_trap();
 /*
  * @brief   Application entry point.
  */
@@ -102,8 +103,8 @@ int main(void) {
 }
 
 //static float dummy;
-static bool pwr_rdy_flag=false, ppg_rdy_flag=false, alc_ovf_flag=false;
-static bool die_temp_rdy_flag=false, a_full_flag=false;
+static max30102_interrupt_status_t max30102_interrupts;
+static volatile bool flag=false;
 
 static max30102_led_data_t ir_led_samples[RF_SAMPLES];
 static max30102_led_data_t red_led_samples[RF_SAMPLES];
@@ -120,19 +121,17 @@ static float curr_correl = 0;
 //just for debugging
 static void handle_max_interrupts(){
 	while(true){
-		if(pwr_rdy_flag){
-			pwr_rdy_flag = false;
+		if(max30102_interrupts.pwr_rdy){
+			max30102_interrupts.pwr_rdy = false;
 			// no action necessary as the pwr_rdy flag is cleared when read.
 			// "The interrupts are cleared whenever the interrupt status register is read,
 			// or when the register that triggered the interrupt is read".
 		}
-		if(ppg_rdy_flag){
-			ppg_rdy_flag = false;
-			max30102_set_ppg_rdy_en(false);
-			max30102_set_a_full_en(false);
+		if(max30102_interrupts.ppg_rdy){
+			max30102_interrupts.ppg_rdy = false;
 
 			uint8_t n_available_samples = max30102_get_num_available_samples();
-
+			uint32_t prev_buffer_n_samples = curr_buffer_n_samples;
 			curr_buffer_n_samples += max30102_read_n_samples(n_available_samples, ir_led_samples, red_led_samples);
 
 			//is the buffer full ? (should the accumulated samples be processed?)
@@ -141,21 +140,18 @@ static void handle_max_interrupts(){
 						&curr_spo2, (int8_t*) &curr_spo2_valid, &curr_heart_rate, (int8_t*)&curr_hr_valid, &curr_ratio, &curr_correl);
 				curr_buffer_n_samples = 0;
 			}
-
-			max30102_set_ppg_rdy_en(true);
-			max30102_set_a_full_en(true);
 		}
-		if(alc_ovf_flag){
-			alc_ovf_flag = false;
+		if(max30102_interrupts.alc_ovf){
+			max30102_interrupts.alc_ovf = false;
 
 		}
-		if(die_temp_rdy_flag){
-			die_temp_rdy_flag = false;
+		if(max30102_interrupts.die_temp_rdy){
+			max30102_interrupts.die_temp_rdy = false;
 
 		}
 
-		if(a_full_flag){
-			a_full_flag = false;
+		if(max30102_interrupts.a_full){
+			max30102_interrupts.a_full = false;
 		}
 	}
 }
@@ -163,12 +159,23 @@ static void handle_max_interrupts(){
 static void example_task(void *pvParameters) {
 
 	max30102_state_t state = max30102_init(MAX30102_SPO2_MODE);
+	if(state == MAX30102_FAILURE) {
+		error_trap();
+	}
+
 //	state = state == MAX30102_SUCCESS ? max30102_trigger_temp_read(): state;
 //	state = state == MAX30102_SUCCESS ? max30102_wait_temp_read_ready(): state;
 //	state = state == MAX30102_SUCCESS ? max30102_get_temperature_c(&dummy): state;
 
-	max30102_state_t state3 = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
-	max30102_state_t state4 = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
+	state = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
+	if(state == MAX30102_FAILURE) {
+		error_trap();
+	}
+
+	state = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
+	if(state == MAX30102_FAILURE){
+		error_trap();
+	}
 
 	max30102_fifo_configuration_t fifo_conf;
 	fifo_conf.val = 0;
@@ -183,7 +190,7 @@ static void example_task(void *pvParameters) {
 	spo2_conf.spo2_sr = MAX30102_SPO2_SAMPLE_RATE_100HZ;
 	spo2_conf.spo2_adc_rge = MAX30102_SPO2_ADC_RESOLUTION_4096NA;
 	max30102_state_t state2 = max30102_set_spo2_config(&spo2_conf);
-
+	memset(&max30102_interrupts, 0, sizeof(max30102_interrupts));
 	NVIC_EnableIRQ(PORTB_IRQn);
 
 	max30102_trigger_spo2_reads();
@@ -197,7 +204,6 @@ static void example_task(void *pvParameters) {
 }
 
 
-
 /* PORTB_IRQn interrupt handler */
 void GPIOB_IRQHANDLER(void) {
   /* Get pin flags */
@@ -206,13 +212,9 @@ void GPIOB_IRQHANDLER(void) {
   for(int i = 0; i < sizeof(pin_flags)*8; i++){
 	  if(pin_flags & (1 << i)){
 		  if(i == BOARD_MAX30102_INT_PIN_PIN){
-			  max30102_interrupt_status_t status;
-			  max30102_get_interrupt_status(&status);
-			  if(status.pwr_rdy) pwr_rdy_flag = status.pwr_rdy;
-			  if(status.ppg_rdy) ppg_rdy_flag = status.ppg_rdy;
-			  if(status.alc_ovf) alc_ovf_flag = status.alc_ovf;
-			  if(status.die_temp_rdy) die_temp_rdy_flag = status.die_temp_rdy;
-			  if(status.a_full) a_full_flag = status.a_full;
+			  max30102_state_t succ = max30102_get_interrupt_status(&max30102_interrupts);
+			  if(succ != MAX30102_SUCCESS) error_trap();
+			  break;
 		  }
 	  }
   }
@@ -228,3 +230,9 @@ void GPIOB_IRQHANDLER(void) {
   #endif
 }
 
+
+static void error_trap(){
+	PRINTF("ERROR - TRAP");
+	while(1);
+
+}
