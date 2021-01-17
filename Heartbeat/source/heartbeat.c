@@ -58,7 +58,7 @@
  ******************************************************************************/
 /* Application API */
 static void example_task(void *pvParameters);
-
+static void setup_max30205();
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -83,7 +83,6 @@ int main(void) {
     NVIC_SetPriority(I2C_A_IRQn, 5);
     NVIC_SetPriority(PORTB_IRQn, 4);
 
-
 	/* RTOS Init Tasks. */
 	if (xTaskCreate(example_task, "example_task",
 	configMINIMAL_STACK_SIZE + 166, NULL, mainEXAMPLE_TASK_PRIORITY, NULL) != pdPASS) {
@@ -100,34 +99,14 @@ int main(void) {
 		;
 }
 
-static float dummy;
+
+static void setup_max30205(){
+	max30205_state_t state = max30205_init();
+}
+//static float dummy;
 static void example_task(void *pvParameters) {
 
-	max30102_state_t state = max30102_init(MAX30102_SPO2_MODE);
-//	state = state == MAX30102_SUCCESS ? max30102_trigger_temp_read(): state;
-//	state = state == MAX30102_SUCCESS ? max30102_wait_temp_read_ready(): state;
-//	state = state == MAX30102_SUCCESS ? max30102_get_temperature_c(&dummy): state;
-
-	max30102_state_t state3 = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
-	max30102_state_t state4 = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
-
-	max30102_fifo_configuration_t fifo_conf;
-	fifo_conf.val = 0;
-	fifo_conf.fifo_a_full = 0xF;
-	fifo_conf.fifo_roll_over_en = true;
-	fifo_conf.smp_ave = MAX30102_SMP_AVE_1;
-	max30102_state_t state1 = max30102_set_fifo_config(&fifo_conf);
-
-	max30102_spo2_configuration_t spo2_conf;
-	spo2_conf.val = 0;
-	spo2_conf.led_pw = MAX30102_LED_PW_411US_ADC_18_BITS;
-	spo2_conf.spo2_sr = MAX30102_SPO2_SAMPLE_RATE_100HZ;
-	spo2_conf.spo2_adc_rge = MAX30102_SPO2_ADC_RESOLUTION_4096NA;
-	max30102_state_t state2 = max30102_set_spo2_config(&spo2_conf);
-
-	NVIC_EnableIRQ(PORTB_IRQn);
-
-	max30102_trigger_spo2_read();
+	setup_max30205();
 
 	for (;;) {
 		vTaskSuspend(NULL);
@@ -135,48 +114,6 @@ static void example_task(void *pvParameters) {
 
 }
 
-/* PORTB_IRQn interrupt handler */
-void GPIOB_IRQHANDLER(void) {
-  /* Get pin flags */
-  uint32_t pin_flags = GPIO_PortGetInterruptFlags(GPIOB);
-
-  for(int i = 0; i < sizeof(pin_flags)*8; i++){
-	  if(pin_flags & (1 << i)){
-		  if(i == BOARD_MAX30102_INT_PIN_PIN){
-			  max30102_interrupt_status_t status;
-			  max30102_get_interrupt_status(&status);
-			  if(status.pwr_rdy){
-
-			  }
-			  if(status.ppg_rdy){
-				  max30102_set_ppg_rdy_en(false);
-				  max30102_set_a_full_en(false);
-				  uint8_t n_available_samples = max30102_get_num_available_samples();
-				  uint8_t m_read_samples = 0;
-				  max30102_sample_t *samples = max30102_read_n_samples(n_available_samples, &m_read_samples);
-				  for(int i =0; i < m_read_samples; i++)
-					  PRINTF("%d , ", samples[i]);
-				  max30102_set_ppg_rdy_en(true);
-				  max30102_set_a_full_en(true);
-			  }
-			  if(status.alc_ovf){
-
-			  }
-			  if(status.die_temp_rdy){
-
-			  }
-		  }
-	  }
-  }
 
 
-  /* Clear pin flags */
-  GPIO_PortClearInterruptFlags(GPIOB, pin_flags);
-
-  /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
-     Store immediate overlapping exception return operation might vector to incorrect interrupt. */
-  #if defined __CORTEX_M && (__CORTEX_M == 4U)
-    __DSB();
-  #endif
-}
 
