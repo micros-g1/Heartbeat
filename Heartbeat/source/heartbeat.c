@@ -59,7 +59,7 @@
  ******************************************************************************/
 /* Application API */
 static void example_task(void *pvParameters);
-
+static void setup_max30102();
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -68,6 +68,7 @@ static void example_task(void *pvParameters);
  * Code
  ******************************************************************************/
 static void error_trap();
+static void setup_max30205();
 /*
  * @brief   Application entry point.
  */
@@ -119,7 +120,46 @@ static bool curr_spo2_valid = false;
 static float curr_ratio = 0;
 static float curr_correl = 0;
 
-//just for debugging
+static void setup_max30102(){
+	max30102_state_t state = max30102_init(MAX30102_SPO2_MODE);
+	if(state == MAX30102_FAILURE) {
+		PRINTF("MAX30102 INITIALIZATION ERROR\n");
+		error_trap();
+	}
+
+//	state = state == MAX30102_SUCCESS ? max30102_trigger_temp_read(): state;
+//	state = state == MAX30102_SUCCESS ? max30102_wait_temp_read_ready(): state;
+//	state = state == MAX30102_SUCCESS ? max30102_get_temperature_c(&dummy): state;
+
+	state = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
+	if(state == MAX30102_FAILURE) {
+		PRINTF("MAX30102 LED1 ERROR\n");
+		error_trap();
+	}
+
+	state = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
+	if(state == MAX30102_FAILURE){
+		PRINTF("MAX30102 LED2 ERROR\n");
+		error_trap();
+	}
+
+	max30102_fifo_configuration_t fifo_conf;
+	fifo_conf.val = 0;
+	fifo_conf.fifo_a_full = 0xF;
+	fifo_conf.fifo_roll_over_en = true;
+	fifo_conf.smp_ave = MAX30102_SMP_AVE_4;
+	max30102_state_t state1 = max30102_set_fifo_config(&fifo_conf);
+
+	max30102_spo2_configuration_t spo2_conf;
+	spo2_conf.val = 0;
+	spo2_conf.led_pw = MAX30102_LED_PW_411US_ADC_18_BITS;
+	spo2_conf.spo2_sr = MAX30102_SPO2_SAMPLE_RATE_100HZ;
+	spo2_conf.spo2_adc_rge = MAX30102_SPO2_ADC_RESOLUTION_4096NA;
+	max30102_state_t state2 = max30102_set_spo2_config(&spo2_conf);
+	memset(&max30102_interrupts, 0, sizeof(max30102_interrupts));
+	NVIC_EnableIRQ(PORTB_IRQn);
+}
+
 static void handle_max_interrupts(){
 	while(true){
 		if(max30102_interrupts.pwr_rdy){
@@ -165,49 +205,13 @@ static void handle_max_interrupts(){
 	}
 }
 
+
 static void example_task(void *pvParameters) {
 
-	max30102_state_t state = max30102_init(MAX30102_SPO2_MODE);
-	if(state == MAX30102_FAILURE) {
-		PRINTF("MAX30102 INITIALIZATION ERROR\n");
-		error_trap();
-	}
-
-//	state = state == MAX30102_SUCCESS ? max30102_trigger_temp_read(): state;
-//	state = state == MAX30102_SUCCESS ? max30102_wait_temp_read_ready(): state;
-//	state = state == MAX30102_SUCCESS ? max30102_get_temperature_c(&dummy): state;
-
-	state = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
-	if(state == MAX30102_FAILURE) {
-		PRINTF("MAX30102 LED1 ERROR\n");
-		error_trap();
-	}
-
-	state = max30102_set_led_current(0xFF,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
-	if(state == MAX30102_FAILURE){
-		PRINTF("MAX30102 LED2 ERROR\n");
-		error_trap();
-	}
-
-	max30102_fifo_configuration_t fifo_conf;
-	fifo_conf.val = 0;
-	fifo_conf.fifo_a_full = 0xF;
-	fifo_conf.fifo_roll_over_en = true;
-	fifo_conf.smp_ave = MAX30102_SMP_AVE_4;
-	max30102_state_t state1 = max30102_set_fifo_config(&fifo_conf);
-
-	max30102_spo2_configuration_t spo2_conf;
-	spo2_conf.val = 0;
-	spo2_conf.led_pw = MAX30102_LED_PW_411US_ADC_18_BITS;
-	spo2_conf.spo2_sr = MAX30102_SPO2_SAMPLE_RATE_100HZ;
-	spo2_conf.spo2_adc_rge = MAX30102_SPO2_ADC_RESOLUTION_4096NA;
-	max30102_state_t state2 = max30102_set_spo2_config(&spo2_conf);
-	memset(&max30102_interrupts, 0, sizeof(max30102_interrupts));
-	NVIC_EnableIRQ(PORTB_IRQn);
-
+	setup_max30102();
 	max30102_trigger_spo2_reads();
-
 	handle_max_interrupts();
+
 
 	for (;;) {
 		vTaskSuspend(NULL);
