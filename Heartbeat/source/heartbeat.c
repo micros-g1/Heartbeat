@@ -43,7 +43,7 @@
 #include "fsl_debug_console.h"
 /* other includes. */
 #include "drv/max30102.h"
-
+#include "drv/max30205.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -58,6 +58,7 @@
  ******************************************************************************/
 /* Application API */
 static void example_task(void *pvParameters);
+static void temperature_task(void *pvParameters);
 static void setup_max30205();
 /*******************************************************************************
  * Variables
@@ -94,6 +95,7 @@ int main(void) {
 		setvbuf (stdout, NULL, _IONBF, 0);
 //		PRINTF("Empezo\n");
 	}
+
 	vTaskStartScheduler();
 	for (;;)
 		;
@@ -101,19 +103,35 @@ int main(void) {
 
 
 static void setup_max30205(){
-	max30205_state_t state = max30205_init();
+	max30205_init();
 }
 //static float dummy;
 static void example_task(void *pvParameters) {
 
 	setup_max30205();
-
+	if (xTaskCreate(temperature_task, "temperature_task",
+	configMINIMAL_STACK_SIZE + 166, NULL, 3, NULL) != pdPASS) {
+		PRINTF("Example task creation failed!.\r\n");
+		while (1)
+			;
+	}
 	for (;;) {
 		vTaskSuspend(NULL);
 	}
 
 }
 
+static void temperature_task(void *pvParameters){
+	max30205_state_t result;
+	float temp;
+	for(;;){
+		if(max30205_temp_read(&temp))
+			PRINTF("%f\n", temp);
+		else
+			PRINTF("Error de Lectura\n");
+		vTaskDelay(pdMS_TO_TICKS(1000));
+	}
+}
 
 
 
