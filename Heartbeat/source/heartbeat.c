@@ -107,9 +107,10 @@ int main(void) {
 //static float dummy;
 static max30102_interrupt_status_t max30102_interrupts;
 
-static max30102_led_data_t ir_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
-static max30102_led_data_t red_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
-uint8_t samp1[9];
+static uint32_t ir_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
+static uint32_t red_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
+char samp1[9];
+char samp2[9];
 
 static uint32_t curr_buffer_n_samples = 0;
 
@@ -131,17 +132,13 @@ static void setup_max30102(){
 		error_trap();
 	}
 
-//	state = state == MAX30102_SUCCESS ? max30102_trigger_temp_read(): state;
-//	state = state == MAX30102_SUCCESS ? max30102_wait_temp_read_ready(): state;
-//	state = state == MAX30102_SUCCESS ? max30102_get_temperature_c(&dummy): state;
-
-	state = max30102_set_led_current(0x1F,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
+	state = max30102_set_led_current(0x3F,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
 	if(state == MAX30102_FAILURE) {
 		PRINTF("MAX30102 LED1 ERROR\n");
 		error_trap();
 	}
 
-	state = max30102_set_led_current(0x1F,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
+	state = max30102_set_led_current(0x3F,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
 	if(state == MAX30102_FAILURE){
 		PRINTF("MAX30102 LED2 ERROR\n");
 		error_trap();
@@ -152,21 +149,28 @@ static void setup_max30102(){
 	fifo_conf.fifo_a_full = 0xF;
 	fifo_conf.fifo_roll_over_en = true;
 	fifo_conf.smp_ave = MAX30102_SMP_AVE_4;
-	max30102_state_t state1 = max30102_set_fifo_config(&fifo_conf);
-
+	state = max30102_set_fifo_config(&fifo_conf);
+	if(state == MAX30102_FAILURE) {
+		PRINTF("MAX30102 FIFO CONFIG ERROR\n");
+		error_trap();
+	}
 	max30102_spo2_configuration_t spo2_conf;
 	spo2_conf.val = 0;
 	spo2_conf.led_pw = MAX30102_LED_PW_411US_ADC_18_BITS;
 	spo2_conf.spo2_sr = MAX30102_SPO2_SAMPLE_RATE_100HZ;
 	spo2_conf.spo2_adc_rge = MAX30102_SPO2_ADC_RESOLUTION_4096NA;
-	max30102_state_t state2 = max30102_set_spo2_config(&spo2_conf);
+	state = max30102_set_spo2_config(&spo2_conf);
+	if(state == MAX30102_FAILURE) {
+		PRINTF("MAX30102 SPO2 CONFIG ERROR\n");
+		error_trap();
+	}
 	memset(&max30102_interrupts, 0, sizeof(max30102_interrupts));
 }
 
 static void handle_max_interrupts(){
 	while(true){
 		while(interrupt_flag || !GPIO_PinRead(GPIOB, BOARD_MAX30102_INT_PIN_PIN)){
-			max30102_state_t succ = max30102_get_interrupt_status(&max30102_interrupts);
+			max30102_get_interrupt_status(&max30102_interrupts);
 			interrupt_flag = false;
 
 			if(max30102_interrupts.pwr_rdy){
@@ -179,16 +183,18 @@ static void handle_max_interrupts(){
 				max30102_interrupts.ppg_rdy = false;
 
 	//			uint8_t n_available_samples = max30102_get_num_available_samples();
-	//			if(n_available_samples == 31)
-	//				error_trap();
 				uint8_t n_available_samples = 1;
 				uint32_t prev_buffer_n_samples = curr_buffer_n_samples;
 				curr_buffer_n_samples += max30102_read_n_samples(n_available_samples,
 						&ir_led_samples[curr_buffer_n_samples], &red_led_samples[curr_buffer_n_samples]);
 
 				for(int i = prev_buffer_n_samples; i < curr_buffer_n_samples; i++){
-					itoa((int) ir_led_samples[i].led_data, samp1, 10);
-					UART_RTOS_Send(&UART0_rtos_handle, samp1, 6);
+					itoa((int) ir_led_samples[i], samp1, 10);
+					itoa((int) red_led_samples[i], samp2, 10);
+
+					UART_RTOS_Send(&UART0_rtos_handle, samp1, 7);
+					UART_RTOS_Send(&UART0_rtos_handle, ",", 1);
+					UART_RTOS_Send(&UART0_rtos_handle, samp2, 7);
 					UART_RTOS_Send(&UART0_rtos_handle, "\n", 1);
 				}
 

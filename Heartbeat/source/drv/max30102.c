@@ -23,9 +23,6 @@ static uint8_t wr_ptr = 0;
 static uint8_t rd_ptr = 0;
 
 
-static max30102_state_t max30102_set_mode(max30102_mode_t conf);
-//interrupts to be enabled should be set.
-static max30102_state_t max30102_enable_interrupts(max30102_interrupt_enable_t *enables, max30102_addr_t interrupt_enable_addr);
 static max30102_state_t max30102_hard_reset();
 static max30102_state_t max30102_is_reset_ready(bool* reset_ready);
 static max30102_state_t max30102_wait_reset_ready();
@@ -40,19 +37,14 @@ max30102_state_t max30102_init(max30102_mode_t initial_mode)
 	state = state == MAX30102_SUCCESS? (part_id == MAX30102_PART_ID? MAX30102_SUCCESS : MAX30102_FAILURE) : state;
 	state = state == MAX30102_SUCCESS? max30102_hard_reset() : state;
 	state = state == MAX30102_SUCCESS? max30102_wait_reset_ready() : state;
-//	state = state == MAX30102_SUCCESS? max30102_set_mode(initial_mode) : state;
 
-	const uint8_t data[1]={0x00};
-
+	uint8_t data[1]={0x00};
+	i2c_write_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_INTERRUPT_ENABLE_2_ADDR, 1, data);
 	i2c_write_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_WRITE_POINTER_ADDR, 1, data);
 	i2c_write_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_OVERFLOW_COUNTER_ADDR, 1, data);
 	i2c_write_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_READ_POINTER_ADDR, 1, data);
 
-	max30102_set_mode(MAX30102_SPO2_MODE);
-	//	max30102_interrupt_enable_t enables;
-//	memset(&enables, 0, sizeof(enables));
-//	enables.die_temp_rdy_en = true;
-//	state = state == MAX30102_SUCCESS? max30102_enable_interrupts(&enables, MAX30102_INTERRUPT_ENABLE_2_ADDR): state;
+	max30102_set_mode(initial_mode);
 
 	return state;
 }
@@ -161,17 +153,6 @@ max30102_state_t max30102_get_part_id(uint8_t* part_id)
 	return state;
 }
 
-max30102_state_t max30102_set_mode(max30102_mode_t mode){
-	if(!i2c) return MAX30102_FAILURE;
-
-	max30102_mode_configuration_t new_conf;
-	memset(&new_conf, 0, sizeof(new_conf));
-	new_conf.mode = mode;
-	uint8_t mask = MAX30102_MASK_GENERATE(MAX30102_MODE_BIT_START, MAX30102_MODE_BIT_LENGTH);
-	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_MODE_CONFIGURATION_ADDR, mask, new_conf.val)?
-				MAX30102_SUCCESS : MAX30102_FAILURE;
-}
-
 max30102_state_t max30102_set_die_temp_rdy_en(bool die_tmp_rdy_en){
 	if(!i2c) return MAX30102_FAILURE;
 
@@ -210,14 +191,6 @@ max30102_state_t max30102_set_a_full_en(bool a_full_en){
 	enables.a_full_en = a_full_en;
 	uint8_t mask = MAX30102_MASK_GENERATE(MAX30102_A_FULL_BIT_START, MAX30102_A_FULL_BIT_LENGTH);
 	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_INTERRUPT_ENABLE_1_ADDR, mask, enables.byte[1])?
-				MAX30102_SUCCESS : MAX30102_FAILURE;
-}
-
-max30102_state_t max30102_enable_interrupts(max30102_interrupt_enable_t *enables, max30102_addr_t interrupt_enable_addr){
-	if(!i2c) return MAX30102_FAILURE;
-
-	uint8_t *part = (interrupt_enable_addr == MAX30102_INTERRUPT_ENABLE_2_ADDR) ? enables->byte : enables->byte + 1;
-	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, interrupt_enable_addr, *part, *part)?
 				MAX30102_SUCCESS : MAX30102_FAILURE;
 }
 
@@ -301,26 +274,44 @@ max30102_state_t max30102_set_led_current(uint8_t curr_lvl, max30102_addr_t led_
 	return i2c_write_byte_addr8(i2c, MAX30102_I2C_ADDRESS, led_addr, curr_lvl) ? MAX30102_SUCCESS : MAX30102_FAILURE;
 }
 
-uint8_t max30102_read_n_samples(uint8_t n_samples, max30102_led_data_t *ir_data, max30102_led_data_t *red_data){
+uint8_t max30102_read_n_samples(uint8_t n_samples, uint32_t *ir_data, uint32_t *red_data){
 
 	if(!i2c) return 0;
+	uint32_t un_temp = 0;
 	uint8_t m_success = 0;
 	uint8_t data[6];
+
 	for(int i = 0; i < n_samples; i++){
 		if(!i2c_read_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_DATA_REGISTER_ADDR, 6, data)){
-
+			i2c_write_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_READ_POINTER_ADDR, rd_ptr + i);
+			m_success = i;
+			return m_success;
 		}
-//		if(!i2c_read_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_DATA_REGISTER_ADDR, MAX30102_SAMPLE_N_BYTES,
-//				&(ir_data[i].bytes[1])) ||
-//				!i2c_read_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_DATA_REGISTER_ADDR, MAX30102_SAMPLE_N_BYTES,
-//						&(red_data[i].bytes[1]))){
-//			i2c_write_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_READ_POINTER_ADDR, rd_ptr + i);
-//			m_success = i;
-//			return m_success;
-//		}
 		else{
-			ir_data[i].led_data &= 0x03FFFF;  //Mask MSB [23:18]
-			red_data[i].led_data &= 0x03FFFF;	 //Mask MSB [23:18]
+			red_data[i] = 0;
+			ir_data[i] = 0;
+
+			un_temp = (unsigned char) data[0];
+			un_temp<<=16;
+			red_data[i] += un_temp;
+			un_temp = (unsigned char) data[1];
+			un_temp <<= 8;
+			red_data[i]+=un_temp;
+			un_temp=(unsigned char) data[2];
+			red_data[i]+=un_temp;
+
+			un_temp=(unsigned char) data[3];
+			un_temp<<=16;
+			ir_data[i]+=un_temp;
+			un_temp=(unsigned char) data[4];
+			un_temp<<=8;
+			ir_data[i]+=un_temp;
+			un_temp=(unsigned char) data[5];
+			ir_data[i]+=un_temp;
+
+			red_data[i]&=0x03FFFF;  //Mask MSB [23:18]
+			ir_data[i]&=0x03FFFF;  //Mask MSB [23:18]
+			un_temp = 0;
 		}
 	}
 
@@ -355,6 +346,47 @@ max30102_state_t max30102_get_interrupt_status(max30102_interrupt_status_t *stat
 	if(state == MAX30102_SUCCESS)
 		state = i2c_read_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_INTERRUPT_STATUS_2_ADDR, &(status->byte[0])) ?
 				MAX30102_SUCCESS: MAX30102_FAILURE;
-//	return MAX30102_SUCCESS;
 	return state;
+}
+
+
+max30102_state_t max30102_set_mode_config(max30102_mode_configuration_t *config){
+	if(!i2c) return MAX30102_FAILURE;
+
+	return i2c_write_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_MODE_CONFIGURATION_ADDR, config->val)?
+					MAX30102_SUCCESS : MAX30102_FAILURE;
+}
+
+max30102_state_t max30102_set_mode(max30102_mode_t mode){
+	if(!i2c) return MAX30102_FAILURE;
+
+	max30102_mode_configuration_t new_conf;
+	memset(&new_conf, 0, sizeof(new_conf));
+	new_conf.mode = mode;
+	uint8_t mask = MAX30102_MASK_GENERATE(MAX30102_MODE_BIT_START, MAX30102_MODE_BIT_LENGTH);
+	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_MODE_CONFIGURATION_ADDR, mask, new_conf.val)?
+				MAX30102_SUCCESS : MAX30102_FAILURE;
+}
+
+max30102_state_t max30102_set_shdn(bool shdn){
+	if(!i2c) return MAX30102_FAILURE;
+
+	max30102_mode_configuration_t new_conf;
+	memset(&new_conf, 0, sizeof(new_conf));
+	new_conf.shdn = shdn;
+	uint8_t mask = MAX30102_MASK_GENERATE(MAX30102_SHDN_BIT_START, MAX30102_SHDN_BIT_LENGTH);
+	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_MODE_CONFIGURATION_ADDR, mask, new_conf.val)?
+				MAX30102_SUCCESS : MAX30102_FAILURE;
+}
+
+
+max30102_state_t max30102_set_reset(bool reset){
+	if(!i2c) return MAX30102_FAILURE;
+
+	max30102_mode_configuration_t new_conf;
+	memset(&new_conf, 0, sizeof(new_conf));
+	new_conf.reset = reset;
+	uint8_t mask = MAX30102_MASK_GENERATE(MAX30102_RESET_BIT_START, MAX30102_RESET_BIT_LENGTH);
+	return i2c_write_byte_addr8_mask(i2c, MAX30102_I2C_ADDRESS, MAX30102_MODE_CONFIGURATION_ADDR, mask, new_conf.val)?
+				MAX30102_SUCCESS : MAX30102_FAILURE;
 }
