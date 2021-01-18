@@ -144,7 +144,7 @@ BOARD_InitPins:
   - {pin_num: '36', peripheral: TPIU, signal: SWO, pin_signal: PTA2/UART0_TX/FTM0_CH7/JTAG_TDO/TRACE_SWO/EZP_DO, drive_strength: low, pull_select: down, pull_enable: disable}
   - {pin_num: '31', peripheral: I2C0, signal: SCL, pin_signal: ADC0_SE17/PTE24/UART4_TX/I2C0_SCL/EWM_OUT_b, identifier: ''}
   - {pin_num: '32', peripheral: I2C0, signal: SDA, pin_signal: ADC0_SE18/PTE25/UART4_RX/I2C0_SDA/EWM_IN, identifier: ''}
-  - {pin_num: '57', peripheral: GPIOB, signal: 'GPIO, 9', pin_signal: PTB9/SPI1_PCS1/UART3_CTS_b/FB_AD20, direction: INPUT, gpio_interrupt: kPORT_InterruptLogicZero,
+  - {pin_num: '57', peripheral: GPIOB, signal: 'GPIO, 9', pin_signal: PTB9/SPI1_PCS1/UART3_CTS_b/FB_AD20, direction: INPUT, gpio_interrupt: kPORT_InterruptFallingEdge,
     pull_select: up}
   - {peripheral: ADC0, signal: 'TRG, A', pin_signal: PIT_trigger_0}
   - {pin_num: '19', peripheral: ADC0, signal: 'DM, 0', pin_signal: ADC0_DM0/ADC1_DM3}
@@ -195,8 +195,8 @@ void BOARD_InitPins(void)
     /* PORTB9 (pin 57) is configured as PTB9 */
     PORT_SetPinMux(BOARD_MAX30102_INT_PIN_PORT, BOARD_MAX30102_INT_PIN_PIN, kPORT_MuxAsGpio);
 
-    /* Interrupt configuration on PORTB9 (pin 57): Interrupt when logic zero */
-    PORT_SetPinInterruptConfig(BOARD_MAX30102_INT_PIN_PORT, BOARD_MAX30102_INT_PIN_PIN, kPORT_InterruptLogicZero);
+    /* Interrupt configuration on PORTB9 (pin 57): Interrupt on falling edge */
+    PORT_SetPinInterruptConfig(BOARD_MAX30102_INT_PIN_PORT, BOARD_MAX30102_INT_PIN_PIN, kPORT_InterruptFallingEdge);
 
     PORTB->PCR[9] = ((PORTB->PCR[9] &
                       /* Mask bits to zero which are setting */

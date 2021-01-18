@@ -71,6 +71,7 @@
 //const float mean_X = (float)(BUFFER_SIZE-1)/2.0; // Mean value of the set of integers from 0 to BUFFER_SIZE-1. For ST=4 and FS=25 it's equal to 49.5.
 
 #define RF_SAMPLES 100
+#define RF_SAMPLES_MARGIN 100
 #define RF_N_BUFFERS 2
 void rf_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer, int32_t n_ir_buffer_length, uint32_t *pun_red_buffer, float *pn_spo2, int8_t *pch_spo2_valid, int32_t *pn_heart_rate,
                                         int8_t *pch_hr_valid, float *ratio, float *correl);

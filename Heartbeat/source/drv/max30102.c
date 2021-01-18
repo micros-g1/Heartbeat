@@ -12,10 +12,10 @@
 #include <peripherals.h>
 #include "i2c.h"
 
-#define MAX30100_TFRAC_STEP_C	1.0/16
-#define MAX30100_TINT_SETP_C	1
-#define MAX30100_CALCULATE_TEMP_C(tint,tfrac) ((float)(MAX30100_TINT_SETP_C*((int8_t)(tint)) + MAX30100_TFRAC_STEP_C*((uint8_t)(tfrac))))
-#define MAX30100_SAMPLE_N_BYTES 3
+#define MAX30102_TFRAC_STEP_C	1.0/16
+#define MAX30102_TINT_SETP_C	1
+#define MAX30102_CALCULATE_TEMP_C(tint,tfrac) ((float)(MAX30102_TINT_SETP_C*((int8_t)(tint)) + MAX30102_TFRAC_STEP_C*((uint8_t)(tfrac))))
+#define MAX30102_SAMPLE_N_BYTES 3
 
 i2c_handle_t* i2c = NULL;
 
@@ -40,7 +40,7 @@ max30102_state_t max30102_init(max30102_mode_t initial_mode)
 	state = state == MAX30102_SUCCESS? (part_id == MAX30102_PART_ID? MAX30102_SUCCESS : MAX30102_FAILURE) : state;
 	state = state == MAX30102_SUCCESS? max30102_hard_reset() : state;
 	state = state == MAX30102_SUCCESS? max30102_wait_reset_ready() : state;
-	state = state == MAX30102_SUCCESS? max30102_set_mode(initial_mode) : state;
+//	state = state == MAX30102_SUCCESS? max30102_set_mode(initial_mode) : state;
 
 	const uint8_t data[1]={0x00};
 
@@ -101,7 +101,7 @@ max30102_state_t max30102_get_temperature_c(float* temp)
 	{
 		uint8_t integer = MAX30102_RECOVER_BITSTART_LENGTH(t_data[0],MAX30102_DIE_TEMP_INTEGER_BIT_START,MAX30102_DIE_TEMP_INTEGER_LENGTH);
 		uint8_t frac = MAX30102_RECOVER_BITSTART_LENGTH(t_data[1],MAX30102_DIE_TEMP_FRACTION_BIT_START,MAX30102_DIE_TEMP_FRACTION_LENGTH);
-		*temp = MAX30100_CALCULATE_TEMP_C(integer,frac);
+		*temp = MAX30102_CALCULATE_TEMP_C(integer,frac);
 	}
 	return state;
 }
@@ -305,16 +305,19 @@ uint8_t max30102_read_n_samples(uint8_t n_samples, max30102_led_data_t *ir_data,
 
 	if(!i2c) return 0;
 	uint8_t m_success = 0;
-
+	uint8_t data[6];
 	for(int i = 0; i < n_samples; i++){
-		if(!i2c_read_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_DATA_REGISTER_ADDR, MAX30100_SAMPLE_N_BYTES,
-				&(ir_data[i].bytes[1])) ||
-				!i2c_read_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_DATA_REGISTER_ADDR, MAX30100_SAMPLE_N_BYTES,
-						&(red_data[i].bytes[1]))){
-			i2c_write_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_READ_POINTER_ADDR, rd_ptr + i);
-			m_success = i;
-			return m_success;
+		if(!i2c_read_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_DATA_REGISTER_ADDR, 6, data)){
+
 		}
+//		if(!i2c_read_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_DATA_REGISTER_ADDR, MAX30102_SAMPLE_N_BYTES,
+//				&(ir_data[i].bytes[1])) ||
+//				!i2c_read_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_DATA_REGISTER_ADDR, MAX30102_SAMPLE_N_BYTES,
+//						&(red_data[i].bytes[1]))){
+//			i2c_write_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_READ_POINTER_ADDR, rd_ptr + i);
+//			m_success = i;
+//			return m_success;
+//		}
 		else{
 			ir_data[i].led_data &= 0x03FFFF;  //Mask MSB [23:18]
 			red_data[i].led_data &= 0x03FFFF;	 //Mask MSB [23:18]
@@ -346,30 +349,12 @@ max30102_state_t max30102_trigger_spo2_reads(){
 max30102_state_t max30102_get_interrupt_status(max30102_interrupt_status_t *status){
 	if(!i2c) return MAX30102_FAILURE;
 
-	i2c_master_transfer_t master_x_fer;
-	master_x_fer.slaveAddress = MAX30102_I2C_ADDRESS;
-	master_x_fer.direction = kI2C_Read;
-	master_x_fer.subaddress = MAX30102_INTERRUPT_STATUS_1_ADDR;
-	master_x_fer.subaddressSize = 1;
-	master_x_fer.data = &(status->byte[1]);
-	master_x_fer.dataSize = sizeof(status->byte[1]);
-	master_x_fer.flags = kI2C_TransferDefaultFlag;
-
-	if(I2C_MasterTransferBlocking(i2c->base, &master_x_fer) != kStatus_Success) return MAX30102_FAILURE;
-
-	master_x_fer.slaveAddress = MAX30102_I2C_ADDRESS;
-	master_x_fer.direction = kI2C_Read;
-	master_x_fer.subaddress = MAX30102_INTERRUPT_STATUS_2_ADDR;
-	master_x_fer.subaddressSize = 1;
-	master_x_fer.data = &(status->byte[0]);
-	master_x_fer.dataSize = sizeof(status->byte[0]);
-	master_x_fer.flags = kI2C_TransferDefaultFlag;
-	if(I2C_MasterTransferBlocking(i2c->base, &master_x_fer) != kStatus_Success) return MAX30102_FAILURE;
-
-//	state = i2c_read_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_INTERRUPT_STATUS_1_ADDR, &(status->byte[1]))?
-//			MAX30102_SUCCESS : MAX30102_FAILURE;
-//	state = state == MAX30102_SUCCESS?
-//			i2c_read_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_INTERRUPT_STATUS_2_ADDR, &(status->byte[0])) : state;
-
-	return MAX30102_SUCCESS;
+	max30102_state_t state;
+	state = i2c_read_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_INTERRUPT_STATUS_1_ADDR, &(status->byte[1]))?
+			MAX30102_SUCCESS : MAX30102_FAILURE;
+	if(state == MAX30102_SUCCESS)
+		state = i2c_read_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_INTERRUPT_STATUS_2_ADDR, &(status->byte[0])) ?
+				MAX30102_SUCCESS: MAX30102_FAILURE;
+//	return MAX30102_SUCCESS;
+	return state;
 }
