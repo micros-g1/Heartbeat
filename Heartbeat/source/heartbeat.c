@@ -171,24 +171,26 @@ static void handle_max_interrupts(){
 		if(max30102_interrupts.ppg_rdy){
 			max30102_interrupts.ppg_rdy = false;
 
-			uint8_t n_available_samples = max30102_get_num_available_samples();
-			if(n_available_samples == 31)
-				error_trap();
+//			uint8_t n_available_samples = max30102_get_num_available_samples();
+//			if(n_available_samples == 31)
+//				error_trap();
+			uint8_t n_available_samples = 1;
 			uint32_t prev_buffer_n_samples = curr_buffer_n_samples;
-			curr_buffer_n_samples += max30102_read_n_samples(n_available_samples, ir_led_samples, red_led_samples);
+			curr_buffer_n_samples += max30102_read_n_samples(n_available_samples,
+					&ir_led_samples[curr_buffer_n_samples], &red_led_samples[curr_buffer_n_samples]);
 
 			for(int i = prev_buffer_n_samples; i < curr_buffer_n_samples; i++){
-				itoa((int) ir_led_samples[i].led_data, samp1, 4);
-				UART_RTOS_Send(&UART0_rtos_handle, samp1, 4);
+				itoa((int) ir_led_samples[i].led_data, samp1, 6);
+				UART_RTOS_Send(&UART0_rtos_handle, samp1, 6);
 				UART_RTOS_Send(&UART0_rtos_handle, "\n", 1);
 			}
 
 			//is the buffer full ? (should the accumulated samples be processed?)
-//			if(curr_buffer_n_samples >= RF_SAMPLES){
+			if(curr_buffer_n_samples >= RF_SAMPLES){
 //				rf_heart_rate_and_oxygen_saturation((uint32_t*)ir_led_samples, RF_SAMPLES, (uint32_t*)red_led_samples,
 //						&curr_spo2, (int8_t*) &curr_spo2_valid, &curr_heart_rate, (int8_t*)&curr_hr_valid, &curr_ratio, &curr_correl);
-//				curr_buffer_n_samples = 0;
-//			}
+				curr_buffer_n_samples = 0;
+			}
 		}
 		if(max30102_interrupts.alc_ovf){
 			max30102_interrupts.alc_ovf = false;
