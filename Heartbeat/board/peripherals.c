@@ -263,7 +263,7 @@ instance:
         - channelNumber: '0'
         - enableChain: 'false'
         - timerPeriod: '5555'
-        - startTimer: 'true'
+        - startTimer: 'false'
         - enableInterrupt: 'false'
         - interrupt:
           - IRQn: 'PIT0_IRQn'
@@ -282,8 +282,6 @@ static void PIT_init(void) {
   PIT_Init(PIT_PERIPHERAL, &PIT_config);
   /* Set channel 0 period to N/A. */
   PIT_SetTimerPeriod(PIT_PERIPHERAL, PIT_CHANNEL_0, PIT_CHANNEL_0_TICKS);
-  /* Start channel 0. */
-  PIT_StartTimer(PIT_PERIPHERAL, PIT_CHANNEL_0);
 }
 
 /***********************************************************************************************************************

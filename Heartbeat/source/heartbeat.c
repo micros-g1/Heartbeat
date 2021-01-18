@@ -45,6 +45,7 @@
 /* other includes. */
 //#include "drv/max30102.h"
 #include "drv/ad8232.h"
+#include <stdio.h>
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -101,6 +102,10 @@ int main(void) {
 		;
 }
 
+static char buf[30];
+static volatile bool adc_flag = false;
+static float new_sample;
+
 //static float dummy;
 static void example_task(void *pvParameters) {
 
@@ -108,22 +113,23 @@ static void example_task(void *pvParameters) {
 	ad8232_state = ad8232_trigger_reads();
 
 	for (;;) {
+		if(adc_flag){
+
+		    gcvt(new_sample, 6, buf);
+			if(UART_RTOS_Send(&UART0_rtos_handle, buf, 30) != kStatus_Success)
+				PRINTF("error\n");
+			adc_flag = false;
+		}
 		vTaskSuspend(NULL);
 	}
 
 }
 
-static char buf[30];
 /* ADC0_IRQn interrupt handler */
 void ADC0_IRQHANDLER(void) {
-  /*  Place your code here */
-	float new_sample;
 	if(ad8232_get_new_sample(&new_sample) == AD8232_SUCCESS){
 		//add to event queue or plot
-
-	    gcvt(new_sample, 6, buf);
-		if(UART_RTOS_Send(&UART0_rtos_handle, buf, 30) != kStatus_Success)
-			PRINTF("error\n");
+		adc_flag = true;
 	}
   /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
      Store immediate overlapping exception return operation might vector to incorrect interrupt. */

@@ -1171,7 +1171,7 @@
                               <setting name="channelNumber" value="0"/>
                               <setting name="enableChain" value="false"/>
                               <setting name="timerPeriod" value="5555"/>
-                              <setting name="startTimer" value="true"/>
+                              <setting name="startTimer" value="false"/>
                               <setting name="enableInterrupt" value="false"/>
                               <struct name="interrupt">
                                  <setting name="IRQn" value="PIT0_IRQn"/>

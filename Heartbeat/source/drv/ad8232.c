@@ -21,7 +21,6 @@ static float buffer[AD8232_MAX_SAMPLES];
 
 ad8232_state_t ad8232_init(){
 	//Both PIT and ADC are already initialized (peripherals.c)
-    if (!ADC16_DoAutoCalibration(ADC0_PERIPHERAL)) return AD8232_FAILURE;
 	return AD8232_SUCCESS;
 }
 
