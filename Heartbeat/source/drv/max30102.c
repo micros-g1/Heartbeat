@@ -42,10 +42,17 @@ max30102_state_t max30102_init(max30102_mode_t initial_mode)
 	state = state == MAX30102_SUCCESS? max30102_wait_reset_ready() : state;
 	state = state == MAX30102_SUCCESS? max30102_set_mode(initial_mode) : state;
 
-	max30102_interrupt_enable_t enables;
-	memset(&enables, 0, sizeof(enables));
-	enables.die_temp_rdy_en = true;
-	state = state == MAX30102_SUCCESS? max30102_enable_interrupts(&enables, MAX30102_INTERRUPT_ENABLE_2_ADDR): state;
+	const uint8_t data[1]={0x00};
+
+	i2c_write_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_WRITE_POINTER_ADDR, 1, data);
+	i2c_write_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_OVERFLOW_COUNTER_ADDR, 1, data);
+	i2c_write_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_READ_POINTER_ADDR, 1, data);
+
+	max30102_set_mode(MAX30102_SPO2_MODE);
+	//	max30102_interrupt_enable_t enables;
+//	memset(&enables, 0, sizeof(enables));
+//	enables.die_temp_rdy_en = true;
+//	state = state == MAX30102_SUCCESS? max30102_enable_interrupts(&enables, MAX30102_INTERRUPT_ENABLE_2_ADDR): state;
 
 	return state;
 }
