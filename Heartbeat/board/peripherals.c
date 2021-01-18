@@ -92,7 +92,7 @@ instance:
     - i2c_master_config:
       - enableMaster: 'true'
       - enableStopHold: 'false'
-      - baudRate_Bps: '100000'
+      - baudRate_Bps: '400000'
       - glitchFilterWidth: '0'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
@@ -100,13 +100,56 @@ i2c_rtos_handle_t I2CA_rtosHandle;
 const i2c_master_config_t I2C0_config = {
   .enableMaster = true,
   .enableStopHold = false,
-  .baudRate_Bps = 100000UL,
+  .baudRate_Bps = 400000UL,
   .glitchFilterWidth = 0U
 };
 
 static void I2C0_init(void) {
   /* Initialization function */
   I2C_RTOS_Init(&I2CA_rtosHandle, I2C0_PERIPHERAL, &I2C0_config, I2C0_CLK_FREQ);
+}
+
+/***********************************************************************************************************************
+ * UART0 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'UART0'
+- type: 'uart'
+- mode: 'freertos'
+- custom_name_enabled: 'false'
+- type_id: 'uart_88ab1eca0cddb7ee407685775de016d5'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'UART0'
+- config_sets:
+  - fsl_uart_freertos:
+    - uart_rtos_configuration:
+      - clockSource: 'BusInterfaceClock'
+      - clockSourceFreq: 'GetFreq'
+      - baudrate: '115200'
+      - parity: 'kUART_ParityDisabled'
+      - stopbits: 'kUART_OneStopBit'
+      - buffer_size: '100'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+uart_rtos_handle_t UART0_rtos_handle;
+uart_handle_t UART0_uart_handle;
+uint8_t UART0_background_buffer[UART0_BACKGROUND_BUFFER_SIZE];
+uart_rtos_config_t UART0_rtos_config = {
+  .base = UART0_PERIPHERAL,
+  .baudrate = 115200UL,
+  .parity = kUART_ParityDisabled,
+  .stopbits = kUART_OneStopBit,
+  .buffer = UART0_background_buffer,
+  .buffer_size = UART0_BACKGROUND_BUFFER_SIZE
+};
+
+static void UART0_init(void) {
+  /* UART clock source initialization */
+  UART0_rtos_config.srcclk = UART0_CLOCK_SOURCE;
+  /* UART rtos initialization */
+  UART_RTOS_Init(&UART0_rtos_handle, &UART0_uart_handle, &UART0_rtos_config);
 }
 
 /***********************************************************************************************************************
@@ -117,6 +160,7 @@ void BOARD_InitPeripherals(void)
   /* Initialize components */
   GPIOB_init();
   I2C0_init();
+  UART0_init();
 }
 
 /***********************************************************************************************************************

@@ -906,6 +906,16 @@
                   <data type="Version">2.0.5</data>
                </feature>
             </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.uart" description="UART Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
+               <feature name="enabled" evaluation="equal">
+                  <data type="Boolean">true</data>
+               </feature>
+            </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.uart" description="Unsupported version of the UART Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
+               <feature name="version" evaluation="greaterOrEqual">
+                  <data type="Version">2.2.0</data>
+               </feature>
+            </dependency>
          </dependencies>
          <generated_project_files>
             <file path="board/peripherals.c" update_enabled="true"/>
@@ -944,6 +954,31 @@
                         <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="UART0.uart_tx" description="Signal TX of the peripheral UART0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="equal">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="UART0.uart_rx" description="Signal RX of the peripheral UART0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="equal">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="SWComponent" resourceId="platform.drivers.uart_freertos" description="The fsl_uart_freertos driver is missing in the project (required for the FreeRTOS mode)." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="enabled" evaluation="equal">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="SWComponent" resourceId="platform.drivers.uart_freertos" description="The compatible version of the fsl_uart_freertos driver is not available in the project (required for the FreeRTOS mode)." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="version" evaluation="compatible">
+                        <data type="Version">2.2.0</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="System_clock" description="System clock is inactive." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
+                     </feature>
+                  </dependency>
                </dependencies>
                <instances>
                   <instance name="GPIOB" uuid="74a50033-1c87-4fe5-8d66-0e418185eda0" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOB" enabled="true" comment="" custom_name_enabled="false">
@@ -970,9 +1005,69 @@
                         <struct name="i2c_master_config">
                            <setting name="enableMaster" value="true"/>
                            <setting name="enableStopHold" value="false"/>
-                           <setting name="baudRate_Bps" value="100000"/>
+                           <setting name="baudRate_Bps" value="400000"/>
                            <setting name="glitchFilterWidth" value="0"/>
                         </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="UART0" uuid="24935351-00e4-421f-b6b4-6d750a745838" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="freertos" peripheral="UART0" enabled="true" comment="" custom_name_enabled="false">
+                     <config_set name="fsl_uart_freertos">
+                        <struct name="uart_rtos_configuration">
+                           <setting name="clockSource" value="BusInterfaceClock"/>
+                           <setting name="clockSourceFreq" value="GetFreq"/>
+                           <setting name="baudrate" value="115200"/>
+                           <setting name="parity" value="kUART_ParityDisabled"/>
+                           <setting name="stopbits" value="kUART_OneStopBit"/>
+                           <setting name="buffer_size" value="100"/>
+                        </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="FTM0" uuid="c366ca01-4a5a-4e4f-9cbd-01ce06735370" type="ftm" type_id="ftm_04a15ae4af2b404bf2ae403c3dbe98b3" mode="EdgeAligned" peripheral="FTM0" enabled="false" comment="" custom_name_enabled="false">
+                     <config_set name="ftm_main_config" quick_selection="QuickSelectionDefault">
+                        <struct name="ftm_config">
+                           <setting name="clockSource" value="kFTM_SystemClock"/>
+                           <setting name="clockSourceFreq" value="GetFreq"/>
+                           <setting name="prescale" value="kFTM_Prescale_Divide_1"/>
+                           <setting name="timerFrequency" value="10000"/>
+                           <setting name="bdmMode" value="kFTM_BdmMode_0"/>
+                           <set name="pwmSyncMode">
+                              <selected>
+                                 <id>kFTM_SoftwareTrigger</id>
+                              </selected>
+                           </set>
+                           <set name="reloadPoints">
+                              <selected/>
+                           </set>
+                           <setting name="faultMode" value="kFTM_Fault_Disable"/>
+                           <setting name="faultFilterValue" value="0"/>
+                           <setting name="deadTimePrescale" value="kFTM_Deadtime_Prescale_1"/>
+                           <setting name="deadTimeValue" value="0"/>
+                           <set name="extTriggers">
+                              <selected/>
+                           </set>
+                           <set name="chnlInitState">
+                              <selected/>
+                           </set>
+                           <set name="chnlPolarity">
+                              <selected/>
+                           </set>
+                           <setting name="useGlobalTimeBase" value="false"/>
+                        </struct>
+                        <set name="timer_interrupts">
+                           <selected/>
+                        </set>
+                        <setting name="enable_irq" value="false"/>
+                        <struct name="ftm_interrupt">
+                           <setting name="IRQn" value="FTM0_IRQn"/>
+                           <setting name="enable_interrrupt" value="enabled"/>
+                           <setting name="enable_priority" value="false"/>
+                           <setting name="priority" value="0"/>
+                           <setting name="enable_custom_name" value="false"/>
+                        </struct>
+                        <setting name="EnableTimerInInit" value="true"/>
+                     </config_set>
+                     <config_set name="ftm_edge_aligned_mode">
+                        <array name="ftm_edge_aligned_channels_config"/>
                      </config_set>
                   </instance>
                </instances>
