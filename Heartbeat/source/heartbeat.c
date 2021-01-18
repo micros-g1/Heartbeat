@@ -200,8 +200,8 @@ static void handle_max_interrupts(){
 
 				//is the buffer full ? (should the accumulated samples be processed?)
 				if(curr_buffer_n_samples >= RF_SAMPLES){
-					rf_heart_rate_and_oxygen_saturation((uint32_t*)ir_led_samples, RF_SAMPLES, (uint32_t*)red_led_samples,
-							&curr_spo2, (int8_t*) &curr_spo2_valid, &curr_heart_rate, (int8_t*)&curr_hr_valid, &curr_ratio, &curr_correl);
+//					rf_heart_rate_and_oxygen_saturation((uint32_t*)ir_led_samples, RF_SAMPLES, (uint32_t*)red_led_samples,
+//							&curr_spo2, (int8_t*) &curr_spo2_valid, &curr_heart_rate, (int8_t*)&curr_hr_valid, &curr_ratio, &curr_correl);
 					curr_buffer_n_samples = 0;
 				}
 			}
