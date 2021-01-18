@@ -146,6 +146,8 @@ BOARD_InitPins:
   - {pin_num: '32', peripheral: I2C0, signal: SDA, pin_signal: ADC0_SE18/PTE25/UART4_RX/I2C0_SDA/EWM_IN, identifier: ''}
   - {pin_num: '57', peripheral: GPIOB, signal: 'GPIO, 9', pin_signal: PTB9/SPI1_PCS1/UART3_CTS_b/FB_AD20, direction: INPUT, gpio_interrupt: kPORT_InterruptLogicZero,
     pull_select: up}
+  - {peripheral: ADC0, signal: 'TRG, A', pin_signal: PIT_trigger_0}
+  - {pin_num: '19', peripheral: ADC0, signal: 'DM, 0', pin_signal: ADC0_DM0/ADC1_DM3}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -209,6 +211,19 @@ void BOARD_InitPins(void)
 
     /* PORTE25 (pin 32) is configured as I2C0_SDA */
     PORT_SetPinMux(PORTE, 25U, kPORT_MuxAlt5);
+
+    SIM->SOPT7 = ((SIM->SOPT7 &
+                   /* Mask bits to zero which are setting */
+                   (~(SIM_SOPT7_ADC0TRGSEL_MASK | SIM_SOPT7_ADC0PRETRGSEL_MASK | SIM_SOPT7_ADC0ALTTRGEN_MASK)))
+
+                  /* ADC0 trigger select: PIT trigger 0. */
+                  | SIM_SOPT7_ADC0TRGSEL(SOPT7_ADC0TRGSEL_PIT0)
+
+                  /* ADC0 pretrigger select: Pre-trigger A. */
+                  | SIM_SOPT7_ADC0PRETRGSEL(SOPT7_ADC0PRETRGSEL_A)
+
+                  /* ADC0 alternate trigger enable: Alternate trigger selected for ADC0. */
+                  | SIM_SOPT7_ADC0ALTTRGEN(SOPT7_ADC0ALTTRGEN_ALT));
 }
 
 /* clang-format off */
