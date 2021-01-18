@@ -60,6 +60,8 @@
 /* Application API */
 static void example_task(void *pvParameters);
 static void setup_max30102();
+static void error_trap();
+static void setup_max30205();
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -67,8 +69,6 @@ static void setup_max30102();
 /*******************************************************************************
  * Code
  ******************************************************************************/
-static void error_trap();
-static void setup_max30205();
 /*
  * @brief   Application entry point.
  */
@@ -114,7 +114,7 @@ char samp2[9];
 
 static uint32_t curr_buffer_n_samples = 0;
 
-static uint32_t curr_heart_rate = 0;
+static int32_t curr_heart_rate = 0;
 static bool curr_hr_valid = false;
 static float curr_spo2 = 0;
 static bool curr_spo2_valid = false;
@@ -192,16 +192,16 @@ static void handle_max_interrupts(){
 					itoa((int) ir_led_samples[i], samp1, 10);
 					itoa((int) red_led_samples[i], samp2, 10);
 
-					UART_RTOS_Send(&UART0_rtos_handle, samp1, 7);
+					UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)samp1, 7);
 					UART_RTOS_Send(&UART0_rtos_handle, ",", 1);
-					UART_RTOS_Send(&UART0_rtos_handle, samp2, 7);
+					UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)samp2, 7);
 					UART_RTOS_Send(&UART0_rtos_handle, "\n", 1);
 				}
 
 				//is the buffer full ? (should the accumulated samples be processed?)
 				if(curr_buffer_n_samples >= RF_SAMPLES){
-	//				rf_heart_rate_and_oxygen_saturation((uint32_t*)ir_led_samples, RF_SAMPLES, (uint32_t*)red_led_samples,
-	//						&curr_spo2, (int8_t*) &curr_spo2_valid, &curr_heart_rate, (int8_t*)&curr_hr_valid, &curr_ratio, &curr_correl);
+					rf_heart_rate_and_oxygen_saturation((uint32_t*)ir_led_samples, RF_SAMPLES, (uint32_t*)red_led_samples,
+							&curr_spo2, (int8_t*) &curr_spo2_valid, &curr_heart_rate, (int8_t*)&curr_hr_valid, &curr_ratio, &curr_correl);
 					curr_buffer_n_samples = 0;
 				}
 			}
