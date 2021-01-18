@@ -327,7 +327,7 @@ uint8_t max30102_get_num_available_samples(){
 		return wr_ptr - rd_ptr;
 	}
 	else
-		return -1;
+		return 0;
 }
 
 

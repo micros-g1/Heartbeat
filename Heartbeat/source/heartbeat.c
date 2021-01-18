@@ -111,13 +111,15 @@ static uint32_t ir_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
 static uint32_t red_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
 char samp1[9];
 char samp2[9];
+char hr[5];
+char spo2[5];
 
 static uint32_t curr_buffer_n_samples = 0;
 
 static int32_t curr_heart_rate = 0;
-static bool curr_hr_valid = false;
+static int8_t curr_hr_valid = 0;
 static float curr_spo2 = 0;
-static bool curr_spo2_valid = false;
+static int8_t curr_spo2_valid = 0;
 static float curr_ratio = 0;
 static float curr_correl = 0;
 
@@ -132,13 +134,13 @@ static void setup_max30102(){
 		error_trap();
 	}
 
-	state = max30102_set_led_current(0x3F,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
+	state = max30102_set_led_current(0x24,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
 	if(state == MAX30102_FAILURE) {
 		PRINTF("MAX30102 LED1 ERROR\n");
 		error_trap();
 	}
 
-	state = max30102_set_led_current(0x3F,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
+	state = max30102_set_led_current(0x24,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
 	if(state == MAX30102_FAILURE){
 		PRINTF("MAX30102 LED2 ERROR\n");
 		error_trap();
@@ -168,6 +170,7 @@ static void setup_max30102(){
 }
 
 static void handle_max_interrupts(){
+	int counter = 0;
 	while(true){
 		while(interrupt_flag || !GPIO_PinRead(GPIOB, BOARD_MAX30102_INT_PIN_PIN)){
 			max30102_get_interrupt_status(&max30102_interrupts);
@@ -182,7 +185,7 @@ static void handle_max_interrupts(){
 			if(max30102_interrupts.ppg_rdy){
 				max30102_interrupts.ppg_rdy = false;
 
-	//			uint8_t n_available_samples = max30102_get_num_available_samples();
+//				uint8_t n_available_samples = max30102_get_num_available_samples();
 				uint8_t n_available_samples = 1;
 				uint32_t prev_buffer_n_samples = curr_buffer_n_samples;
 				curr_buffer_n_samples += max30102_read_n_samples(n_available_samples,
@@ -200,9 +203,24 @@ static void handle_max_interrupts(){
 
 				//is the buffer full ? (should the accumulated samples be processed?)
 				if(curr_buffer_n_samples >= RF_SAMPLES){
-//					rf_heart_rate_and_oxygen_saturation((uint32_t*)ir_led_samples, RF_SAMPLES, (uint32_t*)red_led_samples,
-//							&curr_spo2, (int8_t*) &curr_spo2_valid, &curr_heart_rate, (int8_t*)&curr_hr_valid, &curr_ratio, &curr_correl);
+					counter++;
+					if(counter > 5){
+						rf_heart_rate_and_oxygen_saturation(ir_led_samples, RF_SAMPLES, red_led_samples,
+							&curr_spo2, &curr_spo2_valid, &curr_heart_rate, &curr_hr_valid, &curr_ratio, &curr_correl);
+						itoa((int) curr_heart_rate, hr, 10);
+						itoa((int) curr_spo2, spo2, 10);
+					}
+//					if(curr_hr_valid && curr_spo2_valid){
+//						itoa((int) curr_heart_rate, hr, 10);
+//					itoa((int) curr_spo2, spo2, 10);
+//
+//					UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)hr, 5);
+//					UART_RTOS_Send(&UART0_rtos_handle, ",", 1);
+//					UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)spo2, 5);
+//					UART_RTOS_Send(&UART0_rtos_handle, "\n", 1);
+//					}
 					curr_buffer_n_samples = 0;
+
 				}
 			}
 			if(max30102_interrupts.alc_ovf){
