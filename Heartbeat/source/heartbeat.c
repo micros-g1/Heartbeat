@@ -50,6 +50,7 @@
  * Definitions
  ******************************************************************************/
 #define I2C_A_IRQn I2C0_IRQn
+#define UART_A_IRQn UART0_RX_TX_IRQn
 
 /* Priorities at which the tasks are created.  */
 #define mainEXAMPLE_TASK_PRIORITY   (tskIDLE_PRIORITY + 1)
@@ -60,6 +61,7 @@
  ******************************************************************************/
 /* Application API */
 static void example_task(void *pvParameters);
+static void error_trap();
 
 /*******************************************************************************
  * Variables
@@ -84,7 +86,7 @@ int main(void) {
 #endif
     NVIC_SetPriority(I2C_A_IRQn, 5);
     NVIC_SetPriority(PORTB_IRQn, 4);
-
+    NVIC_SetPriority(UART_A_IRQn, 5);
 
 	/* RTOS Init Tasks. */
 	if (xTaskCreate(example_task, "example_task",
@@ -110,21 +112,35 @@ static float new_sample;
 static void example_task(void *pvParameters) {
 
 	ad8232_state_t ad8232_state = ad8232_init();
+	if(ad8232_state == AD8232_FAILURE){
+		PRINTF("AD8232 error de init\n");
+		error_trap();
+	}
 	ad8232_state = ad8232_trigger_reads();
 
 	for (;;) {
 		if(adc_flag){
 
 		    gcvt(new_sample, 6, buf);
-			if(UART_RTOS_Send(&UART0_rtos_handle, buf, 30) != kStatus_Success)
+			if(UART_RTOS_Send(&UART0_rtos_handle, buf, 30) != kStatus_Success){
 				PRINTF("error\n");
+				error_trap();
+			}
+			if(UART_RTOS_Send(&UART0_rtos_handle, "\n", 1) != kStatus_Success){
+				PRINTF("error\n");
+				error_trap();
+			}
 			adc_flag = false;
 		}
-		vTaskSuspend(NULL);
 	}
+	vTaskSuspend(NULL);
 
 }
 
+static void error_trap(){
+	PRINTF("ERROR - TRAP\n");
+	while(1);
+}
 /* ADC0_IRQn interrupt handler */
 void ADC0_IRQHANDLER(void) {
 	if(ad8232_get_new_sample(&new_sample) == AD8232_SUCCESS){
@@ -137,5 +153,6 @@ void ADC0_IRQHANDLER(void) {
     __DSB();
   #endif
 }
+
 
 
