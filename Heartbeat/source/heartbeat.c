@@ -205,20 +205,19 @@ static void handle_max_interrupts(){
 				if(curr_buffer_n_samples >= RF_SAMPLES){
 					counter++;
 					if(counter > 5){
-						rf_heart_rate_and_oxygen_saturation(ir_led_samples, RF_SAMPLES, red_led_samples,
+						//the red led is switched with the ir led on the board.
+						rf_heart_rate_and_oxygen_saturation(red_led_samples, RF_SAMPLES, ir_led_samples,
 							&curr_spo2, &curr_spo2_valid, &curr_heart_rate, &curr_hr_valid, &curr_ratio, &curr_correl);
+					}
+					if(curr_hr_valid && curr_spo2_valid){
 						itoa((int) curr_heart_rate, hr, 10);
 						itoa((int) curr_spo2, spo2, 10);
+
+//						UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)hr, 5);
+//						UART_RTOS_Send(&UART0_rtos_handle, ",", 1);
+//						UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)spo2, 5);
+//						UART_RTOS_Send(&UART0_rtos_handle, "\n", 1);
 					}
-//					if(curr_hr_valid && curr_spo2_valid){
-//						itoa((int) curr_heart_rate, hr, 10);
-//					itoa((int) curr_spo2, spo2, 10);
-//
-//					UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)hr, 5);
-//					UART_RTOS_Send(&UART0_rtos_handle, ",", 1);
-//					UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)spo2, 5);
-//					UART_RTOS_Send(&UART0_rtos_handle, "\n", 1);
-//					}
 					curr_buffer_n_samples = 0;
 
 				}
