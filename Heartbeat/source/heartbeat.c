@@ -44,7 +44,7 @@
 #include "fsl_debug_console.h"
 /* other includes. */
 #include "drv/max30102.h"
-
+#include "drv/max30205.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -63,6 +63,7 @@
 static void example_task(void *pvParameters);
 static void setup_max30102();
 static void error_trap();
+static void temperature_task(void *pvParameters);
 static void setup_max30205();
 /*******************************************************************************
  * Variables
@@ -108,7 +109,6 @@ int main(void) {
     NVIC_SetPriority(UART_A_IRQn, 5);
     NVIC_SetPriority(PORTB_IRQn, 4);
 
-
 	/* RTOS Init Tasks. */
 	if (xTaskCreate(example_task, "example_task",
 	configMINIMAL_STACK_SIZE + 166, NULL, mainEXAMPLE_TASK_PRIORITY, NULL) != pdPASS) {
@@ -120,11 +120,11 @@ int main(void) {
 		setvbuf (stdout, NULL, _IONBF, 0);
 //		PRINTF("Empezo\n");
 	}
+
 	vTaskStartScheduler();
 	for (;;)
 		;
 }
-
 
 static void setup_max30102(){
 	NVIC_EnableIRQ(PORTB_IRQn);
@@ -168,6 +168,10 @@ static void setup_max30102(){
 		error_trap();
 	}
 	memset(&max30102_interrupts, 0, sizeof(max30102_interrupts));
+}
+
+static void setup_max30205(){
+	max30205_init();
 }
 
 static void handle_max_interrupts(){
@@ -251,10 +255,18 @@ static void example_task(void *pvParameters) {
 		ir_led_samples[i] = 0;
 		red_led_samples[i] = 0;
 	}
+  setup_max30205();
 	setup_max30102();
-	max30102_trigger_spo2_reads();
+	
+  if (xTaskCreate(temperature_task, "temperature_task",
+	configMINIMAL_STACK_SIZE + 166, NULL, 3, NULL) != pdPASS) {
+		PRINTF("Example task creation failed!.\r\n");
+		while (1)
+			;
+	}
+  max30102_trigger_spo2_reads();
 	handle_max_interrupts();
-
+  
 	for (;;) {
 		vTaskSuspend(NULL);
 	}
@@ -290,4 +302,16 @@ static void error_trap(){
 	PRINTF("ERROR - TRAP");
 	while(1);
 
+}
+
+static void temperature_task(void *pvParameters){
+	max30205_state_t result;
+	float temp;
+	for(;;){
+		if(max30205_temp_read(&temp))
+			PRINTF("%f\n", temp);
+		else
+			PRINTF("Error de Lectura\n");
+		vTaskDelay(pdMS_TO_TICKS(1000));
+	}
 }
