@@ -25,6 +25,10 @@ extern "C" {
  */
 void BOARD_InitBootPins(void);
 
+#define SOPT7_ADC0ALTTRGEN_ALT 0x01u /*!<@brief ADC0 alternate trigger enable: Alternate trigger selected for ADC0. */
+#define SOPT7_ADC0PRETRGSEL_A 0x00u  /*!<@brief ADC0 pretrigger select: Pre-trigger A */
+#define SOPT7_ADC0TRGSEL_PIT0 0x04u  /*!<@brief ADC0 trigger select: PIT trigger 0 */
+
 /*! @name PORTB9 (number 57), J1[6]
   @{ */
 
