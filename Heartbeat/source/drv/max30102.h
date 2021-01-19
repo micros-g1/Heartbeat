@@ -78,8 +78,7 @@ max30102_state_t max30102_set_led_pw(max30102_led_pw_t led_pw);								//checked
 
 //spO2 readings
 max30102_state_t max30102_trigger_spo2_reads();												//checked
-uint8_t max30102_get_num_available_samples();												//checked
-uint8_t max30102_read_n_samples(uint8_t n_samples, uint32_t *ir_data, uint32_t *red_data);
+uint8_t max30102_read_sample(uint32_t *ir_data, uint32_t *red_data);
 
 
 #endif /* DRV_MAX30102_H_ */

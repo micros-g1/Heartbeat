@@ -34,6 +34,7 @@
  */
 
 /* Default includes. */
+#include <drv/algorithm_by_RF.h>
 #include <stdio.h>
 #include "board.h"
 #include "peripherals.h"
@@ -43,7 +44,6 @@
 #include "fsl_debug_console.h"
 /* other includes. */
 #include "drv/max30102.h"
-#include <drv/rf_spo2_algorithm.h>
 
 /*******************************************************************************
  * Definitions
@@ -53,7 +53,9 @@
 /* Priorities at which the tasks are created.  */
 #define mainEXAMPLE_TASK_PRIORITY   (tskIDLE_PRIORITY + 1)
 #define M2T(X) ((unsigned int)((X)*(configTICK_RATE_HZ/1000.0)))
-
+#define MAX_SAMP_CHARS 9
+#define RF_SAMPLES 100
+#define RF_SAMPLES_MARGIN 20
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -65,7 +67,26 @@ static void setup_max30205();
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+static max30102_interrupt_status_t max30102_interrupts;
 
+char hr[5];
+char spo2[5];
+
+static uint32_t curr_buffer_n_samples = 0;
+
+uint32_t ir_led_samples[RF_SAMPLES];
+uint32_t red_led_samples[RF_SAMPLES];
+unsigned char samp1[MAX_SAMP_CHARS];
+unsigned char samp2[MAX_SAMP_CHARS];
+
+static int32_t curr_heart_rate = 0;
+static int8_t curr_hr_valid = 0;
+static float curr_spo2 = 0;
+static int8_t curr_spo2_valid = 0;
+static float curr_ratio = 0;
+static float curr_correl = 0;
+
+static volatile bool interrupt_flag = false;
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -104,26 +125,6 @@ int main(void) {
 		;
 }
 
-//static float dummy;
-static max30102_interrupt_status_t max30102_interrupts;
-
-static uint32_t ir_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
-static uint32_t red_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
-char samp1[9];
-char samp2[9];
-char hr[5];
-char spo2[5];
-
-static uint32_t curr_buffer_n_samples = 0;
-
-static int32_t curr_heart_rate = 0;
-static int8_t curr_hr_valid = 0;
-static float curr_spo2 = 0;
-static int8_t curr_spo2_valid = 0;
-static float curr_ratio = 0;
-static float curr_correl = 0;
-
-static volatile bool interrupt_flag = false;
 
 static void setup_max30102(){
 	NVIC_EnableIRQ(PORTB_IRQn);
@@ -170,8 +171,9 @@ static void setup_max30102(){
 }
 
 static void handle_max_interrupts(){
-	int counter = 0;
+
 	while(true){
+
 		while(interrupt_flag || !GPIO_PinRead(GPIOB, BOARD_MAX30102_INT_PIN_PIN)){
 			max30102_get_interrupt_status(&max30102_interrupts);
 			interrupt_flag = false;
@@ -185,41 +187,39 @@ static void handle_max_interrupts(){
 			if(max30102_interrupts.ppg_rdy){
 				max30102_interrupts.ppg_rdy = false;
 
-//				uint8_t n_available_samples = max30102_get_num_available_samples();
-				uint8_t n_available_samples = 1;
-				uint32_t prev_buffer_n_samples = curr_buffer_n_samples;
-				curr_buffer_n_samples += max30102_read_n_samples(n_available_samples,
-						&ir_led_samples[curr_buffer_n_samples], &red_led_samples[curr_buffer_n_samples]);
+				uint32_t aux_sample_red = 0;
+				uint32_t aux_sample_ir = 0;
 
-				for(int i = prev_buffer_n_samples; i < curr_buffer_n_samples; i++){
-					itoa((int) ir_led_samples[i], samp1, 10);
-					itoa((int) red_led_samples[i], samp2, 10);
+				max30102_read_sample(&aux_sample_ir, &aux_sample_red);
+				ir_led_samples[curr_buffer_n_samples] = aux_sample_ir;
+				red_led_samples[curr_buffer_n_samples] = aux_sample_red;
 
-					UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)samp1, 7);
-					UART_RTOS_Send(&UART0_rtos_handle, ",", 1);
-					UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)samp2, 7);
-					UART_RTOS_Send(&UART0_rtos_handle, "\n", 1);
-				}
+				itoa( ir_led_samples[curr_buffer_n_samples], samp1, 10);
+				itoa( red_led_samples[curr_buffer_n_samples], samp2, 10);
+				curr_buffer_n_samples++;
+
+//				UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)samp1, 7);
+//				UART_RTOS_Send(&UART0_rtos_handle, ",", 1);
+//				UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)samp2, 7);
+//				UART_RTOS_Send(&UART0_rtos_handle, "\n", 1);
+
 
 				//is the buffer full ? (should the accumulated samples be processed?)
 				if(curr_buffer_n_samples >= RF_SAMPLES){
-					counter++;
-					if(counter > 5){
-						//the red led is switched with the ir led on the board.
-						rf_heart_rate_and_oxygen_saturation(red_led_samples, RF_SAMPLES, ir_led_samples,
-							&curr_spo2, &curr_spo2_valid, &curr_heart_rate, &curr_hr_valid, &curr_ratio, &curr_correl);
-					}
-					if(curr_hr_valid && curr_spo2_valid){
-						itoa((int) curr_heart_rate, hr, 10);
-						itoa((int) curr_spo2, spo2, 10);
+					//the red led is switched with the ir led on the board.
+					rf_heart_rate_and_oxygen_saturation(red_led_samples, RF_SAMPLES, ir_led_samples,
+						&curr_spo2, &curr_spo2_valid, &curr_heart_rate, &curr_hr_valid, &curr_ratio, &curr_correl);
 
+					if(curr_hr_valid && curr_spo2_valid){
+//						itoa((int) curr_heart_rate, hr, 10);
+//						itoa((int) curr_spo2, spo2, 10);
+//
 //						UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)hr, 5);
 //						UART_RTOS_Send(&UART0_rtos_handle, ",", 1);
 //						UART_RTOS_Send(&UART0_rtos_handle, (uint8_t *)spo2, 5);
 //						UART_RTOS_Send(&UART0_rtos_handle, "\n", 1);
 					}
 					curr_buffer_n_samples = 0;
-
 				}
 			}
 			if(max30102_interrupts.alc_ovf){
@@ -242,7 +242,15 @@ static void handle_max_interrupts(){
 
 
 static void example_task(void *pvParameters) {
+	for(int i=0; i < MAX_SAMP_CHARS; i++){
+		samp1[i] = 0;
+		samp2[i] = 0;
+	}
 
+	for(int i=0; i < RF_SAMPLES + RF_SAMPLES_MARGIN;i++){
+		ir_led_samples[i] = 0;
+		red_led_samples[i] = 0;
+	}
 	setup_max30102();
 	max30102_trigger_spo2_reads();
 	handle_max_interrupts();

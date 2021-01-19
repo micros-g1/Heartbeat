@@ -31,33 +31,8 @@
 * ownership rights.
 *******************************************************************************
 */
-#include <drv/rf_spo2_algorithm.h>
+#include <drv/algorithm_by_RF.h>
 #include <math.h>
-#include<stdbool.h>
-#include<stdint.h>
-
-
-const float sum_X2 = 83325;
-
-const float min_autocorrelation_ratio = 0.5;
-// Pearson correlation between red and IR signals.
-// Good quality signals must have their correlation coefficient greater than this minimum.
-const float min_pearson_correlation = 0.8;
-
-/*
- * Derived parameters
- * Do not touch these!
- *
- */
-const int32_t BUFFER_SIZE = FS*ST; // Number of smaples in a single batch
-const int32_t FS60 = FS*60;  // Conversion factor for heart rate from bps to bpm
-const int32_t LOWEST_PERIOD = FS60/MAX_HR; // Minimal distance between peaks
-const int32_t HIGHEST_PERIOD = FS60/MIN_HR; // Maximal distance between peaks
-const float mean_X = (float)(BUFFER_SIZE-1)/2.0; // Mean value of the set of integers from 0 to BUFFER_SIZE-1. For ST=4 and FS=25 it's equal to 49.5.
-
-
-
-
 
 void rf_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer, int32_t n_ir_buffer_length, uint32_t *pun_red_buffer, float *pn_spo2, int8_t *pch_spo2_valid,
                 int32_t *pn_heart_rate, int8_t *pch_hr_valid, float *ratio, float *correl)
@@ -142,7 +117,7 @@ void rf_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer, int32_t n_ir_b
 
   // After trend removal, the mean represents DC level
   xy_ratio= (f_y_ac*f_ir_mean)/(f_x_ac*f_red_mean);  //formula is (f_y_ac*f_x_dc) / (f_x_ac*f_y_dc) ;
-  if(xy_ratio>0.02 && xy_ratio<1.84) { // Check boundaries of applicability 1.84
+  if(xy_ratio>0.02 && xy_ratio<1.84) { // Check boundaries of applicability
     *pn_spo2 = (-45.060*xy_ratio + 30.354)*xy_ratio + 94.845;
     *pch_spo2_valid = 1;
   } else {

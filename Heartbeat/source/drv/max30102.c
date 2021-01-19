@@ -19,10 +19,6 @@
 
 i2c_handle_t* i2c = NULL;
 
-static uint8_t wr_ptr = 0;
-static uint8_t rd_ptr = 0;
-
-
 static max30102_state_t max30102_hard_reset();
 static max30102_state_t max30102_is_reset_ready(bool* reset_ready);
 static max30102_state_t max30102_wait_reset_ready();
@@ -274,62 +270,43 @@ max30102_state_t max30102_set_led_current(uint8_t curr_lvl, max30102_addr_t led_
 	return i2c_write_byte_addr8(i2c, MAX30102_I2C_ADDRESS, led_addr, curr_lvl) ? MAX30102_SUCCESS : MAX30102_FAILURE;
 }
 
-uint8_t max30102_read_n_samples(uint8_t n_samples, uint32_t *ir_data, uint32_t *red_data){
+uint8_t max30102_read_sample(uint32_t *ir_data, uint32_t *red_data){
 
 	if(!i2c) return 0;
 	uint32_t un_temp = 0;
-	uint8_t m_success = 0;
 	uint8_t data[6];
 
-	for(int i = 0; i < n_samples; i++){
-		if(!i2c_read_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_DATA_REGISTER_ADDR, 6, data)){
-			i2c_write_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_READ_POINTER_ADDR, rd_ptr + i);
-			m_success = i;
-			return m_success;
-		}
-		else{
-			red_data[i] = 0;
-			ir_data[i] = 0;
-
-			un_temp = (unsigned char) data[0];
-			un_temp<<=16;
-			red_data[i] += un_temp;
-			un_temp = (unsigned char) data[1];
-			un_temp <<= 8;
-			red_data[i]+=un_temp;
-			un_temp=(unsigned char) data[2];
-			red_data[i]+=un_temp;
-
-			un_temp=(unsigned char) data[3];
-			un_temp<<=16;
-			ir_data[i]+=un_temp;
-			un_temp=(unsigned char) data[4];
-			un_temp<<=8;
-			ir_data[i]+=un_temp;
-			un_temp=(unsigned char) data[5];
-			ir_data[i]+=un_temp;
-
-			red_data[i]&=0x03FFFF;  //Mask MSB [23:18]
-			ir_data[i]&=0x03FFFF;  //Mask MSB [23:18]
-			un_temp = 0;
-		}
-	}
-
-	m_success = n_samples;
-	return m_success;
-}
-
-uint8_t max30102_get_num_available_samples(){
-	if(i2c_read_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_READ_POINTER_ADDR, &rd_ptr)&&
-				i2c_read_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_WRITE_POINTER_ADDR, &wr_ptr)){
-		//NUM_AVAILABLE_SAMPLES = FIFO_WR_PTR – FIFO_RD_PTR
-		//(Note: pointer wrap around should be taken into account)
-		return wr_ptr - rd_ptr;
-	}
-	else
+	if(!i2c_read_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_DATA_REGISTER_ADDR, 6, data)){
 		return 0;
-}
+	}
+	else{
+		*red_data = 0;
+		*ir_data = 0;
 
+		un_temp = (unsigned char) data[0];
+		un_temp<<=16;
+		*red_data += un_temp;
+		un_temp = (unsigned char) data[1];
+		un_temp <<= 8;
+		*red_data+=un_temp;
+		un_temp=(unsigned char) data[2];
+		*red_data+=un_temp;
+
+		un_temp=(unsigned char) data[3];
+		un_temp<<=16;
+		*ir_data+=un_temp;
+		un_temp=(unsigned char) data[4];
+		un_temp<<=8;
+		*ir_data+=un_temp;
+		un_temp=(unsigned char) data[5];
+		*ir_data+=un_temp;
+
+		*red_data&=0x03FFFF;  //Mask MSB [23:18]
+		*ir_data&=0x03FFFF;  //Mask MSB [23:18]
+	}
+
+	return 1;
+}
 
 max30102_state_t max30102_trigger_spo2_reads(){
 	if(!i2c) return MAX30102_FAILURE;
