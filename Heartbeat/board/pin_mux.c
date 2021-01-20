@@ -149,6 +149,7 @@ BOARD_InitPins:
   - {peripheral: ADC0, signal: 'TRG, A', pin_signal: PIT_trigger_0}
   - {pin_num: '19', peripheral: ADC0, signal: 'SE, 19', pin_signal: ADC0_DM0/ADC1_DM3}
   - {pin_num: '23', peripheral: ADC0, signal: VREFH, pin_signal: VREFH}
+
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
