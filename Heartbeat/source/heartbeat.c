@@ -43,9 +43,7 @@
 #include "fsl_debug_console.h"
 #include "drivers/fsl_uart.h"
 /* other includes. */
-//#include "drv/max30102.h"
 #include "drv/ad8232.h"
-#include <stdio.h>
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -66,7 +64,9 @@ static void error_trap();
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-
+char buf[30];
+volatile bool adc_flag_indicate;
+volatile uint32_t new_sample;
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -104,11 +104,6 @@ int main(void) {
 		;
 }
 
-static char buf[30];
-static volatile bool adc_flag = false;
-static float new_sample;
-
-//static float dummy;
 static void example_task(void *pvParameters) {
 
 	ad8232_state_t ad8232_state = ad8232_init();
@@ -118,11 +113,10 @@ static void example_task(void *pvParameters) {
 	}
 	ad8232_state = ad8232_trigger_reads();
 
-	for (;;) {
-		if(adc_flag){
-
-		    gcvt(new_sample, 6, buf);
-			if(UART_RTOS_Send(&UART0_rtos_handle, buf, 30) != kStatus_Success){
+	while(true){
+		if(adc_flag_indicate){
+			itoa(new_sample, buf, 10);
+			if(UART_RTOS_Send(&UART0_rtos_handle, buf, 10) != kStatus_Success){
 				PRINTF("error\n");
 				error_trap();
 			}
@@ -130,7 +124,7 @@ static void example_task(void *pvParameters) {
 				PRINTF("error\n");
 				error_trap();
 			}
-			adc_flag = false;
+			adc_flag_indicate = false;
 		}
 	}
 	vTaskSuspend(NULL);
@@ -141,17 +135,16 @@ static void error_trap(){
 	PRINTF("ERROR - TRAP\n");
 	while(1);
 }
+
 /* ADC0_IRQn interrupt handler */
 void ADC0_IRQHANDLER(void) {
-	if(ad8232_get_new_sample(&new_sample) == AD8232_SUCCESS){
-		//add to event queue or plot
-		adc_flag = true;
-	}
-  /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
+	adc_flag_indicate = true;
+	new_sample = ad8232_get_new_sample();
+  	/* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
      Store immediate overlapping exception return operation might vector to incorrect interrupt. */
-  #if defined __CORTEX_M && (__CORTEX_M == 4U)
-    __DSB();
-  #endif
+  	#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    	__DSB();
+	#endif
 }
 
 

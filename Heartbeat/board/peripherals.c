@@ -55,7 +55,7 @@ instance:
     - adc16_config:
       - referenceVoltageSource: 'kADC16_ReferenceVoltageSourceVref'
       - clockSource: 'kADC16_ClockSourceAlt0'
-      - enableAsynchronousClock: 'true'
+      - enableAsynchronousClock: 'false'
       - clockDivider: 'kADC16_ClockDivider8'
       - resolution: 'kADC16_ResolutionSE12Bit'
       - longSampleMode: 'kADC16_LongSampleDisabled'
@@ -80,7 +80,7 @@ instance:
     - adc16_channels_config:
       - 0:
         - enableDifferentialConversion: 'false'
-        - channelNumber: 'SE.2'
+        - channelNumber: 'SE.19'
         - enableInterruptOnConversionCompleted: 'true'
         - channelGroup: '0'
         - initializeChannel: 'true'
@@ -88,7 +88,7 @@ instance:
 /* clang-format on */
 adc16_channel_config_t ADC0_channelsConfig[1] = {
   {
-    .channelNumber = 2U,
+    .channelNumber = 19U,
     .enableDifferentialConversion = false,
     .enableInterruptOnConversionCompleted = true,
   }
@@ -96,7 +96,7 @@ adc16_channel_config_t ADC0_channelsConfig[1] = {
 const adc16_config_t ADC0_config = {
   .referenceVoltageSource = kADC16_ReferenceVoltageSourceVref,
   .clockSource = kADC16_ClockSourceAlt0,
-  .enableAsynchronousClock = true,
+  .enableAsynchronousClock = false,
   .clockDivider = kADC16_ClockDivider8,
   .resolution = kADC16_ResolutionSE12Bit,
   .longSampleMode = kADC16_LongSampleDisabled,
@@ -220,10 +220,10 @@ instance:
         - enableChain: 'false'
         - timerPeriod: '5555'
         - startTimer: 'false'
-        - enableInterrupt: 'true'
+        - enableInterrupt: 'false'
         - interrupt:
           - IRQn: 'PIT0_IRQn'
-          - enable_interrrupt: 'noInit'
+          - enable_interrrupt: 'enabled'
           - enable_priority: 'false'
           - priority: '0'
           - enable_custom_name: 'false'
@@ -238,10 +238,6 @@ static void PIT_init(void) {
   PIT_Init(PIT_PERIPHERAL, &PIT_config);
   /* Set channel 0 period to 5.555 ms (333300 ticks). */
   PIT_SetTimerPeriod(PIT_PERIPHERAL, PIT_CHANNEL_0, PIT_CHANNEL_0_TICKS);
-  /* Enable interrupts from channel 0. */
-  PIT_EnableInterrupts(PIT_PERIPHERAL, PIT_CHANNEL_0, kPIT_TimerInterruptEnable);
-  /* Interrupt PIT_CHANNEL_0_IRQN request in the NVIC is not initialized (disabled by default). */
-  /* It can be enabled later by EnableIRQ(PIT_CHANNEL_0_IRQN); function call. */
 }
 
 /***********************************************************************************************************************

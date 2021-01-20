@@ -198,7 +198,8 @@
                      </pin_features>
                   </pin>
                   <pin peripheral="ADC0" signal="TRG, A" pin_num="" pin_signal="PIT_trigger_0"/>
-                  <pin peripheral="ADC0" signal="DM, 0" pin_num="19" pin_signal="ADC0_DM0/ADC1_DM3"/>
+                  <pin peripheral="ADC0" signal="SE, 19" pin_num="19" pin_signal="ADC0_DM0/ADC1_DM3"/>
+                  <pin peripheral="ADC0" signal="VREFH" pin_num="23" pin_signal="VREFH"/>
                </pins>
             </function>
             <function name="BOARD_InitButtonsPins">
@@ -967,7 +968,7 @@
                         <data type="String">ADC0.adc_trigger.B</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="ADC0.adc_se.2" description="Signal SE of the channel 2 of the peripheral ADC0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="ADC0.adc_se.19" description="Signal SE of the channel 19 of the peripheral ADC0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="">
                         <data type="Boolean">true</data>
                      </feature>
@@ -1034,7 +1035,7 @@
                         <struct name="adc16_config">
                            <setting name="referenceVoltageSource" value="kADC16_ReferenceVoltageSourceVref"/>
                            <setting name="clockSource" value="kADC16_ClockSourceAlt0"/>
-                           <setting name="enableAsynchronousClock" value="true"/>
+                           <setting name="enableAsynchronousClock" value="false"/>
                            <setting name="clockDivider" value="kADC16_ClockDivider8"/>
                            <setting name="resolution" value="kADC16_ResolutionSE12Bit"/>
                            <setting name="longSampleMode" value="kADC16_LongSampleDisabled"/>
@@ -1062,7 +1063,7 @@
                         <array name="adc16_channels_config">
                            <struct name="0">
                               <setting name="enableDifferentialConversion" value="false"/>
-                              <setting name="channelNumber" value="SE.2"/>
+                              <setting name="channelNumber" value="SE.19"/>
                               <setting name="enableInterruptOnConversionCompleted" value="true"/>
                               <setting name="channelGroup" value="0"/>
                               <setting name="initializeChannel" value="true"/>
@@ -1161,10 +1162,10 @@
                               <setting name="enableChain" value="false"/>
                               <setting name="timerPeriod" value="5555"/>
                               <setting name="startTimer" value="false"/>
-                              <setting name="enableInterrupt" value="true"/>
+                              <setting name="enableInterrupt" value="false"/>
                               <struct name="interrupt">
                                  <setting name="IRQn" value="PIT0_IRQn"/>
-                                 <setting name="enable_interrrupt" value="noInit"/>
+                                 <setting name="enable_interrrupt" value="enabled"/>
                                  <setting name="enable_priority" value="false"/>
                                  <setting name="priority" value="0"/>
                                  <setting name="enable_custom_name" value="false"/>

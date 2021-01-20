@@ -16,8 +16,6 @@
 #define VREF_BRD 3.300
 #define SE_12BIT 4096.0
 
-static unsigned int curr_buffer_len = 0;
-static float buffer[AD8232_MAX_SAMPLES];
 
 ad8232_state_t ad8232_init(){
 	//Both PIT and ADC are already initialized (peripherals.c)
@@ -34,7 +32,6 @@ ad8232_state_t ad8232_set_sampling_period(uint64_t micro_segs){
 ad8232_state_t ad8232_trigger_reads(){
 	//start PIT to trigger the ADC and empty the samples' buffer
 	PIT_StartTimer(PIT_PERIPHERAL, PIT_CHANNEL_0);
-	curr_buffer_len = 0;
 	return AD8232_SUCCESS;
 }
 ad8232_state_t ad8232_stop_reading(){
@@ -43,35 +40,8 @@ ad8232_state_t ad8232_stop_reading(){
 	return AD8232_SUCCESS;
 }
 
-uint8_t ad8232_get_num_available_samples(){
-	return curr_buffer_len;
-}
-
-uint8_t ad8232_get_n_samples(uint8_t n_samples, float *samples){
-
-	//if there are not enough samples in the buffer, just read all provide all available samples
-	if(curr_buffer_len < n_samples) n_samples = curr_buffer_len;
-
-	int i, j=0;
-	//copy n_samples from ad8232 buffer to the user provided buffer.
-	for(i = 0; i < n_samples; i++)
-		samples[i] = buffer[i];
-
-	//put whatever samples are left back in the ad8232 buffer to the beginning of the buffer.
-	while(i < curr_buffer_len)
-		buffer[j++] = buffer[i++];
-
-	//update buffer size with whatever is left on the ad8232 buffer.
-	curr_buffer_len = (n_samples < curr_buffer_len) ? curr_buffer_len - n_samples : 0;
-
-	return n_samples;
-}
-
-ad8232_state_t ad8232_get_new_sample(float *sample){
+uint32_t ad8232_get_new_sample(){
 	//<SDK_ROOT>/boards/<BOARD>/driver_examples/adc_etc for API example
-	uint32_t g_Adc16ConversionValue = ADC16_GetChannelConversionValue(ADC0_PERIPHERAL,
+	return ADC16_GetChannelConversionValue(ADC0_PERIPHERAL,
 			ADC0_CH0_CONTROL_GROUP);
-	*sample = (float)(g_Adc16ConversionValue * (VREF_BRD / SE_12BIT));
-
-	return AD8232_SUCCESS;
 }
