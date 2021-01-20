@@ -42,14 +42,19 @@
 #include "clock_config.h"
 #include "MK64F12.h"
 #include "fsl_debug_console.h"
+#include "drivers/fsl_uart.h"
 /* other includes. */
+
+#include "drv/ad8232.h"
 #include "drv/max30102.h"
 #include "drv/max30205.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 #define I2C_A_IRQn I2C0_IRQn
 #define UART_A_IRQn UART0_RX_TX_IRQn
+
 /* Priorities at which the tasks are created.  */
 #define mainEXAMPLE_TASK_PRIORITY   (tskIDLE_PRIORITY + 1)
 #define M2T(X) ((unsigned int)((X)*(configTICK_RATE_HZ/1000.0)))
@@ -61,6 +66,14 @@
  ******************************************************************************/
 /* Application API */
 static void example_task(void *pvParameters);
+static void error_trap();
+
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
+char buf[30];
+volatile bool adc_flag_indicate;
+volatile uint32_t new_sample;
 static void setup_max30102();
 static void error_trap();
 static void temperature_task(void *pvParameters);
@@ -255,6 +268,12 @@ static void example_task(void *pvParameters) {
 		ir_led_samples[i] = 0;
 		red_led_samples[i] = 0;
 	}
+  
+  ad8232_state_t ad8232_state = ad8232_init();
+	if(ad8232_state == AD8232_FAILURE){
+		PRINTF("AD8232 error de init\n");
+		error_trap();
+  }
   setup_max30205();
 	setup_max30102();
 	
@@ -270,7 +289,35 @@ static void example_task(void *pvParameters) {
 	for (;;) {
 		vTaskSuspend(NULL);
 	}
+	ad8232_state = ad8232_trigger_reads();
 
+	while(true){
+		if(adc_flag_indicate){
+			itoa(new_sample, buf, 10);
+			if(UART_RTOS_Send(&UART0_rtos_handle, buf, 10) != kStatus_Success){
+				PRINTF("error\n");
+				error_trap();
+			}
+			if(UART_RTOS_Send(&UART0_rtos_handle, "\n", 1) != kStatus_Success){
+				PRINTF("error\n");
+				error_trap();
+			}
+			adc_flag_indicate = false;
+		}
+	}
+	vTaskSuspend(NULL);
+
+}
+
+static void error_trap(){
+	PRINTF("ERROR - TRAP\n");
+	while(1);
+}
+
+/* ADC0_IRQn interrupt handler */
+void ADC0_IRQHANDLER(void) {
+	adc_flag_indicate = true;
+	new_sample = ad8232_get_new_sample();
 }
 
 /* PORTB_IRQn interrupt handler */
@@ -292,17 +339,11 @@ void GPIOB_IRQHANDLER(void) {
 
   /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
      Store immediate overlapping exception return operation might vector to incorrect interrupt. */
-  #if defined __CORTEX_M && (__CORTEX_M == 4U)
-    __DSB();
-  #endif
+  	#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    	__DSB();
+	#endif
 }
 
-
-static void error_trap(){
-	PRINTF("ERROR - TRAP");
-	while(1);
-
-}
 
 static void temperature_task(void *pvParameters){
 	max30205_state_t result;
@@ -315,3 +356,4 @@ static void temperature_task(void *pvParameters){
 		vTaskDelay(pdMS_TO_TICKS(1000));
 	}
 }
+

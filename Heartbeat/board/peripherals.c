@@ -55,7 +55,7 @@ instance:
     - adc16_config:
       - referenceVoltageSource: 'kADC16_ReferenceVoltageSourceVref'
       - clockSource: 'kADC16_ClockSourceAlt0'
-      - enableAsynchronousClock: 'true'
+      - enableAsynchronousClock: 'false'
       - clockDivider: 'kADC16_ClockDivider8'
       - resolution: 'kADC16_ResolutionSE12Bit'
       - longSampleMode: 'kADC16_LongSampleDisabled'
@@ -65,7 +65,8 @@ instance:
     - adc16_channel_mux_mode: 'kADC16_ChannelMuxA'
     - adc16_hardware_compare_config:
       - hardwareCompareModeEnable: 'false'
-    - doAutoCalibration: 'true'
+    - doAutoCalibration: 'false'
+    - offset: '0'
     - trigger: 'true'
     - hardwareAverageConfiguration: 'kADC16_HardwareAverageDisabled'
     - enable_dma: 'false'
@@ -79,7 +80,7 @@ instance:
     - adc16_channels_config:
       - 0:
         - enableDifferentialConversion: 'false'
-        - channelNumber: 'SE.2'
+        - channelNumber: 'SE.19'
         - enableInterruptOnConversionCompleted: 'true'
         - channelGroup: '0'
         - initializeChannel: 'true'
@@ -87,7 +88,7 @@ instance:
 /* clang-format on */
 adc16_channel_config_t ADC0_channelsConfig[1] = {
   {
-    .channelNumber = 2U,
+    .channelNumber = 19U,
     .enableDifferentialConversion = false,
     .enableInterruptOnConversionCompleted = true,
   }
@@ -95,7 +96,7 @@ adc16_channel_config_t ADC0_channelsConfig[1] = {
 const adc16_config_t ADC0_config = {
   .referenceVoltageSource = kADC16_ReferenceVoltageSourceVref,
   .clockSource = kADC16_ClockSourceAlt0,
-  .enableAsynchronousClock = true,
+  .enableAsynchronousClock = false,
   .clockDivider = kADC16_ClockDivider8,
   .resolution = kADC16_ResolutionSE12Bit,
   .longSampleMode = kADC16_LongSampleDisabled,
@@ -115,8 +116,6 @@ static void ADC0_init(void) {
   ADC16_SetHardwareAverage(ADC0_PERIPHERAL, ADC0_hardwareAverageMode);
   /* Configure channel multiplexing mode */
   ADC16_SetChannelMuxMode(ADC0_PERIPHERAL, ADC0_muxMode);
-  /* Perform auto calibration */
-  ADC16_DoAutoCalibration(ADC0_PERIPHERAL);
   /* Initialize channel */
   ADC16_SetChannelConfig(ADC0_PERIPHERAL, ADC0_CH0_CONTROL_GROUP, &ADC0_channelsConfig[0]);
   /* Enable interrupt ADC0_IRQN request in the NVIC */
@@ -196,6 +195,52 @@ static void I2C0_init(void) {
 }
 
 /***********************************************************************************************************************
+ * PIT initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'PIT'
+- type: 'pit'
+- mode: 'LPTMR_GENERAL'
+- custom_name_enabled: 'false'
+- type_id: 'pit_a4782ba5223c8a2527ba91aeb2bc4159'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'PIT'
+- config_sets:
+  - fsl_pit:
+    - enableRunInDebug: 'false'
+    - timingConfig:
+      - clockSource: 'BusInterfaceClock'
+      - clockSourceFreq: 'BOARD_BootClockRUN'
+    - channels:
+      - 0:
+        - channel_id: 'CHANNEL_0'
+        - channelNumber: '0'
+        - enableChain: 'false'
+        - timerPeriod: '5555'
+        - startTimer: 'false'
+        - enableInterrupt: 'false'
+        - interrupt:
+          - IRQn: 'PIT0_IRQn'
+          - enable_interrrupt: 'enabled'
+          - enable_priority: 'false'
+          - priority: '0'
+          - enable_custom_name: 'false'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const pit_config_t PIT_config = {
+  .enableRunInDebug = false
+};
+
+static void PIT_init(void) {
+  /* Initialize the PIT. */
+  PIT_Init(PIT_PERIPHERAL, &PIT_config);
+  /* Set channel 0 period to 5.555 ms (333300 ticks). */
+  PIT_SetTimerPeriod(PIT_PERIPHERAL, PIT_CHANNEL_0, PIT_CHANNEL_0_TICKS);
+}
+
+/***********************************************************************************************************************
  * UART0 initialization code
  **********************************************************************************************************************/
 /* clang-format off */
@@ -247,6 +292,7 @@ void BOARD_InitPeripherals(void)
   ADC0_init();
   GPIOB_init();
   I2C0_init();
+  PIT_init();
   UART0_init();
 }
 

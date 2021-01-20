@@ -198,7 +198,8 @@
                      </pin_features>
                   </pin>
                   <pin peripheral="ADC0" signal="TRG, A" pin_num="" pin_signal="PIT_trigger_0"/>
-                  <pin peripheral="ADC0" signal="DM, 0" pin_num="19" pin_signal="ADC0_DM0/ADC1_DM3"/>
+                  <pin peripheral="ADC0" signal="SE, 19" pin_num="19" pin_signal="ADC0_DM0/ADC1_DM3"/>
+                  <pin peripheral="ADC0" signal="VREFH" pin_num="23" pin_signal="VREFH"/>
                </pins>
             </function>
             <function name="BOARD_InitButtonsPins">
@@ -923,6 +924,16 @@
                   <data type="Version">2.0.5</data>
                </feature>
             </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.pit" description="PIT Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
+               <feature name="enabled" evaluation="equal">
+                  <data type="Boolean">true</data>
+               </feature>
+            </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.pit" description="Unsupported version of the PIT Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
+               <feature name="version" evaluation="equivalent">
+                  <data type="Version">2.0.0</data>
+               </feature>
+            </dependency>
             <dependency resourceType="SWComponent" resourceId="platform.drivers.uart" description="UART Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
                <feature name="enabled" evaluation="equal">
                   <data type="Boolean">true</data>
@@ -957,7 +968,7 @@
                         <data type="String">ADC0.adc_trigger.B</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="ADC0.adc_se.2" description="Signal SE of the channel 2 of the peripheral ADC0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="ADC0.adc_se.19" description="Signal SE of the channel 19 of the peripheral ADC0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="">
                         <data type="Boolean">true</data>
                      </feature>
@@ -983,6 +994,11 @@
                      </feature>
                   </dependency>
                   <dependency resourceType="ClockOutput" resourceId="Bus_clock" description="Bus clock is inactive." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="Bus_clock" description="Bus clock is inactive." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="frequency" evaluation="greaterThan">
                         <data type="Frequency" unit="Hz">0</data>
                      </feature>
@@ -1019,7 +1035,7 @@
                         <struct name="adc16_config">
                            <setting name="referenceVoltageSource" value="kADC16_ReferenceVoltageSourceVref"/>
                            <setting name="clockSource" value="kADC16_ClockSourceAlt0"/>
-                           <setting name="enableAsynchronousClock" value="true"/>
+                           <setting name="enableAsynchronousClock" value="false"/>
                            <setting name="clockDivider" value="kADC16_ClockDivider8"/>
                            <setting name="resolution" value="kADC16_ResolutionSE12Bit"/>
                            <setting name="longSampleMode" value="kADC16_LongSampleDisabled"/>
@@ -1031,7 +1047,8 @@
                         <struct name="adc16_hardware_compare_config">
                            <setting name="hardwareCompareModeEnable" value="false"/>
                         </struct>
-                        <setting name="doAutoCalibration" value="true"/>
+                        <setting name="doAutoCalibration" value="false"/>
+                        <setting name="offset" value="0"/>
                         <setting name="trigger" value="true"/>
                         <setting name="hardwareAverageConfiguration" value="kADC16_HardwareAverageDisabled"/>
                         <setting name="enable_dma" value="false"/>
@@ -1046,7 +1063,7 @@
                         <array name="adc16_channels_config">
                            <struct name="0">
                               <setting name="enableDifferentialConversion" value="false"/>
-                              <setting name="channelNumber" value="SE.2"/>
+                              <setting name="channelNumber" value="SE.19"/>
                               <setting name="enableInterruptOnConversionCompleted" value="true"/>
                               <setting name="channelGroup" value="0"/>
                               <setting name="initializeChannel" value="true"/>
@@ -1131,12 +1148,12 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="PIT" uuid="6173a1dc-b4a1-45ea-bd66-f23709af5a64" type="pit" type_id="pit_a4782ba5223c8a2527ba91aeb2bc4159" mode="LPTMR_GENERAL" peripheral="PIT" enabled="false" comment="" custom_name_enabled="false">
+                  <instance name="PIT" uuid="6173a1dc-b4a1-45ea-bd66-f23709af5a64" type="pit" type_id="pit_a4782ba5223c8a2527ba91aeb2bc4159" mode="LPTMR_GENERAL" peripheral="PIT" enabled="true" comment="" custom_name_enabled="false">
                      <config_set name="fsl_pit">
                         <setting name="enableRunInDebug" value="false"/>
                         <struct name="timingConfig">
                            <setting name="clockSource" value="BusInterfaceClock"/>
-                           <setting name="clockSourceFreq" value="GetFreq"/>
+                           <setting name="clockSourceFreq" value="BOARD_BootClockRUN"/>
                         </struct>
                         <array name="channels">
                            <struct name="0">
