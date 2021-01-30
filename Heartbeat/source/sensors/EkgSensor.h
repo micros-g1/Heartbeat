@@ -7,7 +7,7 @@
 class EkgSensor : public Sensor
 {
 public:
-    EkgSensor();
+    EkgSensor(uint32_t sampling_rate_ms);
     ~EkgSensor();
     void start_sampling();
 	void stop_sampling();

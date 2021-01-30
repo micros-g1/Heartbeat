@@ -50,9 +50,9 @@ int main(void)
 	BOARD_InitDebugConsole();
 	#endif
 
-	sensors[0] = new TemperatureSensor(1000);
-	sensors[1] = new EkgSensor();
-	sensors[2] = new Spo2Sensor(2);
+	sensors[0] = new TemperatureSensor(TEMP_SAMPLING_PERIOD_MS);
+	sensors[1] = new EkgSensor(EKG_SAMPLING_PERIOD_MS);
+	sensors[2] = new Spo2Sensor(SPO2_TASK_PRIORITY);
 
 	Sensor::set_limits(EVENT_TEMPERATURE, LOWEST_TEMPERATURE, HIGHEST_TEMPERATURE);
 	Sensor::set_limits(EVENT_SPO2_SPO2, LOWEST_SPO2, HIGHEST_SPO2);
@@ -64,8 +64,8 @@ int main(void)
 
 	BT_com_init();
 
-	xTaskCreate(sensor_task, "sensor task", configMINIMAL_STACK_SIZE + 166, nullptr, tskIDLE_PRIORITY+2, nullptr);
-	xTaskCreate(comms_task, "comms task", configMINIMAL_STACK_SIZE + 166, nullptr, tskIDLE_PRIORITY+1, nullptr);
+	xTaskCreate(sensor_task, "sensor task", configMINIMAL_STACK_SIZE + 166, nullptr, SENSOR_TASK_PRIORITY, nullptr);
+	xTaskCreate(comms_task, "comms task", configMINIMAL_STACK_SIZE + 166, nullptr, COMMS_TASK_PRIORITY, nullptr);
 
 	vTaskStartScheduler();
 	for (;;)

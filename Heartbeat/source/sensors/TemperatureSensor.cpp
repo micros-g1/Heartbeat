@@ -16,7 +16,7 @@ TemperatureSensor::TemperatureSensor(uint32_t sampling_rate_ms) : Sensor(SENSOR_
 	if (temperature_sensor_status == MAX30205_SUCCESS) {
 		xTimer = xTimerCreate(
 				"max30205_timer", 		// name for debugging purposes only
-				pdMS_TO_TICKS(1000),	// period = 1s
+				pdMS_TO_TICKS(sampling_rate_ms),	// period
 				pdTRUE,					// auto-reload timer (as opposed to one-shot)
 				nullptr,	            // timer id. it can be NULL if we don't want to use it
 				read_temp_callback		// callback

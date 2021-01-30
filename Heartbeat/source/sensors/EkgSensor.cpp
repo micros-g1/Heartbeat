@@ -5,12 +5,13 @@
 static EkgSensor * sensor = nullptr;
 
 
-EkgSensor::EkgSensor() : Sensor(SENSOR_EKG, EVENT_EKG)
+EkgSensor::EkgSensor(uint32_t sampling_rate_ms) : Sensor(SENSOR_EKG, EVENT_EKG)
 {
     if (sensor != nullptr)
         return;
 
     status = ad8232_init() == AD8232_SUCCESS;
+   ad8232_set_sampling_period(sampling_rate_ms * 1000);
     Sensor::set_limits(EVENT_EKG, 0.0, 1.0);
 }
     
