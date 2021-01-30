@@ -7,15 +7,22 @@
 
 
 #include "Sensor.h"
+static QueueHandle_t xSensorQueue;
+static float min_values[N_SENSOR_EVENTS];
+static float max_values[N_SENSOR_EVENTS];
+
+static float threshold_low[N_SENSOR_EVENTS];
+static float threshold_high[N_SENSOR_EVENTS];
+
+static uint32_t range_status[N_SENSOR_EVENTS];
 
 
 static uint32_t sensor_count = 0;
-static QueueHandle_t Sensor::xSensorQueue = nullptr;
+static QueueHandle_t xSensorQueue = NULL;
 
-Sensor::Sensor(sensor_t sensor_type, sensor_event_type_t default_event_type)
-: type(sensor_type), default_event_type(default_event_type)
+void sensor_init(void)
 {
-	if (xSensorQueue == nullptr) {
+	if (xSensorQueue == NULL) {
 		xSensorQueue = xQueueCreate(UI_SENSOR_QUEUE_LENGTH, sizeof(sensor_event_t));
 
 		memset(range_status, EVENT_RANGE_ERROR, N_SENSOR_EVENTS);
@@ -23,31 +30,23 @@ Sensor::Sensor(sensor_t sensor_type, sensor_event_type_t default_event_type)
 	sensor_count++;
 }
 
-Sensor::~Sensor()
-{
-	if (--sensor_count == 0 && xSensorQueue != nullptr) {
-		vQueueDelete(xSensorQueue);
-		xSensorQueue = nullptr;
-	}
-}
-
-bool Sensor::read_sample(sensor_event_t * event)
+bool read_sample(sensor_event_t * event)
 {
 	return xQueueReceive(xSensorQueue, (void * const) event, portMAX_DELAY) == pdTRUE;
 }
 
-bool Sensor::write_sample(float sample, sensor_event_type_t event_type=N_SENSOR_EVENTS, BaseType_t * pxHigherPriorityTaskWoken=nullptr)
+bool write_sample(float sample, sensor_event_type_t event_type, BaseType_t * pxHigherPriorityTaskWoken)
 {
-	if (xSensorQueue == nullptr) 
+	if (xSensorQueue == NULL) 
 		return false;
 
 	sensor_event_t event = {
-		.type = event_type == N_SENSOR_EVENTS ? default_event_type : event_type,
+		.type = event_type,
 		.value = sample
 	};
 
 	BaseType_t success = pdFALSE; 
-	if (pxHigherPriorityTaskWoken == nullptr) {
+	if (pxHigherPriorityTaskWoken == NULL) {
 		success = xQueueSendToBack(xSensorQueue, &event, 0);
 	} else {
 		success = xQueueSendToBackFromISR(xSensorQueue, &event, pxHigherPriorityTaskWoken);
@@ -56,7 +55,7 @@ bool Sensor::write_sample(float sample, sensor_event_type_t event_type=N_SENSOR_
 	return success == pdTRUE;
 }
 
-void Sensor::set_limits(sensor_event_t ev, float min, float max)
+void set_limits(sensor_event_type_t ev, float min, float max)
 {
 	if (ev < N_SENSOR_EVENTS) {
 		min_values[ev] = min;
@@ -69,7 +68,7 @@ void Sensor::set_limits(sensor_event_t ev, float min, float max)
 	}
 }
 
-uint32_t Sensor::in_range(sensor_event_t ev)
+uint32_t in_range(sensor_event_t ev)
 {
 	if (ev.type < N_SENSOR_EVENTS && range_status[ev.type] != EVENT_RANGE_ERROR) {
 
@@ -77,9 +76,9 @@ uint32_t Sensor::in_range(sensor_event_t ev)
 		float max = max_values[ev.type];
 
 		if (range_status[ev.type] == EVENT_RANGE_UNDERFLOW)
-			min = threshold_low[ev];
+			min = threshold_low[ev.type];
 		else if (range_status[ev.type] == EVENT_RANGE_OVERFLOW)
-			max = threshold_high[ev];
+			max = threshold_high[ev.type];
 
 		if (ev.value > max)
 			range_status[ev.type] = EVENT_RANGE_OVERFLOW;
@@ -92,7 +91,7 @@ uint32_t Sensor::in_range(sensor_event_t ev)
 	return range_status[ev.type];
 }
 
-uint32_t Sensor::get_range_status(sensor_event_type_t ev)
+uint32_t get_range_status(sensor_event_type_t ev)
 {
 	return ev < N_SENSOR_EVENTS ? range_status[ev] : EVENT_RANGE_ERROR;
 }

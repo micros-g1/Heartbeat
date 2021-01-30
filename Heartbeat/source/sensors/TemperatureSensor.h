@@ -1,17 +1,8 @@
-#pragma once
+#ifndef __TEMPERATURE_SENSOR_H__
+#define __TEMPERATURE_SENSOR_H__
 
 #include "Sensor.h"
 
+Sensor * new_temperature_sensor(void);
 
-
-
-class TemperatureSensor : public Sensor
-{
-public:
-    TemperatureSensor(uint32_t sampling_rate_ms);
-    ~TemperatureSensor();
-    void start_sampling();
-	void stop_sampling();
-
-private:
-};
+#endif

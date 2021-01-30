@@ -3,12 +3,22 @@
 #include "drv/max30102/algorithm_by_RF.h"
 #include "pin_mux.h"
 #include "fsl_gpio.h"
+#include "fsl_debug_console.h"
 #include "semphr.h"
 
-static Spo2Sensor * sensor = nullptr;
-static TaskHandle_t xTaskSpo2 = nullptr;
-static SemaphoreHandle_t xBinarySemaphore = nullptr;
+static __volatile__ Sensor sensor;
+static TaskHandle_t xTaskSpo2 = NULL;
+static SemaphoreHandle_t xBinarySemaphore = NULL;
 
+
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+#define MAX_SAMP_CHARS 9
+#define RF_SAMPLES 100
+#define RF_SAMPLES_MARGIN 20
+
+#define UINT18_MAX	((0x00000001<<18) - 1)
 
 /*******************************************************************************
  * Variables
@@ -33,42 +43,42 @@ static float curr_ratio = 0;
 static float curr_correl = 0;
 
 
-/*******************************************************************************
- * Definitions
- ******************************************************************************/
-#define I2C_A_IRQn I2C0_IRQn
+void spo2_task(void *pvParameters);
 
-/* Priorities at which the tasks are created.  */
-#define M2T(X) ((unsigned int)((X)*(configTICK_RATE_HZ/1000.0)))
-#define MAX_SAMP_CHARS 9
-#define RF_SAMPLES 100
-#define RF_SAMPLES_MARGIN 20
+void spo2_init(uint32_t task_priority);
+void spo2_start_sampling(void);
+void spo2_stop_sampling(void);
 
 
-
-Spo2Sensor::Spo2Sensor(uint32_t task_priority) : Sensor(SENSOR_SPO2, EVENT_SPO2_EKG)
+Sensor * new_spo2_sensor(void)
 {
-	if (sensor != nullptr)
-		return;
-	sensor = this;
+	sensor.type = SENSOR_SPO2;
+	sensor.init = spo2_init;
+	sensor.start_sampling = spo2_start_sampling;
+	sensor.stop_sampling = spo2_stop_sampling;
+	sensor.status = false;
 
+	return &sensor;
+}
 
+void spo2_init(uint32_t task_priority)
+{
 	NVIC_EnableIRQ(PORTB_IRQn);
 
-	status = max30102_init(MAX30102_SPO2_MODE) == MAX30102_SUCCESS;
-	if(!status) {
+	sensor.status = max30102_init(MAX30102_SPO2_MODE) == MAX30102_SUCCESS;
+	if(!sensor.status) {
 		PRINTF("MAX30102 INITIALIZATION ERROR\n");
 		return;
 	}
 
-	status = max30102_set_led_current(0x24,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
-	if(!status) {
+	sensor.status = max30102_set_led_current(0x24,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_1);
+	if(!sensor.status) {
 		PRINTF("MAX30102 LED1 ERROR\n");
 		return;
 	}
 
-	status = max30102_set_led_current(0x24,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
-	if(!status){
+	sensor.status = max30102_set_led_current(0x24,  MAX30102_LED_PULSE_AMPLITUDE_ADDR_2);
+	if(!sensor.status){
 		PRINTF("MAX30102 LED2 ERROR\n");
 		return;
 	}
@@ -78,8 +88,8 @@ Spo2Sensor::Spo2Sensor(uint32_t task_priority) : Sensor(SENSOR_SPO2, EVENT_SPO2_
 	fifo_conf.fifo_a_full = 0xF;
 	fifo_conf.fifo_roll_over_en = true;
 	fifo_conf.smp_ave = MAX30102_SMP_AVE_4;
-	status = max30102_set_fifo_config(&fifo_conf);
-	if(!status) {
+	sensor.status = max30102_set_fifo_config(&fifo_conf);
+	if(!sensor.status) {
 		PRINTF("MAX30102 FIFO CONFIG ERROR\n");
 		return;
 	}
@@ -88,24 +98,24 @@ Spo2Sensor::Spo2Sensor(uint32_t task_priority) : Sensor(SENSOR_SPO2, EVENT_SPO2_
 	spo2_conf.led_pw = MAX30102_LED_PW_411US_ADC_18_BITS;
 	spo2_conf.spo2_sr = MAX30102_SPO2_SAMPLE_RATE_100HZ;
 	spo2_conf.spo2_adc_rge = MAX30102_SPO2_ADC_RESOLUTION_4096NA;
-	status = max30102_set_spo2_config(&spo2_conf);
-	if(!status) {
+	sensor.status = max30102_set_spo2_config(&spo2_conf);
+	if(!sensor.status) {
 		PRINTF("MAX30102 SPO2 CONFIG ERROR\n");
 		return;
 	}
 	memset(&max30102_interrupts, 0, sizeof(max30102_interrupts));
 
-	status = xTaskCreate(
+	sensor.status = xTaskCreate(
 			spo2_task, "spo2 task",
-			configMINIMAL_STACK_SIZE + 166, nullptr,
+			configMINIMAL_STACK_SIZE + 166, NULL,
 			task_priority, &xTaskSpo2) == pdTRUE;
-	if (!status) {
+	if (!sensor.status) {
 		PRINTF("Spo2 task creation failed!.\r\n");
 		return;
 	}
 
-	status = (xBinarySemaphore = xSemaphoreCreateBinary()) == nullptr;
-	if (!status) {
+	sensor.status = (xBinarySemaphore = xSemaphoreCreateBinary()) == NULL;
+	if (!sensor.status) {
 		PRINTF("Spo2 semaphore creation failed!.\r\n");
 		return;
 	}
@@ -121,30 +131,18 @@ Spo2Sensor::Spo2Sensor(uint32_t task_priority) : Sensor(SENSOR_SPO2, EVENT_SPO2_
 		red_led_samples[i] = 0;
 	}
 
-	Sensor::set_limits(EVENT_SPO2_EKG, 0.0, 1.0);
+	set_limits(EVENT_SPO2_EKG, 0.0, 1.0);
 }
 
 
-Spo2Sensor::~Spo2Sensor()
-{
-	stop_sampling();
-
-	vSemaphoreDelete(xBinarySemaphore);
-	xBinarySemaphore = nullptr;
-
-	vTaskDelete(xTaskSpo2);
-	xTaskSpo2 = nullptr;
-}
-
-
-void Spo2Sensor::start_sampling()
+void spo2_start_sampling(void)
 {
 	max30102_trigger_spo2_reads();
 	vTaskResume(xTaskSpo2);
 }
 
 
-void Spo2Sensor::stop_sampling()
+void spo2_stop_sampling(void)
 {
 	vTaskSuspend(xTaskSpo2);
 }
@@ -157,7 +155,6 @@ void spo2_task(void *pvParameters)
 
 		if (!GPIO_PinRead(GPIOB, BOARD_MAX30102_INT_PIN_PIN)) {
 			max30102_get_interrupt_status(&max30102_interrupts);
-			interrupt_flag = false;
 
 			if(max30102_interrupts.pwr_rdy){
 				max30102_interrupts.pwr_rdy = false;
@@ -176,7 +173,7 @@ void spo2_task(void *pvParameters)
 				ir_led_samples[curr_buffer_n_samples] = aux_sample_ir;
 				red_led_samples[curr_buffer_n_samples] = aux_sample_red;
 
-				sensor->write_sample(float(aux_sample_ir)/float(0x00000001<<18 - 1));
+				write_sample(((float)aux_sample_ir) / ((float)UINT18_MAX), EVENT_SPO2_EKG, NULL);
 
 				curr_buffer_n_samples++;
 
@@ -188,8 +185,8 @@ void spo2_task(void *pvParameters)
 						&curr_spo2, &curr_spo2_valid, &curr_heart_rate, &curr_hr_valid, &curr_ratio, &curr_correl);
 
 					if(curr_hr_valid && curr_spo2_valid){
-						sensor->write_sample(float(curr_heart_rate), EVENT_SPO2_BPM);
-						sensor->write_sample(float(curr_spo2)/float(100), EVENT_SPO2_SPO2);
+						write_sample((float)curr_heart_rate, EVENT_SPO2_BPM, NULL);
+						write_sample(((float)curr_spo2)/100.0, EVENT_SPO2_SPO2, NULL);
 					}
 					curr_buffer_n_samples = 0;
 				}

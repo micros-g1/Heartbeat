@@ -1,16 +1,9 @@
-#pragma once
+#ifndef __EKG_SENSOR_H__
+#define __EKG_SENSOR_H__
+
 
 #include "Sensor.h"
 
+Sensor * new_ekg_sensor(void);
 
-
-class EkgSensor : public Sensor
-{
-public:
-    EkgSensor(uint32_t sampling_rate_ms);
-    ~EkgSensor();
-    void start_sampling();
-	void stop_sampling();
-
-private:
-};
+#endif

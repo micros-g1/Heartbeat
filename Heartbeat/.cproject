@@ -663,21 +663,6 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="Heartbeat.null.1333034300" name="Heartbeat" projectType="com.crt.advproject.projecttype.exe"/>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.1962714242;com.crt.advproject.config.exe.debug.1962714242.;com.crt.advproject.gas.exe.debug.621045396;com.crt.advproject.assembler.input.1812554994">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.1577032532;com.crt.advproject.config.exe.release.1577032532.;com.crt.advproject.gas.exe.release.858429923;com.crt.advproject.assembler.input.1956299755">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.1962714242;com.crt.advproject.config.exe.debug.1962714242.;com.crt.advproject.gcc.exe.debug.873044363;com.crt.advproject.compiler.input.234881913">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.1577032532;com.crt.advproject.config.exe.release.1577032532.;com.crt.advproject.gcc.exe.release.1027841686;com.crt.advproject.compiler.input.118910473">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="com.nxp.mcuxpresso.core.datamodels">
 		<sdkName>SDK_2.x_FRDM-K64F</sdkName>
@@ -721,5 +706,23 @@
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/Heartbeat"/>
 		</configuration>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.1962714242;com.crt.advproject.config.exe.debug.1962714242.;com.crt.advproject.gas.exe.debug.621045396;com.crt.advproject.assembler.input.1812554994">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.1577032532;com.crt.advproject.config.exe.release.1577032532.;com.crt.advproject.gas.exe.release.858429923;com.crt.advproject.assembler.input.1956299755">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.1962714242;com.crt.advproject.config.exe.debug.1962714242.;com.crt.advproject.cpp.exe.debug.754762688;com.crt.advproject.compiler.cpp.input.1038174596">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.crt.advproject.GCCManagedMakePerProjectProfileCPP"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.1962714242;com.crt.advproject.config.exe.debug.1962714242.;com.crt.advproject.gcc.exe.debug.873044363;com.crt.advproject.compiler.input.234881913">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.1577032532;com.crt.advproject.config.exe.release.1577032532.;com.crt.advproject.gcc.exe.release.1027841686;com.crt.advproject.compiler.input.118910473">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>

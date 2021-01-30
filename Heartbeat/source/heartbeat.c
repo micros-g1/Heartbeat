@@ -1,29 +1,17 @@
 #include "defs.h"
-#include "MK64F12.h"
+#include "board.h"
+#include "peripherals.h"
 #include "sensors/EkgSensor.h"
 #include "sensors/Spo2Sensor.h"
 #include "sensors/TemperatureSensor.h"
 #include "bt_com.h"
 
-typedef union {
-	struct {
-		uint8_t temperature_sensor : 1;
-		uint8_t temperature_timer : 1;
-		uint8_t ekg : 1;
-		uint8_t spo2 : 1;
-		uint8_t sensor_queue : 1;
-	};
-	uint8_t as_int;
-} heartbeat_status_t;
-
-
-__volatile__ QueueHandle_t xSensorQueue = NULL;
-__volatile__ QueueHandle_t xCommsQueue = NULL;
+QueueHandle_t xSensorQueue = NULL;
+QueueHandle_t xCommsQueue = NULL;
 
 TimerHandle_t xTemperatureSensorTimer = NULL;
 void * pvTemperatureSensorId = NULL;
 
-__volatile__ heartbeat_status_t status;
 
 static Sensor * sensors[3];
 
@@ -50,37 +38,45 @@ int main(void)
 	BOARD_InitDebugConsole();
 	#endif
 
-	sensors[0] = new TemperatureSensor(TEMP_SAMPLING_PERIOD_MS);
-	sensors[1] = new EkgSensor(EKG_SAMPLING_PERIOD_MS);
-	sensors[2] = new Spo2Sensor(SPO2_TASK_PRIORITY);
+	sensors[0] = new_temperature_sensor();
+	sensors[0]->init(TEMP_SAMPLING_PERIOD_MS);
 
-	Sensor::set_limits(EVENT_TEMPERATURE, LOWEST_TEMPERATURE, HIGHEST_TEMPERATURE);
-	Sensor::set_limits(EVENT_SPO2_SPO2, LOWEST_SPO2, HIGHEST_SPO2);
-	Sensor::set_limits(EVENT_SPO2_BPM, LOWEST_BPM, HIGHEST_BPM);
+	sensors[1] = new_spo2_sensor();
+	sensors[1]->init(SPO2_TASK_PRIORITY);
 
-    NVIC_SetPriority(I2C_A_IRQn, 5);
+	sensors[2] = new_ekg_sensor();
+	sensors[2]->init(EKG_SAMPLING_PERIOD_MS);
+
+	set_limits(EVENT_TEMPERATURE, LOWEST_TEMPERATURE, HIGHEST_TEMPERATURE);
+	set_limits(EVENT_SPO2_SPO2, LOWEST_SPO2, HIGHEST_SPO2);
+	set_limits(EVENT_SPO2_BPM, LOWEST_BPM, HIGHEST_BPM);
+
+    NVIC_SetPriority(I2C0_IRQn, 5);
     NVIC_SetPriority(PORTB_IRQn, 4);
 	NVIC_EnableIRQ(PORTB_IRQn);
 
 	BT_com_init();
 
-	xTaskCreate(sensor_task, "sensor task", configMINIMAL_STACK_SIZE + 166, nullptr, SENSOR_TASK_PRIORITY, nullptr);
-	xTaskCreate(comms_task, "comms task", configMINIMAL_STACK_SIZE + 166, nullptr, COMMS_TASK_PRIORITY, nullptr);
+	xTaskCreate(sensors_task, "sensor task", configMINIMAL_STACK_SIZE + 166, NULL, SENSOR_TASK_PRIORITY, NULL);
+	xTaskCreate(comms_task, "comms task", configMINIMAL_STACK_SIZE + 166, NULL, COMMS_TASK_PRIORITY, NULL);
 
 	vTaskStartScheduler();
-	for (;;)
-		;
+	while (true) ;
 }
 
 void sensors_task(void *pvParameters)
 {
 	sensor_event_t ev;
+	for (unsigned int i = 0; i < N_SENSORS; i++) {
+		sensors[i]->start_sampling();
+	}
+
 	while (true) {
-		if (Sensor::read_sample(&ev)) {
+		if (read_sample(&ev)) {
 			xQueueSend(xCommsQueue, &ev, pdMS_TO_TICKS(100));
 
-			uint32_t last_range_status = Sensor::get_range_status(ev.type);
-			uint32_t new_range_status = Sensor::in_range(ev);
+			uint32_t last_range_status = get_range_status(ev.type);
+			uint32_t new_range_status = in_range(ev);
 
 			if (new_range_status != last_range_status) {
 				ev.type = new_range_status == EVENT_RANGE_OK ? ev.type+N_SENSOR_EVENTS+1 : ev.type+EVENTS_OUT+1;

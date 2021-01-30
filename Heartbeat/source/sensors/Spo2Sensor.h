@@ -1,15 +1,9 @@
-#pragma once
+#ifndef __SPO2_SENSOR_H__
+#define __SPO2_SENSOR_H__
+
 
 #include "Sensor.h"
 
-class Spo2Sensor : public Sensor
-{
-public:
-	Spo2Sensor(uint32_t task_priority);
-	~Spo2Sensor();
-    void start_sampling();
-	void stop_sampling();
+Sensor * new_spo2_sensor(void);
 
-private:
-};
-
+#endif

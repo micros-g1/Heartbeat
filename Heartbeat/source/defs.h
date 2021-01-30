@@ -1,12 +1,14 @@
-#pragma once 
+#ifndef __DEFS_H__
+#define __DEFS_H__
 
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h> 
 
+#include "MK64F12.h"
 #include "FreeRTOSConfig.h"
+#include "FreeRTOS.h"
 #include "projdefs.h"
-#include "portmacro.h"
 #include "timers.h"
 #include "queue.h"
 
@@ -53,3 +55,5 @@ typedef struct {
 #define HIGHEST_SPO2	1.00
 
 #define SENSOR_HYSTERESIS 0.025
+
+#endif
