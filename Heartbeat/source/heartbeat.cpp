@@ -1,10 +1,20 @@
-#include "heartbeat.h"
 #include "defs.h"
 #include "MK64F12.h"
 #include "sensors/EkgSensor.h"
 #include "sensors/Spo2Sensor.h"
 #include "sensors/TemperatureSensor.h"
 #include "bt_com.h"
+
+typedef union {
+	struct {
+		uint8_t temperature_sensor : 1;
+		uint8_t temperature_timer : 1;
+		uint8_t ekg : 1;
+		uint8_t spo2 : 1;
+		uint8_t sensor_queue : 1;
+	};
+	uint8_t as_int;
+} heartbeat_status_t;
 
 
 __volatile__ QueueHandle_t xSensorQueue = NULL;
@@ -17,18 +27,29 @@ __volatile__ heartbeat_status_t status;
 
 static Sensor * sensors[3];
 
-heartbeat_status_t heartbeat_status()
-{
-	return status;
-}
+void sensors_task(void *pvParameters);
+void comms_task(void * pvParameters);
 
-bool heartbeat_ok()
-{
-	return status.as_int == 0b11111;
-}
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
+/*
+ * @brief   Application entry point.
+ */
 
-bool heartbeat_init()
+
+int main(void)
 {
+
+	/* Init board hardware. */
+	BOARD_InitBootPins();
+	BOARD_InitBootClocks();
+	BOARD_InitBootPeripherals();
+	#ifndef BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL
+	    /* Init FSL debug console. */
+	BOARD_InitDebugConsole();
+	#endif
+
 	sensors[0] = new TemperatureSensor(1000);
 	sensors[1] = new EkgSensor();
 	sensors[2] = new Spo2Sensor(2);
@@ -46,21 +67,10 @@ bool heartbeat_init()
 	xTaskCreate(sensor_task, "sensor task", configMINIMAL_STACK_SIZE + 166, nullptr, tskIDLE_PRIORITY+2, nullptr);
 	xTaskCreate(comms_task, "comms task", configMINIMAL_STACK_SIZE + 166, nullptr, tskIDLE_PRIORITY+1, nullptr);
 
-	return heartbeat_ok();
+	vTaskStartScheduler();
+	for (;;)
+		;
 }
-
-void hearbeat_deinit()
-{
-	NVIC_DisableIRQ(PORTB_IRQn);
-
-	for (unsigned int i = 0; i < N_SENSORS; i++) {
-		delete sensors[i];
-	}
-}
-
-
-
-
 
 void sensors_task(void *pvParameters)
 {
