@@ -34,9 +34,7 @@ extern "C" {
 #define ADC0_IRQN ADC0_IRQn
 /* ADC0 interrupt handler identifier. */
 #define ADC0_IRQHANDLER ADC0_IRQHandler
-
 /* Channel 0 (SE.19) conversion control group. */
-
 #define ADC0_CH0_CONTROL_GROUP 0
 /* Alias for GPIOB peripheral */
 #define GPIOB_GPIO GPIOB
@@ -53,7 +51,6 @@ extern "C" {
 #define I2C0_CLOCK_SOURCE I2C0_CLK_SRC
 /* Definition of the clock source frequency */
 #define I2C0_CLK_FREQ CLOCK_GetFreq(I2C0_CLOCK_SOURCE)
-
 /* BOARD_InitPeripherals defines for PIT */
 /* Definition of peripheral ID. */
 #define PIT_PERIPHERAL PIT
@@ -67,7 +64,6 @@ extern "C" {
 #define PIT_CHANNEL_0 kPIT_Chnl_0
 /* Definition of ticks count for channel 0. */
 #define PIT_CHANNEL_0_TICKS 333299U
-
 /* Definition of peripheral ID */
 #define UART0_PERIPHERAL UART0
 /* Definition of the clock source frequency */

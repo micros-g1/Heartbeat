@@ -48,6 +48,7 @@
 #include "drv/ad8232.h"
 #include "drv/max30102.h"
 #include "drv/max30205.h"
+#include "drv/hc05.h"
 
 /*******************************************************************************
  * Definitions
@@ -259,6 +260,12 @@ static void handle_max_interrupts(){
 
 
 static void example_task(void *pvParameters) {
+
+
+	// initialize bluetooth module
+	hc05_init();
+
+
 	for(int i=0; i < MAX_SAMP_CHARS; i++){
 		samp1[i] = 0;
 		samp2[i] = 0;

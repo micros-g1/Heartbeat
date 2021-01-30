@@ -149,7 +149,7 @@ BOARD_InitPins:
   - {peripheral: ADC0, signal: 'TRG, A', pin_signal: PIT_trigger_0}
   - {pin_num: '19', peripheral: ADC0, signal: 'SE, 19', pin_signal: ADC0_DM0/ADC1_DM3}
   - {pin_num: '23', peripheral: ADC0, signal: VREFH, pin_signal: VREFH}
-
+  - {pin_num: '35', peripheral: UART0, signal: RX, pin_signal: PTA1/UART0_RX/FTM0_CH6/JTAG_TDI/EZP_DI}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -175,6 +175,9 @@ void BOARD_InitPins(void)
     };
     /* Initialize GPIO functionality on pin PTB9 (pin 57)  */
     GPIO_PinInit(BOARD_MAX30102_INT_PIN_GPIO, BOARD_MAX30102_INT_PIN_PIN, &MAX30102_INT_PIN_config);
+
+    /* PORTA1 (pin 35) is configured as UART0_RX */
+    PORT_SetPinMux(PORTA, 1U, kPORT_MuxAlt2);
 
     /* PORTA2 (pin 36) is configured as TRACE_SWO */
     PORT_SetPinMux(PORTA, 2U, kPORT_MuxAlt7);
@@ -418,11 +421,7 @@ void BOARD_InitLEDsPins(void)
  * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 BOARD_InitDEBUG_UARTPins:
 - options: {callFromInitBoot: 'true', prefix: BOARD_, coreID: core0, enableClock: 'true'}
-- pin_list:
-  - {pin_num: '63', peripheral: UART0, signal: TX, pin_signal: PTB17/SPI1_SIN/UART0_TX/FTM_CLKIN1/FB_AD16/EWM_OUT_b, direction: OUTPUT, slew_rate: fast, open_drain: disable,
-    drive_strength: low, pull_select: down, pull_enable: disable, passive_filter: disable}
-  - {pin_num: '62', peripheral: UART0, signal: RX, pin_signal: PTB16/SPI1_SOUT/UART0_RX/FTM_CLKIN0/FB_AD17/EWM_IN, slew_rate: fast, open_drain: disable, drive_strength: low,
-    pull_select: down, pull_enable: disable, passive_filter: disable}
+- pin_list: []
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -435,49 +434,6 @@ BOARD_InitDEBUG_UARTPins:
  * END ****************************************************************************************************************/
 void BOARD_InitDEBUG_UARTPins(void)
 {
-    /* Port B Clock Gate Control: Clock enabled */
-    CLOCK_EnableClock(kCLOCK_PortB);
-
-    const port_pin_config_t DEBUG_UART_RX = {/* Internal pull-up/down resistor is disabled */
-                                             kPORT_PullDisable,
-                                             /* Fast slew rate is configured */
-                                             kPORT_FastSlewRate,
-                                             /* Passive filter is disabled */
-                                             kPORT_PassiveFilterDisable,
-                                             /* Open drain is disabled */
-                                             kPORT_OpenDrainDisable,
-                                             /* Low drive strength is configured */
-                                             kPORT_LowDriveStrength,
-                                             /* Pin is configured as UART0_RX */
-                                             kPORT_MuxAlt3,
-                                             /* Pin Control Register fields [15:0] are not locked */
-                                             kPORT_UnlockRegister};
-    /* PORTB16 (pin 62) is configured as UART0_RX */
-    PORT_SetPinConfig(BOARD_DEBUG_UART_RX_PORT, BOARD_DEBUG_UART_RX_PIN, &DEBUG_UART_RX);
-
-    const port_pin_config_t DEBUG_UART_TX = {/* Internal pull-up/down resistor is disabled */
-                                             kPORT_PullDisable,
-                                             /* Fast slew rate is configured */
-                                             kPORT_FastSlewRate,
-                                             /* Passive filter is disabled */
-                                             kPORT_PassiveFilterDisable,
-                                             /* Open drain is disabled */
-                                             kPORT_OpenDrainDisable,
-                                             /* Low drive strength is configured */
-                                             kPORT_LowDriveStrength,
-                                             /* Pin is configured as UART0_TX */
-                                             kPORT_MuxAlt3,
-                                             /* Pin Control Register fields [15:0] are not locked */
-                                             kPORT_UnlockRegister};
-    /* PORTB17 (pin 63) is configured as UART0_TX */
-    PORT_SetPinConfig(BOARD_DEBUG_UART_TX_PORT, BOARD_DEBUG_UART_TX_PIN, &DEBUG_UART_TX);
-
-    SIM->SOPT5 = ((SIM->SOPT5 &
-                   /* Mask bits to zero which are setting */
-                   (~(SIM_SOPT5_UART0TXSRC_MASK)))
-
-                  /* UART 0 transmit data source select: UART0_TX pin. */
-                  | SIM_SOPT5_UART0TXSRC(SOPT5_UART0TXSRC_UART_TX));
 }
 
 /* clang-format off */
@@ -1014,6 +970,11 @@ BOARD_InitUSBPins:
 - pin_list:
   - {pin_num: '10', peripheral: USB0, signal: DP, pin_signal: USB0_DP}
   - {pin_num: '11', peripheral: USB0, signal: DM, pin_signal: USB0_DM}
+  - {pin_num: '36', peripheral: UART0, signal: TX, pin_signal: PTA2/UART0_TX/FTM0_CH7/JTAG_TDO/TRACE_SWO/EZP_DO}
+  - {pin_num: '57', peripheral: GPIOB, signal: 'GPIO, 9', pin_signal: PTB9/SPI1_PCS1/UART3_CTS_b/FB_AD20, identifier: ''}
+  - {pin_num: '35', peripheral: UART0, signal: RX, pin_signal: PTA1/UART0_RX/FTM0_CH6/JTAG_TDI/EZP_DI}
+  - {pin_num: '64', peripheral: GPIOB, signal: 'GPIO, 18', pin_signal: PTB18/CAN0_TX/FTM2_CH0/I2S0_TX_BCLK/FB_AD15/FTM2_QD_PHA}
+  - {pin_num: '65', peripheral: GPIOB, signal: 'GPIO, 19', pin_signal: PTB19/CAN0_RX/FTM2_CH1/I2S0_TX_FS/FB_OE_b/FTM2_QD_PHB}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -1026,6 +987,32 @@ BOARD_InitUSBPins:
  * END ****************************************************************************************************************/
 void BOARD_InitUSBPins(void)
 {
+    /* Port A Clock Gate Control: Clock enabled */
+    CLOCK_EnableClock(kCLOCK_PortA);
+    /* Port B Clock Gate Control: Clock enabled */
+    CLOCK_EnableClock(kCLOCK_PortB);
+
+    /* PORTA1 (pin 35) is configured as UART0_RX */
+    PORT_SetPinMux(PORTA, 1U, kPORT_MuxAlt2);
+
+    /* PORTA2 (pin 36) is configured as UART0_TX */
+    PORT_SetPinMux(PORTA, 2U, kPORT_MuxAlt2);
+
+    /* PORTB18 (pin 64) is configured as PTB18 */
+    PORT_SetPinMux(PORTB, 18U, kPORT_MuxAsGpio);
+
+    /* PORTB19 (pin 65) is configured as PTB19 */
+    PORT_SetPinMux(PORTB, 19U, kPORT_MuxAsGpio);
+
+    /* PORTB9 (pin 57) is configured as PTB9 */
+    PORT_SetPinMux(PORTB, 9U, kPORT_MuxAsGpio);
+
+    SIM->SOPT5 = ((SIM->SOPT5 &
+                   /* Mask bits to zero which are setting */
+                   (~(SIM_SOPT5_UART0TXSRC_MASK)))
+
+                  /* UART 0 transmit data source select: UART0_TX pin. */
+                  | SIM_SOPT5_UART0TXSRC(SOPT5_UART0TXSRC_UART_TX));
 }
 /***********************************************************************************************************************
  * EOF
