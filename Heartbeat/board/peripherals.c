@@ -6,11 +6,11 @@
 /* clang-format off */
 /* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 !!GlobalInfo
-product: Peripherals v8.0
+product: Peripherals v9.0
 processor: MK64FN1M0xxx12
 package_id: MK64FN1M0VLL12
 mcu_data: ksdk2_0
-processor_version: 8.0.1
+processor_version: 9.0.0
 board: FRDM-K64F
 functionalGroups:
 - name: BOARD_InitPeripherals
@@ -118,7 +118,7 @@ static void ADC0_init(void) {
   ADC16_SetChannelMuxMode(ADC0_PERIPHERAL, ADC0_muxMode);
   /* Initialize channel */
   ADC16_SetChannelConfig(ADC0_PERIPHERAL, ADC0_CH0_CONTROL_GROUP, &ADC0_channelsConfig[0]);
-  /* Enable interrupt ADC0_IRQN request in the NVIC */
+  /* Enable interrupt ADC0_IRQn request in the NVIC. */
   EnableIRQ(ADC0_IRQN);
 }
 
@@ -150,7 +150,7 @@ instance:
 static void GPIOB_init(void) {
   /* Make sure, the clock gate for port B is enabled (e. g. in pin_mux.c) */
   /* Interrupt PORTB_IRQn request in the NVIC is not initialized (disabled by default). */
-  /* It can be enabled later by EnableIRQ(PORTB_IRQn); function call. */
+  /* It can be enabled later by EnableIRQ(GPIOB_IRQN);  function call. */
 }
 
 /***********************************************************************************************************************
@@ -179,6 +179,10 @@ instance:
       - enableStopHold: 'false'
       - baudRate_Bps: '400000'
       - glitchFilterWidth: '0'
+    - interrupt_priority:
+      - IRQn: 'I2C0_IRQn'
+      - enable_priority: 'false'
+      - priority: '0'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 i2c_rtos_handle_t I2CA_rtosHandle;
@@ -262,6 +266,14 @@ instance:
       - parity: 'kUART_ParityDisabled'
       - stopbits: 'kUART_OneStopBit'
       - buffer_size: '100'
+    - interrupt_rx_tx:
+      - IRQn: 'UART0_RX_TX_IRQn'
+      - enable_priority: 'false'
+      - priority: '0'
+    - interrupt_err:
+      - IRQn: 'UART0_ERR_IRQn'
+      - enable_priority: 'false'
+      - priority: '0'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 uart_rtos_handle_t UART0_rtos_handle;
@@ -284,6 +296,61 @@ static void UART0_init(void) {
 }
 
 /***********************************************************************************************************************
+ * UART3 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'UART3'
+- type: 'uart'
+- mode: 'freertos'
+- custom_name_enabled: 'false'
+- type_id: 'uart_88ab1eca0cddb7ee407685775de016d5'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'UART3'
+- config_sets:
+  - fsl_uart_freertos:
+    - uart_rtos_configuration:
+      - clockSource: 'BusInterfaceClock'
+      - clockSourceFreq: 'GetFreq'
+      - baudrate: '9600'
+      - parity: 'kUART_ParityDisabled'
+      - stopbits: 'kUART_OneStopBit'
+      - buffer_size: '100'
+    - interrupt_rx_tx:
+      - IRQn: 'UART3_RX_TX_IRQn'
+      - enable_priority: 'true'
+      - priority: '0'
+    - interrupt_err:
+      - IRQn: 'UART3_ERR_IRQn'
+      - enable_priority: 'true'
+      - priority: '0'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+uart_rtos_handle_t UART3_rtos_handle;
+uart_handle_t UART3_uart_handle;
+uint8_t UART3_background_buffer[UART3_BACKGROUND_BUFFER_SIZE];
+uart_rtos_config_t UART3_rtos_config = {
+  .base = UART3_PERIPHERAL,
+  .baudrate = 9600UL,
+  .parity = kUART_ParityDisabled,
+  .stopbits = kUART_OneStopBit,
+  .buffer = UART3_background_buffer,
+  .buffer_size = UART3_BACKGROUND_BUFFER_SIZE
+};
+
+static void UART3_init(void) {
+  /* UART clock source initialization */
+  UART3_rtos_config.srcclk = UART3_CLOCK_SOURCE;
+  /* UART rtos initialization */
+  UART_RTOS_Init(&UART3_rtos_handle, &UART3_uart_handle, &UART3_rtos_config);
+  /* Interrupt vector UART3_RX_TX_IRQn priority settings in the NVIC. */
+  NVIC_SetPriority(UART3_SERIAL_RX_TX_IRQN, UART3_SERIAL_RX_TX_IRQ_PRIORITY);
+  /* Interrupt vector UART3_ERR_IRQn priority settings in the NVIC. */
+  NVIC_SetPriority(UART3_SERIAL_ERROR_IRQN, UART3_SERIAL_ERROR_IRQ_PRIORITY);
+}
+
+/***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
 void BOARD_InitPeripherals(void)
@@ -294,6 +361,7 @@ void BOARD_InitPeripherals(void)
   I2C0_init();
   PIT_init();
   UART0_init();
+  UART3_init();
 }
 
 /***********************************************************************************************************************

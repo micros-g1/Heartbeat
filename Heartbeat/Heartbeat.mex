@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding= "UTF-8" ?>
-<configuration name="MK64FN1M0xxx12" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_1.8 http://mcuxpresso.nxp.com/XSD/mex_configuration_1.8.xsd" uuid="56c1caf3-4099-44f4-b5ae-aa6497b9b6a5" version="1.8" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_1.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<configuration name="MK64FN1M0xxx12" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_1.9 http://mcuxpresso.nxp.com/XSD/mex_configuration_1.9.xsd" uuid="56c1caf3-4099-44f4-b5ae-aa6497b9b6a5" version="1.9" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_1.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
    <common>
       <processor>MK64FN1M0xxx12</processor>
       <package>MK64FN1M0VLL12</package>
@@ -16,19 +16,19 @@
       <generate_code_modified_registers_only>false</generate_code_modified_registers_only>
    </preferences>
    <tools>
-      <pins name="Pins" version="8.0" enabled="true" update_project_code="true">
+      <pins name="Pins" version="9.0" enabled="true" update_project_code="true">
          <generated_project_files>
             <file path="board/pin_mux.c" update_enabled="true"/>
             <file path="board/pin_mux.h" update_enabled="true"/>
          </generated_project_files>
          <pins_profile>
-            <processor_version>8.0.1</processor_version>
+            <processor_version>9.0.0</processor_version>
             <pin_labels>
                <pin_label pin_num="90" pin_signal="PTC16/UART3_RX/ENET0_1588_TMR0/FB_CS5_b/FB_TSIZ1/FB_BE23_16_BLS15_8_b" label="J1[2]" identifier="TMR_1588_0"/>
                <pin_label pin_num="91" pin_signal="PTC17/UART3_TX/ENET0_1588_TMR1/FB_CS4_b/FB_TSIZ0/FB_BE31_24_BLS7_0_b" label="J1[4]" identifier="TMR_1588_1"/>
                <pin_label pin_num="57" pin_signal="PTB9/SPI1_PCS1/UART3_CTS_b/FB_AD20" label="J1[6]" identifier="MAX30102_INT_PIN"/>
                <pin_label pin_num="35" pin_signal="PTA1/UART0_RX/FTM0_CH6/JTAG_TDI/EZP_DI" label="J1[8]"/>
-               <pin_label pin_num="69" pin_signal="PTB23/SPI2_SIN/SPI0_PCS5/FB_AD28" label="J1[10]"/>
+               <pin_label pin_num="69" pin_signal="PTB23/SPI2_SIN/SPI0_PCS5/FB_AD28" label="J1[10]" identifier="HC05_STATE"/>
                <pin_label pin_num="36" pin_signal="PTA2/UART0_TX/FTM0_CH7/JTAG_TDO/TRACE_SWO/EZP_DO" label="J1[12]/J9[6]/TRACE_SWO"/>
                <pin_label pin_num="72" pin_signal="ADC0_SE4b/CMP1_IN0/PTC2/SPI0_PCS2/UART1_CTS_b/FTM0_CH1/FB_AD12/I2S0_TX_FS" label="J1[14]"/>
                <pin_label pin_num="73" pin_signal="CMP1_IN1/PTC3/LLWU_P7/SPI0_PCS1/UART1_RX/FTM0_CH2/CLKOUT/I2S0_TX_BCLK" label="J1[16]"/>
@@ -200,6 +200,7 @@
                   <pin peripheral="ADC0" signal="TRG, A" pin_num="" pin_signal="PIT_trigger_0"/>
                   <pin peripheral="ADC0" signal="SE, 19" pin_num="19" pin_signal="ADC0_DM0/ADC1_DM3"/>
                   <pin peripheral="ADC0" signal="VREFH" pin_num="23" pin_signal="VREFH"/>
+                  <pin peripheral="GPIOB" signal="GPIO, 23" pin_num="69" pin_signal="PTB23/SPI2_SIN/SPI0_PCS5/FB_AD28"/>
                </pins>
             </function>
             <function name="BOARD_InitButtonsPins">
@@ -759,7 +760,7 @@
             <file path="board/clock_config.h" update_enabled="true"/>
          </generated_project_files>
          <clocks_profile>
-            <processor_version>8.0.1</processor_version>
+            <processor_version>9.0.0</processor_version>
          </clocks_profile>
          <clock_configurations>
             <clock_configuration name="BOARD_BootClockRUN">
@@ -892,7 +893,7 @@
          </dcdx_profile>
          <dcdx_configurations/>
       </dcdx>
-      <periphs name="Peripherals" version="8.0" enabled="true" update_project_code="true">
+      <periphs name="Peripherals" version="9.0" enabled="true" update_project_code="true">
          <dependencies>
             <dependency resourceType="SWComponent" resourceId="platform.drivers.adc16" description="ADC16 Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
                <feature name="enabled" evaluation="equal">
@@ -950,7 +951,7 @@
             <file path="board/peripherals.h" update_enabled="true"/>
          </generated_project_files>
          <peripherals_profile>
-            <processor_version>8.0.1</processor_version>
+            <processor_version>9.0.0</processor_version>
          </peripherals_profile>
          <functional_groups>
             <functional_group name="BOARD_InitPeripherals" uuid="5e99aa89-113c-4ea7-8360-300e047a8bb3" called_from_default_init="true" id_prefix="" core="core0">
@@ -971,6 +972,16 @@
                   <dependency resourceType="PeripheralUnifiedSignal" resourceId="ADC0.adc_se.19" description="Signal SE of the channel 19 of the peripheral ADC0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="">
                         <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="SWComponent" resourceId="platform.drivers.port" description="The fsl_port driver is missing in the project (required for the GPIO driver)." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="enabled" evaluation="equal">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="SWComponent" resourceId="platform.drivers.port" description="The compatible version of the fsl_port driver is not available in the project (required for the GPIO driver)." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="version" evaluation="compatible">
+                        <data type="Version">2.1.0</data>
                      </feature>
                   </dependency>
                   <dependency resourceType="PeripheralUnifiedSignal" resourceId="I2C0.i2c_scl" description="Signal serial clock of the peripheral I2C0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
@@ -1028,9 +1039,34 @@
                         <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="UART3.uart_tx" description="Signal TX of the peripheral UART3 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="equal">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="UART3.uart_rx" description="Signal RX of the peripheral UART3 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="equal">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="SWComponent" resourceId="platform.drivers.uart_freertos" description="The fsl_uart_freertos driver is missing in the project (required for the FreeRTOS mode)." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="enabled" evaluation="equal">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="SWComponent" resourceId="platform.drivers.uart_freertos" description="The compatible version of the fsl_uart_freertos driver is not available in the project (required for the FreeRTOS mode)." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="version" evaluation="compatible">
+                        <data type="Version">2.2.0</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="Bus_clock" description="Bus clock is inactive." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
+                     </feature>
+                  </dependency>
                </dependencies>
                <instances>
-                  <instance name="ADC0" uuid="a70f5dfc-8329-4fbb-b9df-d3c546798726" type="adc16" type_id="adc16_7a29cdeb84266e77f0c7ceac1b49fe2d" mode="ADC" peripheral="ADC0" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="ADC0" uuid="a70f5dfc-8329-4fbb-b9df-d3c546798726" type="adc16" type_id="adc16_7a29cdeb84266e77f0c7ceac1b49fe2d" mode="ADC" peripheral="ADC0" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
                      <config_set name="fsl_adc16">
                         <struct name="adc16_config">
                            <setting name="referenceVoltageSource" value="kADC16_ReferenceVoltageSourceVref"/>
@@ -1071,7 +1107,7 @@
                         </array>
                      </config_set>
                   </instance>
-                  <instance name="FTM0" uuid="c366ca01-4a5a-4e4f-9cbd-01ce06735370" type="ftm" type_id="ftm_04a15ae4af2b404bf2ae403c3dbe98b3" mode="EdgeAligned" peripheral="FTM0" enabled="false" comment="" custom_name_enabled="false">
+                  <instance name="FTM0" uuid="c366ca01-4a5a-4e4f-9cbd-01ce06735370" type="ftm" type_id="ftm_04a15ae4af2b404bf2ae403c3dbe98b3" mode="EdgeAligned" peripheral="FTM0" enabled="false" comment="" custom_name_enabled="false" editing_lock="false">
                      <config_set name="ftm_main_config" quick_selection="QuickSelectionDefault">
                         <struct name="ftm_config">
                            <setting name="clockSource" value="kFTM_SystemClock"/>
@@ -1119,7 +1155,7 @@
                         <array name="ftm_edge_aligned_channels_config"/>
                      </config_set>
                   </instance>
-                  <instance name="GPIOB" uuid="74a50033-1c87-4fe5-8d66-0e418185eda0" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOB" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="GPIOB" uuid="74a50033-1c87-4fe5-8d66-0e418185eda0" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOB" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
                      <config_set name="fsl_gpio">
                         <setting name="enable_irq" value="true"/>
                         <struct name="port_interrupt">
@@ -1131,7 +1167,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="I2C0" uuid="db02f194-a408-4097-80aa-5caaa857b42e" type="i2c" type_id="i2c_2566d7363e7e9aaedabb432110e372d7" mode="freertos" peripheral="I2C0" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="I2C0" uuid="db02f194-a408-4097-80aa-5caaa857b42e" type="i2c" type_id="i2c_2566d7363e7e9aaedabb432110e372d7" mode="freertos" peripheral="I2C0" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
                      <config_set name="fsl_i2c">
                         <setting name="i2c_mode" value="kI2C_Master"/>
                         <setting name="clockSource" value="BusInterfaceClock"/>
@@ -1146,9 +1182,14 @@
                            <setting name="baudRate_Bps" value="400000"/>
                            <setting name="glitchFilterWidth" value="0"/>
                         </struct>
+                        <struct name="interrupt_priority">
+                           <setting name="IRQn" value="I2C0_IRQn"/>
+                           <setting name="enable_priority" value="false"/>
+                           <setting name="priority" value="0"/>
+                        </struct>
                      </config_set>
                   </instance>
-                  <instance name="PIT" uuid="6173a1dc-b4a1-45ea-bd66-f23709af5a64" type="pit" type_id="pit_a4782ba5223c8a2527ba91aeb2bc4159" mode="LPTMR_GENERAL" peripheral="PIT" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="PIT" uuid="6173a1dc-b4a1-45ea-bd66-f23709af5a64" type="pit" type_id="pit_a4782ba5223c8a2527ba91aeb2bc4159" mode="LPTMR_GENERAL" peripheral="PIT" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
                      <config_set name="fsl_pit">
                         <setting name="enableRunInDebug" value="false"/>
                         <struct name="timingConfig">
@@ -1174,7 +1215,7 @@
                         </array>
                      </config_set>
                   </instance>
-                  <instance name="UART0" uuid="24935351-00e4-421f-b6b4-6d750a745838" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="freertos" peripheral="UART0" enabled="true" comment="" custom_name_enabled="false">
+                  <instance name="UART0" uuid="24935351-00e4-421f-b6b4-6d750a745838" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="freertos" peripheral="UART0" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
                      <config_set name="fsl_uart_freertos">
                         <struct name="uart_rtos_configuration">
                            <setting name="clockSource" value="BusInterfaceClock"/>
@@ -1184,54 +1225,38 @@
                            <setting name="stopbits" value="kUART_OneStopBit"/>
                            <setting name="buffer_size" value="100"/>
                         </struct>
-                     </config_set>
-                  </instance>
-                  <instance name="FTM0" uuid="c366ca01-4a5a-4e4f-9cbd-01ce06735370" type="ftm" type_id="ftm_04a15ae4af2b404bf2ae403c3dbe98b3" mode="EdgeAligned" peripheral="FTM0" enabled="false" comment="" custom_name_enabled="false">
-                     <config_set name="ftm_main_config" quick_selection="QuickSelectionDefault">
-                        <struct name="ftm_config">
-                           <setting name="clockSource" value="kFTM_SystemClock"/>
-                           <setting name="clockSourceFreq" value="GetFreq"/>
-                           <setting name="prescale" value="kFTM_Prescale_Divide_1"/>
-                           <setting name="timerFrequency" value="10000"/>
-                           <setting name="bdmMode" value="kFTM_BdmMode_0"/>
-                           <set name="pwmSyncMode">
-                              <selected>
-                                 <id>kFTM_SoftwareTrigger</id>
-                              </selected>
-                           </set>
-                           <set name="reloadPoints">
-                              <selected/>
-                           </set>
-                           <setting name="faultMode" value="kFTM_Fault_Disable"/>
-                           <setting name="faultFilterValue" value="0"/>
-                           <setting name="deadTimePrescale" value="kFTM_Deadtime_Prescale_1"/>
-                           <setting name="deadTimeValue" value="0"/>
-                           <set name="extTriggers">
-                              <selected/>
-                           </set>
-                           <set name="chnlInitState">
-                              <selected/>
-                           </set>
-                           <set name="chnlPolarity">
-                              <selected/>
-                           </set>
-                           <setting name="useGlobalTimeBase" value="false"/>
-                        </struct>
-                        <set name="timer_interrupts">
-                           <selected/>
-                        </set>
-                        <setting name="enable_irq" value="false"/>
-                        <struct name="ftm_interrupt">
-                           <setting name="IRQn" value="FTM0_IRQn"/>
-                           <setting name="enable_interrrupt" value="enabled"/>
+                        <struct name="interrupt_rx_tx">
+                           <setting name="IRQn" value="UART0_RX_TX_IRQn"/>
                            <setting name="enable_priority" value="false"/>
                            <setting name="priority" value="0"/>
-                           <setting name="enable_custom_name" value="false"/>
                         </struct>
-                        <setting name="EnableTimerInInit" value="true"/>
+                        <struct name="interrupt_err">
+                           <setting name="IRQn" value="UART0_ERR_IRQn"/>
+                           <setting name="enable_priority" value="false"/>
+                           <setting name="priority" value="0"/>
+                        </struct>
                      </config_set>
-                     <config_set name="ftm_edge_aligned_mode">
-                        <array name="ftm_edge_aligned_channels_config"/>
+                  </instance>
+                  <instance name="UART3" uuid="0c11400f-63e3-4c1f-b04a-4e60903205fd" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="freertos" peripheral="UART3" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
+                     <config_set name="fsl_uart_freertos">
+                        <struct name="uart_rtos_configuration">
+                           <setting name="clockSource" value="BusInterfaceClock"/>
+                           <setting name="clockSourceFreq" value="GetFreq"/>
+                           <setting name="baudrate" value="9600"/>
+                           <setting name="parity" value="kUART_ParityDisabled"/>
+                           <setting name="stopbits" value="kUART_OneStopBit"/>
+                           <setting name="buffer_size" value="100"/>
+                        </struct>
+                        <struct name="interrupt_rx_tx">
+                           <setting name="IRQn" value="UART3_RX_TX_IRQn"/>
+                           <setting name="enable_priority" value="true"/>
+                           <setting name="priority" value="0"/>
+                        </struct>
+                        <struct name="interrupt_err">
+                           <setting name="IRQn" value="UART3_ERR_IRQn"/>
+                           <setting name="enable_priority" value="true"/>
+                           <setting name="priority" value="0"/>
+                        </struct>
                      </config_set>
                   </instance>
                </instances>

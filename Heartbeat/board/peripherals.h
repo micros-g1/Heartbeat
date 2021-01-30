@@ -34,9 +34,7 @@ extern "C" {
 #define ADC0_IRQN ADC0_IRQn
 /* ADC0 interrupt handler identifier. */
 #define ADC0_IRQHANDLER ADC0_IRQHandler
-
 /* Channel 0 (SE.19) conversion control group. */
-
 #define ADC0_CH0_CONTROL_GROUP 0
 /* Alias for GPIOB peripheral */
 #define GPIOB_GPIO GPIOB
@@ -53,7 +51,8 @@ extern "C" {
 #define I2C0_CLOCK_SOURCE I2C0_CLK_SRC
 /* Definition of the clock source frequency */
 #define I2C0_CLK_FREQ CLOCK_GetFreq(I2C0_CLOCK_SOURCE)
-
+/* I2C0 interrupt vector ID (number). */
+#define I2C0_IRQN I2C0_IRQn
 /* BOARD_InitPeripherals defines for PIT */
 /* Definition of peripheral ID. */
 #define PIT_PERIPHERAL PIT
@@ -67,13 +66,30 @@ extern "C" {
 #define PIT_CHANNEL_0 kPIT_Chnl_0
 /* Definition of ticks count for channel 0. */
 #define PIT_CHANNEL_0_TICKS 333299U
-
 /* Definition of peripheral ID */
 #define UART0_PERIPHERAL UART0
 /* Definition of the clock source frequency */
 #define UART0_CLOCK_SOURCE CLOCK_GetFreq(UART0_CLK_SRC)
 /* Definition of the backround buffer size */
 #define UART0_BACKGROUND_BUFFER_SIZE 100
+/* UART0 interrupt vector ID (number). */
+#define UART0_SERIAL_RX_TX_IRQN UART0_RX_TX_IRQn
+/* UART0 interrupt vector ID (number). */
+#define UART0_SERIAL_ERROR_IRQN UART0_ERR_IRQn
+/* Definition of peripheral ID */
+#define UART3_PERIPHERAL UART3
+/* Definition of the clock source frequency */
+#define UART3_CLOCK_SOURCE CLOCK_GetFreq(UART3_CLK_SRC)
+/* Definition of the backround buffer size */
+#define UART3_BACKGROUND_BUFFER_SIZE 100
+/* UART3 interrupt vector ID (number). */
+#define UART3_SERIAL_RX_TX_IRQN UART3_RX_TX_IRQn
+/* UART3 interrupt vector priority. */
+#define UART3_SERIAL_RX_TX_IRQ_PRIORITY 0
+/* UART3 interrupt vector ID (number). */
+#define UART3_SERIAL_ERROR_IRQN UART3_ERR_IRQn
+/* UART3 interrupt vector priority. */
+#define UART3_SERIAL_ERROR_IRQ_PRIORITY 0
 
 /***********************************************************************************************************************
  * Global variables
@@ -88,10 +104,14 @@ extern const pit_config_t PIT_config;
 extern uart_rtos_handle_t UART0_rtos_handle;
 extern uart_handle_t UART0_uart_handle;
 extern uart_rtos_config_t UART0_rtos_config;
+extern uart_rtos_handle_t UART3_rtos_handle;
+extern uart_handle_t UART3_uart_handle;
+extern uart_rtos_config_t UART3_rtos_config;
 
 /***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
+
 void BOARD_InitPeripherals(void);
 
 /***********************************************************************************************************************

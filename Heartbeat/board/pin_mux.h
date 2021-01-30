@@ -42,6 +42,19 @@ void BOARD_InitBootPins(void);
 #define BOARD_MAX30102_INT_PIN_PIN_MASK (1U << 9U)      /*!<@brief PORT pin mask */
                                                         /* @} */
 
+/*! @name PORTB23 (number 69), J1[10]
+  @{ */
+
+/* Symbols to be used with GPIO driver */
+#define BOARD_HC05_STATE_GPIO GPIOB                /*!<@brief GPIO peripheral base pointer */
+#define BOARD_HC05_STATE_GPIO_PIN_MASK (1U << 23U) /*!<@brief GPIO pin mask */
+
+/* Symbols to be used with PORT driver */
+#define BOARD_HC05_STATE_PORT PORTB                /*!<@brief PORT peripheral base pointer */
+#define BOARD_HC05_STATE_PIN 23U                   /*!<@brief PORT pin number */
+#define BOARD_HC05_STATE_PIN_MASK (1U << 23U)      /*!<@brief PORT pin mask */
+                                                   /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *
