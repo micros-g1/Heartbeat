@@ -96,13 +96,12 @@ void comms_task(void * pvParameters)
 	sensor_event_t ev;
 	while (true) {
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(5));
-		if (xQueueReceive(xCommsQueue, &ev, 0) == pdFAIL)
-			continue;
-
-		if (ev.type < N_SENSOR_EVENTS)
-			BT_com_send_meas(ev);
-		else if (ev.type < EVENTS_IN)
-			BT_com_set_alarm(ev.type, ev.type < EVENTS_OUT);
+		while (xQueueReceive(xCommsQueue, &ev, 0) == pdPASS) {
+			if (ev.type < N_SENSOR_EVENTS)
+				BT_com_send_meas(ev);
+			else if (ev.type < EVENTS_IN)
+				BT_com_set_alarm(ev.type, ev.type < EVENTS_OUT);
+		}
 	}
 }
 
