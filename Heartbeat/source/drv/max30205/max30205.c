@@ -5,9 +5,9 @@
  *      Author: taomasgonzalez
  */
 
-#include "drv/max30205.h"
-#include "drv/i2c.h"
-#include "drv/max30205_registers.h"
+#include "max30205.h"
+#include "drv/i2c/i2c.h"
+#include "max30205_registers.h"
 #include <peripherals.h>
 
 #define MAX30205_TEMP_N_BYTES 2

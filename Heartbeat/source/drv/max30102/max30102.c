@@ -10,7 +10,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <peripherals.h>
-#include "i2c.h"
+#include "drv/i2c/i2c.h"
 
 #define MAX30102_TFRAC_STEP_C	1.0/16
 #define MAX30102_TINT_SETP_C	1
