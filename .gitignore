@@ -2,3 +2,4 @@
 /FreeRTOS_TAD_logs/
 /.mcuxpressoide_packages_support/
 Heartbeat/.cproject
+Heartbeat/.vscode/settings.json

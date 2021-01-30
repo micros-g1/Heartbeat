@@ -212,6 +212,9 @@ void spo2_task(void *pvParameters)
 /* PORTB_IRQn interrupt handler */
 void GPIOB_IRQHANDLER(void) {
   /* Get pin flags */
+	if (xTaskSpo2 == NULL)
+		return;
+
 	BaseType_t xHigherPriorityTaskWoken;
 	uint32_t pin_flags = GPIO_PortGetInterruptFlags(GPIOB);
 
