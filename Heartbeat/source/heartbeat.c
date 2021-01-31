@@ -39,8 +39,8 @@ int main(void)
 	BOARD_InitDebugConsole();
 	#endif
 
-    NVIC_SetPriority(I2C0_IRQn, 5);
-    NVIC_SetPriority(PORTB_IRQn, 4);
+    NVIC_SetPriority(I2C0_IRQn, 4);
+//    NVIC_SetPriority(PORTB_IRQn, 4);
 
 
 //	sensors[0] = new_temperature_sensor();
@@ -57,6 +57,7 @@ int main(void)
 	set_limits(EVENT_SPO2_BPM, LOWEST_BPM, HIGHEST_BPM);
 
 	BT_com_init();
+	sensor_init();
 
 	xTaskCreate(sensors_task, "sensor task", configMINIMAL_STACK_SIZE + 166, NULL, SENSOR_TASK_PRIORITY, NULL);
 	xTaskCreate(comms_task, "comms task", configMINIMAL_STACK_SIZE + 166, NULL, COMMS_TASK_PRIORITY, NULL);
@@ -67,22 +68,23 @@ int main(void)
 
 void sensors_task(void *pvParameters)
 {
-	NVIC_EnableIRQ(PORTB_IRQn);
+//	NVIC_EnableIRQ(PORTB_IRQn);
 
-	sensors[0] = new_temperature_sensor();
-	sensors[0]->init(TEMP_SAMPLING_PERIOD_MS);
+//	sensors[0] = new_temperature_sensor();
+//	sensors[0]->init(TEMP_SAMPLING_PERIOD_MS);
 
 	sensors[1] = new_spo2_sensor();
 	sensors[1]->init(SPO2_TASK_PRIORITY);
 
-	sensors[2] = new_ekg_sensor();
-	sensors[2]->init(EKG_SAMPLING_PERIOD_MS);
+//	sensors[2] = new_ekg_sensor();
+//	sensors[2]->init(EKG_SAMPLING_PERIOD_MS);
 
-
+//
 	sensor_event_t ev;
-	for (unsigned int i = 0; i < N_SENSORS; i++) {
-		sensors[i]->start_sampling();
-	}
+	sensors[1]->start_sampling();
+//	for (unsigned int i = 0; i < N_SENSORS; i++) {
+//		sensors[i]->start_sampling();
+//	}
 
 	while (true) {
 		if (read_sample(&ev)) {
