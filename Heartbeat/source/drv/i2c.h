@@ -26,5 +26,11 @@ bool i2c_read_byte_addr8_mask(i2c_handle_t *dev, uint8_t devAddress, uint8_t sub
 bool i2c_write_byte_addr8_mask(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint8_t mask, uint8_t data);
 bool i2c_read_bits_addr8(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint8_t start_bit, uint8_t bit_length, uint8_t *datap);
 bool i2c_write_bits_addr8(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint8_t start_bit, uint8_t bit_length, uint8_t data);
+bool i2c_read_word_addr8(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint16_t *datap);
+bool i2c_write_word_addr8(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint16_t data);
+bool i2c_read_word_addr8_mask(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint16_t mask, uint16_t *datap);
+bool i2c_write_word_addr8_mask(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint16_t mask, uint16_t data);
+
+
 
 #endif /* DRV_I2C_H_ */

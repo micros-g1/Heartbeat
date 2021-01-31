@@ -14,6 +14,8 @@
 #include "fsl_port.h"
 #include "fsl_i2c.h"
 #include "fsl_i2c_freertos.h"
+#include "fsl_sai.h"
+#include "fsl_clock.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -38,12 +40,28 @@ extern "C" {
 #define I2C0_CLOCK_SOURCE I2C0_CLK_SRC
 /* Definition of the clock source frequency */
 #define I2C0_CLK_FREQ CLOCK_GetFreq(I2C0_CLOCK_SOURCE)
+/* Definition of peripheral ID */
+#define I2S0_PERIPHERAL I2S0
+/* Master clock source frequency used for calculating the master clock divider, not available on all devices. */
+#define I2S0_MCLK_SOURCE_CLOCK_HZ 120000000UL
+/* Master clock value set by the user to the Master clock frequency item. */
+#define I2S0_USER_MCLK_HZ 6144000UL
+/* Bit clock source frequency used for calculating the bit clock divider in the TxSetBitClockRate function. */
+#define I2S0_TX_BCLK_SOURCE_CLOCK_HZ 6144000UL
+/* Sample rate used for calculating the bit clock divider in the TxSetBitClockRate function. */
+#define I2S0_TX_SAMPLE_RATE 16000UL
+/* Word width used for calculating the bit clock divider in the TxSetBitClockRate function. */
+#define I2S0_TX_WORD_WIDTH 16U
+/* Number of words within frame used for calculating the bit clock divider in the TxSetBitClockRate function. */
+#define I2S0_TX_WORDS_PER_FRAME 2U
 
 /***********************************************************************************************************************
  * Global variables
  **********************************************************************************************************************/
 extern i2c_rtos_handle_t I2CA_rtosHandle;
 extern const i2c_master_config_t I2C0_config;
+extern sai_transceiver_t I2S0_Tx_config;
+extern sai_handle_t I2S0_Tx_handle;
 
 /***********************************************************************************************************************
  * Initialization functions

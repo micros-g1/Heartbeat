@@ -110,6 +110,156 @@ static void I2C0_init(void) {
 }
 
 /***********************************************************************************************************************
+ * I2S0 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'I2S0'
+- type: 'sai'
+- mode: 'transfer'
+- custom_name_enabled: 'false'
+- type_id: 'sai_37a0d4b4ecc2db8ea149dbe2026c6550'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'I2S0'
+- config_sets:
+  - fsl_sai:
+    - mclk_config:
+      - masterClockSource: 'kSAI_MclkSourceSysclk'
+      - masterClockSourceFreq: 'BOARD_BootClockRUN'
+      - masterClockFrequency: '6.144 MHz'
+      - init_mclk_config: 'true'
+    - sai_master_clock: []
+    - usage: 'playback'
+    - signal_config:
+      - 0:
+        - sourceTx: 'Tx'
+      - 1:
+        - sourceTx: 'Tx'
+    - syncSwapI: []
+    - bclkTxSetting: []
+    - syncTxSetting: []
+    - whole:
+      - tx_group:
+        - sai_transceiver:
+          - bitClock:
+            - modeM: 'master'
+            - bitClockSource: 'kSAI_BclkSourceMclkDiv'
+            - bclkPolarityM: 'kSAI_PolarityActiveLow'
+            - bclkInputDelayM: 'false'
+          - frameSync:
+            - modeM: 'master'
+            - frameSyncWidthM: '16'
+            - frameSyncPolarityM: 'kSAI_PolarityActiveLow'
+            - frameSyncEarlyM: 'true'
+          - sampleRate_Hz: 'kSAI_SampleRate16KHz'
+          - channelMask: 'kSAI_Channel0Mask'
+          - serialData:
+            - differentFirstWord: 'false'
+            - sameDataWordLengthM: 'kSAI_WordWidth16bits'
+            - dataOrder: 'kSAI_DataMSB'
+            - dataFirstBitShiftedM: '16'
+            - dataWordNumM: '2'
+            - dataMasked_config:
+              - dataMasked_L:
+                - 0: 'false'
+                - 1: 'false'
+                - 2: 'false'
+                - 3: 'false'
+                - 4: 'false'
+                - 5: 'false'
+                - 6: 'false'
+                - 7: 'false'
+                - 8: 'false'
+                - 9: 'false'
+                - 10: 'false'
+                - 11: 'false'
+                - 12: 'false'
+                - 13: 'false'
+                - 14: 'false'
+                - 15: 'false'
+              - dataMasked_H:
+                - 0: 'false'
+                - 1: 'false'
+                - 2: 'false'
+                - 3: 'false'
+                - 4: 'false'
+                - 5: 'false'
+                - 6: 'false'
+                - 7: 'false'
+                - 8: 'false'
+                - 9: 'false'
+                - 10: 'false'
+                - 11: 'false'
+                - 12: 'false'
+                - 13: 'false'
+                - 14: 'false'
+                - 15: 'false'
+          - fifo:
+            - fifoWatermarkM: '7'
+        - transfer_config_group:
+          - init_transfer: 'false'
+          - transfer:
+            - dataSize: '44100'
+          - init_callback: 'false'
+          - callback_fcn: ''
+          - user_data: ''
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+/* I2S0 Tx configuration */
+sai_transceiver_t I2S0_Tx_config = {
+  .masterSlave = kSAI_Master,
+  .bitClock = {
+    .bclkSrcSwap = false,
+    .bclkSource = kSAI_BclkSourceMclkDiv,
+    .bclkPolarity = kSAI_PolarityActiveLow,
+    .bclkInputDelay = false
+  },
+  .frameSync = {
+    .frameSyncWidth = 16U,
+    .frameSyncPolarity = kSAI_PolarityActiveLow,
+    .frameSyncEarly = true,
+  },
+  .syncMode = kSAI_ModeAsync,
+  .channelMask = kSAI_Channel0Mask,
+  .startChannel = 0U,
+  .endChannel = 0U,
+  .channelNums = 1U,
+  .serialData = {
+    .dataWord0Length = (uint8_t)kSAI_WordWidth16bits,
+    .dataWordNLength = (uint8_t)kSAI_WordWidth16bits,
+    .dataWordLength = (uint8_t)kSAI_WordWidth16bits,
+    .dataOrder = kSAI_DataMSB,
+    .dataFirstBitShifted = 16U,
+    .dataWordNum = 2U,
+    .dataMaskedWord = 0x0U
+  },
+  .fifo = {
+    .fifoWatermark = 7U,
+  }
+};
+sai_master_clock_t I2S0_MCLK_config = {
+  .mclkOutputEnable = true,
+  .mclkSource = kSAI_MclkSourceSysclk,
+  .mclkSourceClkHz = I2S0_MCLK_SOURCE_CLOCK_HZ,
+  .mclkHz = I2S0_USER_MCLK_HZ
+};
+sai_handle_t I2S0_Tx_handle;
+
+static void I2S0_init(void) {
+  /* Initialize SAI clock gate */
+  SAI_Init(I2S0_PERIPHERAL);
+  /* Create the SAI Tx transfer handle */
+  SAI_TransferTxCreateHandle(I2S0_PERIPHERAL, &I2S0_Tx_handle, NULL, NULL);
+  /* Configures SAI Tx sub-module functionality */
+  SAI_TransferTxSetConfig(I2S0_PERIPHERAL, &I2S0_Tx_handle, &I2S0_Tx_config);
+  /* Set up SAI Tx bitclock rate by calculation of divider. */
+  SAI_TxSetBitClockRate(I2S0_PERIPHERAL, I2S0_TX_BCLK_SOURCE_CLOCK_HZ, I2S0_TX_SAMPLE_RATE, I2S0_TX_WORD_WIDTH, I2S0_TX_WORDS_PER_FRAME);
+  /* Initialize SAI master clock */
+  SAI_SetMasterClockConfig(I2S0_PERIPHERAL, &I2S0_MCLK_config);
+}
+
+/***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
 void BOARD_InitPeripherals(void)
@@ -117,6 +267,7 @@ void BOARD_InitPeripherals(void)
   /* Initialize components */
   GPIOB_init();
   I2C0_init();
+  I2S0_init();
 }
 
 /***********************************************************************************************************************
