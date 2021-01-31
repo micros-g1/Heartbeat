@@ -41,6 +41,9 @@ void ekg_stop_sampling(void)
 // ekg ISR
 void ADC0_IRQHANDLER(void)
 {
+	if (sensor.type != SENSOR_EKG)
+		return;
+
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     float sample = ((float)ad8232_get_new_sample()) / (float)UINT32_MAX;
     sensor.status = write_sample(sample, EVENT_EKG, &xHigherPriorityTaskWoken);
