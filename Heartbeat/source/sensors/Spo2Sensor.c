@@ -129,7 +129,11 @@ void spo2_init(uint32_t task_priority)
 
 void spo2_start_sampling(void)
 {
-	max30102_trigger_spo2_reads();
+	sensor.status = max30102_trigger_spo2_reads() == MAX30102_SUCCESS;
+	if (!sensor.status) {
+		PRINTF("Could not start Spo2 task!\n");
+		return;
+	}
 	vTaskResume(xTaskSpo2);
 }
 

@@ -25,28 +25,36 @@ Sensor * new_temperature_sensor(void)
 
 void temperature_init(uint32_t sampling_rate_ms)
 {
-	max30205_state_t temperature_sensor_status = max30205_init();
-	if (temperature_sensor_status == MAX30205_SUCCESS) {
-		xTimer = xTimerCreate(
-				"max30205_timer", 		// name for debugging purposes only
-				pdMS_TO_TICKS(sampling_rate_ms),	// period
-				pdTRUE,					// auto-reload timer (as opposed to one-shot)
-				NULL,	            // timer id. it can be NULL if we don't want to use it
-				read_temp_callback		// callback
-		);
+	sensor.status = max30205_init() == MAX30205_SUCCESS;
+	if (!sensor.status) {
+		PRINTF("Temperature sensor could not be initialized!\n");
+		return;
 	}
 
-	sensor.status = temperature_sensor_status == MAX30205_SUCCESS && xTimer != NULL;
+	xTimer = xTimerCreate(
+		"max30205_timer", 		// name for debugging purposes only
+		pdMS_TO_TICKS(sampling_rate_ms),	// period
+		pdTRUE,					// auto-reload timer (as opposed to one-shot)
+		NULL,	            // timer id. it can be NULL if we don't want to use it
+		read_temp_callback		// callback
+	);
+	if (xTimer == NULL) {
+		PRINTF("Temperature sensor could not be initialized!\n");
+		sensor.status = false;
+	}
 }
 
 void temperature_stop_sampling(void)
 {
-	//max30205_shutdown(true);
+	;
 }
     
 void temperature_start_sampling(void)
 {
     sensor.status = xTimerStart(xTimer, 0) == pdTRUE;  // if timer can't be started return immediately
+    if (!sensor.status) {
+    	PRINTF("Temperature sensor timer could not be started!\n");
+    }
 }
 
 
