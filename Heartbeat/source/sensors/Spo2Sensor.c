@@ -144,8 +144,8 @@ void spo2_stop_sampling(void)
 
 void spo2_task(void *pvParameters)
 {
-	while(true){
-		if (!GPIO_PinRead(GPIOB, BOARD_MAX30102_INT_PIN_PIN)) {
+	while(true) {
+		while (!GPIO_PinRead(GPIOB, BOARD_MAX30102_INT_PIN_PIN)) {
 			max30102_get_interrupt_status(&max30102_interrupts);
 
 			if(max30102_interrupts.pwr_rdy){
@@ -205,7 +205,7 @@ void spo2_task(void *pvParameters)
 /* PORTB_IRQn interrupt handler */
 void GPIOB_IRQHANDLER(void) {
   /* Get pin flags */
-	if (xTaskSpo2 == NULL)
+	if (xTaskSpo2 == NULL || xBinarySemaphore == NULL)
 		return;
 
 	BaseType_t xHigherPriorityTaskWoken;
