@@ -55,6 +55,9 @@ void temperature_start_sampling(void)
     if (!sensor.status) {
     	PRINTF("Temperature sensor timer could not be started!\n");
     }
+    if (xTimerIsTimerActive(xTimer) == pdTRUE) {
+    		PRINTF("timer is active :)");
+	}
 }
 
 

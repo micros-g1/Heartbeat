@@ -12,6 +12,7 @@
 #include "timers.h"
 #include "queue.h"
 #include "board/peripherals.h"
+#include "fsl_debug_console.h"
 
 #define	UI_SENSOR_QUEUE_LENGTH	64
 

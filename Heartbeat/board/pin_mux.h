@@ -29,19 +29,6 @@ void BOARD_InitBootPins(void);
 #define SOPT7_ADC0PRETRGSEL_A 0x00u  /*!<@brief ADC0 pretrigger select: Pre-trigger A */
 #define SOPT7_ADC0TRGSEL_PIT0 0x04u  /*!<@brief ADC0 trigger select: PIT trigger 0 */
 
-/*! @name PORTB9 (number 57), J1[6]
-  @{ */
-
-/* Symbols to be used with GPIO driver */
-#define BOARD_MAX30102_INT_PIN_GPIO GPIOB               /*!<@brief GPIO peripheral base pointer */
-#define BOARD_MAX30102_INT_PIN_GPIO_PIN_MASK (1U << 9U) /*!<@brief GPIO pin mask */
-
-/* Symbols to be used with PORT driver */
-#define BOARD_MAX30102_INT_PIN_PORT PORTB               /*!<@brief PORT peripheral base pointer */
-#define BOARD_MAX30102_INT_PIN_PIN 9U                   /*!<@brief PORT pin number */
-#define BOARD_MAX30102_INT_PIN_PIN_MASK (1U << 9U)      /*!<@brief PORT pin mask */
-                                                        /* @} */
-
 /*! @name PORTB23 (number 69), J1[10]
   @{ */
 
@@ -54,6 +41,19 @@ void BOARD_InitBootPins(void);
 #define BOARD_HC05_STATE_PIN 23U                   /*!<@brief PORT pin number */
 #define BOARD_HC05_STATE_PIN_MASK (1U << 23U)      /*!<@brief PORT pin mask */
                                                    /* @} */
+
+/*! @name PORTB9 (number 57), J1[6]
+  @{ */
+
+/* Symbols to be used with GPIO driver */
+#define BOARD_MAX30102_INT_PIN_GPIO GPIOB               /*!<@brief GPIO peripheral base pointer */
+#define BOARD_MAX30102_INT_PIN_GPIO_PIN_MASK (1U << 9U) /*!<@brief GPIO pin mask */
+
+/* Symbols to be used with PORT driver */
+#define BOARD_MAX30102_INT_PIN_PORT PORTB               /*!<@brief PORT peripheral base pointer */
+#define BOARD_MAX30102_INT_PIN_PIN 9U                   /*!<@brief PORT pin number */
+#define BOARD_MAX30102_INT_PIN_PIN_MASK (1U << 9U)      /*!<@brief PORT pin mask */
+                                                        /* @} */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.

@@ -61,8 +61,6 @@ Sensor * new_spo2_sensor(void)
 
 void spo2_init(uint32_t task_priority)
 {
-	NVIC_EnableIRQ(PORTB_IRQn);
-
 	sensor.status = max30102_init(MAX30102_SPO2_MODE) == MAX30102_SUCCESS;
 	if(!sensor.status) {
 		PRINTF("MAX30102 INITIALIZATION ERROR\n");
@@ -147,8 +145,6 @@ void spo2_stop_sampling(void)
 void spo2_task(void *pvParameters)
 {
 	while(true){
-		xSemaphoreTake(xBinarySemaphore, portMAX_DELAY);
-
 		if (!GPIO_PinRead(GPIOB, BOARD_MAX30102_INT_PIN_PIN)) {
 			max30102_get_interrupt_status(&max30102_interrupts);
 
@@ -201,6 +197,7 @@ void spo2_task(void *pvParameters)
 			}
 
 		}
+		xSemaphoreTake(xBinarySemaphore, portMAX_DELAY);
 	}
 }
 

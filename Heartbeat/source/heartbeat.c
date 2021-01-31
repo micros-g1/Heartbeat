@@ -41,7 +41,7 @@ int main(void)
 
     NVIC_SetPriority(I2C0_IRQn, 5);
     NVIC_SetPriority(PORTB_IRQn, 4);
-	NVIC_EnableIRQ(PORTB_IRQn);
+
 
 //	sensors[0] = new_temperature_sensor();
 //	sensors[0]->init(TEMP_SAMPLING_PERIOD_MS);
@@ -67,6 +67,7 @@ int main(void)
 
 void sensors_task(void *pvParameters)
 {
+	NVIC_EnableIRQ(PORTB_IRQn);
 
 	sensors[0] = new_temperature_sensor();
 	sensors[0]->init(TEMP_SAMPLING_PERIOD_MS);
@@ -76,6 +77,7 @@ void sensors_task(void *pvParameters)
 
 	sensors[2] = new_ekg_sensor();
 	sensors[2]->init(EKG_SAMPLING_PERIOD_MS);
+
 
 	sensor_event_t ev;
 	for (unsigned int i = 0; i < N_SENSORS; i++) {

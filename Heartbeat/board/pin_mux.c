@@ -144,12 +144,11 @@ BOARD_InitPins:
   - {pin_num: '36', peripheral: TPIU, signal: SWO, pin_signal: PTA2/UART0_TX/FTM0_CH7/JTAG_TDO/TRACE_SWO/EZP_DO, drive_strength: low, pull_select: down, pull_enable: disable}
   - {pin_num: '31', peripheral: I2C0, signal: SCL, pin_signal: ADC0_SE17/PTE24/UART4_TX/I2C0_SCL/EWM_OUT_b, identifier: ''}
   - {pin_num: '32', peripheral: I2C0, signal: SDA, pin_signal: ADC0_SE18/PTE25/UART4_RX/I2C0_SDA/EWM_IN, identifier: ''}
-  - {pin_num: '57', peripheral: GPIOB, signal: 'GPIO, 9', pin_signal: PTB9/SPI1_PCS1/UART3_CTS_b/FB_AD20, direction: INPUT, gpio_interrupt: kPORT_InterruptFallingEdge,
-    pull_select: up}
   - {peripheral: ADC0, signal: 'TRG, A', pin_signal: PIT_trigger_0}
   - {pin_num: '19', peripheral: ADC0, signal: 'SE, 19', pin_signal: ADC0_DM0/ADC1_DM3}
   - {pin_num: '23', peripheral: ADC0, signal: VREFH, pin_signal: VREFH}
   - {pin_num: '69', peripheral: GPIOB, signal: 'GPIO, 23', pin_signal: PTB23/SPI2_SIN/SPI0_PCS5/FB_AD28}
+  - {pin_num: '57', peripheral: GPIOB, signal: 'GPIO, 9', pin_signal: PTB9/SPI1_PCS1/UART3_CTS_b/FB_AD20, direction: INPUT, gpio_interrupt: kPORT_InterruptFallingEdge}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -202,14 +201,6 @@ void BOARD_InitPins(void)
 
     /* Interrupt configuration on PORTB9 (pin 57): Interrupt on falling edge */
     PORT_SetPinInterruptConfig(BOARD_MAX30102_INT_PIN_PORT, BOARD_MAX30102_INT_PIN_PIN, kPORT_InterruptFallingEdge);
-
-    PORTB->PCR[9] = ((PORTB->PCR[9] &
-                      /* Mask bits to zero which are setting */
-                      (~(PORT_PCR_PS_MASK | PORT_PCR_ISF_MASK)))
-
-                     /* Pull Select: Internal pullup resistor is enabled on the corresponding pin, if the
-                      * corresponding PE field is set. */
-                     | PORT_PCR_PS(kPORT_PullUp));
 
     /* PORTE24 (pin 31) is configured as I2C0_SCL */
     PORT_SetPinMux(PORTE, 24U, kPORT_MuxAlt5);
