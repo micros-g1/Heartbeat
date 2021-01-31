@@ -59,6 +59,8 @@ int main(void)
 	BT_com_init();
 	sensor_init();
 
+	xCommsQueue = xQueueCreate(UI_SENSOR_QUEUE_LENGTH, sizeof(sensor_event_t));
+
 	xTaskCreate(sensors_task, "sensor task", configMINIMAL_STACK_SIZE + 166, NULL, SENSOR_TASK_PRIORITY, NULL);
 	xTaskCreate(comms_task, "comms task", configMINIMAL_STACK_SIZE + 166, NULL, COMMS_TASK_PRIORITY, NULL);
 
