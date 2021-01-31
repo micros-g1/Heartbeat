@@ -30,10 +30,8 @@ char spo2[5];
 
 static uint32_t curr_buffer_n_samples = 0;
 
-uint32_t ir_led_samples[RF_SAMPLES];
-uint32_t red_led_samples[RF_SAMPLES];
-unsigned char samp1[MAX_SAMP_CHARS];
-unsigned char samp2[MAX_SAMP_CHARS];
+uint32_t ir_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
+uint32_t red_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
 
 static int32_t curr_heart_rate = 0;
 static int8_t curr_hr_valid = 0;
@@ -114,16 +112,10 @@ void spo2_init(uint32_t task_priority)
 		return;
 	}
 
-	sensor.status = (xBinarySemaphore = xSemaphoreCreateBinary()) == NULL;
+	sensor.status = (xBinarySemaphore = xSemaphoreCreateBinary()) != NULL;
 	if (!sensor.status) {
 		PRINTF("Spo2 semaphore creation failed!.\r\n");
 		return;
-	}
-
-
-	for(int i=0; i < MAX_SAMP_CHARS; i++){
-		samp1[i] = 0;
-		samp2[i] = 0;
 	}
 
 	for(int i=0; i < RF_SAMPLES + RF_SAMPLES_MARGIN;i++){

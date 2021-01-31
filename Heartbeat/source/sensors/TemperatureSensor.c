@@ -39,13 +39,12 @@ void temperature_init(uint32_t sampling_rate_ms)
 	sensor.status = temperature_sensor_status == MAX30205_SUCCESS && xTimer != NULL;
 }
 
-void temperature_start_sampling(void)
+void temperature_stop_sampling(void)
 {
-	temperature_stop_sampling();
-	max30205_shutdown(true);
+	//max30205_shutdown(true);
 }
     
-void temperature_stop_sampling(void)
+void temperature_start_sampling(void)
 {
     sensor.status = xTimerStart(xTimer, 0) == pdTRUE;  // if timer can't be started return immediately
 }

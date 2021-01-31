@@ -5,6 +5,7 @@
 #include "sensors/Spo2Sensor.h"
 #include "sensors/TemperatureSensor.h"
 #include "bt_com.h"
+#include "fsl_debug_console.h"
 
 QueueHandle_t xSensorQueue = NULL;
 QueueHandle_t xCommsQueue = NULL;
@@ -42,14 +43,14 @@ int main(void)
     NVIC_SetPriority(PORTB_IRQn, 4);
 	NVIC_EnableIRQ(PORTB_IRQn);
 
-	sensors[0] = new_temperature_sensor();
-	sensors[0]->init(TEMP_SAMPLING_PERIOD_MS);
-
-	sensors[1] = new_spo2_sensor();
-	//sensors[1]->init(SPO2_TASK_PRIORITY);
-
-	sensors[2] = new_ekg_sensor();
-	sensors[2]->init(EKG_SAMPLING_PERIOD_MS);
+//	sensors[0] = new_temperature_sensor();
+//	sensors[0]->init(TEMP_SAMPLING_PERIOD_MS);
+//
+//	sensors[1] = new_spo2_sensor();
+//	sensors[1]->init(SPO2_TASK_PRIORITY);
+//
+//	sensors[2] = new_ekg_sensor();
+//	sensors[2]->init(EKG_SAMPLING_PERIOD_MS);
 
 	set_limits(EVENT_TEMPERATURE, LOWEST_TEMPERATURE, HIGHEST_TEMPERATURE);
 	set_limits(EVENT_SPO2_SPO2, LOWEST_SPO2, HIGHEST_SPO2);
@@ -66,10 +67,17 @@ int main(void)
 
 void sensors_task(void *pvParameters)
 {
-	taskENABLE_INTERRUPTS();
+
+	sensors[0] = new_temperature_sensor();
+	sensors[0]->init(TEMP_SAMPLING_PERIOD_MS);
+
+	sensors[1] = new_spo2_sensor();
+	sensors[1]->init(SPO2_TASK_PRIORITY);
+
+	sensors[2] = new_ekg_sensor();
+	sensors[2]->init(EKG_SAMPLING_PERIOD_MS);
 
 	sensor_event_t ev;
-	sensors[1]->init(SPO2_TASK_PRIORITY);
 	for (unsigned int i = 0; i < N_SENSORS; i++) {
 		sensors[i]->start_sampling();
 	}

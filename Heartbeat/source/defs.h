@@ -11,6 +11,7 @@
 #include "projdefs.h"
 #include "timers.h"
 #include "queue.h"
+#include "board/peripherals.h"
 
 #define	UI_SENSOR_QUEUE_LENGTH	64
 
@@ -18,10 +19,16 @@
 #define TEMP_SAMPLING_PERIOD_MS	1000
 #define COMMS_PERIOD_MS			5
 
+//enum {
+//	SENSOR_TASK_PRIORITY = tskIDLE_PRIORITY + 1,
+//	COMMS_TASK_PRIORITY,
+//	SPO2_TASK_PRIORITY
+//};
+
 enum {
-	SENSOR_TASK_PRIORITY = tskIDLE_PRIORITY + 1,
-	COMMS_TASK_PRIORITY,
-	SPO2_TASK_PRIORITY
+	COMMS_TASK_PRIORITY = tskIDLE_PRIORITY + 1,
+	SPO2_TASK_PRIORITY,
+	SENSOR_TASK_PRIORITY
 };
 
 enum {
