@@ -11,7 +11,7 @@
 #include <stdbool.h>
 
 //Address
-#define A1_HIGH	//Comment if A1 pin is not high
+//#define A1_HIGH	//Comment if A1 pin is not high
 #define UDA1380_I2C_ADDR_A1_HIGH  0x1A
 #define UDA1380_I2C_ADDR_A1_LOW   0x18
 #ifdef A1_HIGH
@@ -353,7 +353,7 @@ typedef enum
 #define UDA1380_PWRCTR_INIT_VALUE  (PON_PLL | PON_HP | PON_DAC | PON_BIAS | EN_AVC | PON_AVC | PON_LNA | PON_PGAL | PON_ADCL | PON_PGAR | PON_ADCR)
 #define UDA1380_PWRCTR_INIT_MASK (PON_PLL | PON_HP | PON_DAC | PON_BIAS | EN_AVC | PON_AVC | PON_LNA | PON_PGAL | PON_ADCL | PON_PGAR | PON_ADCR)
 //Enable all clocks, WSPLL was enabled, ADC and DAC clocks from WSPLL. PLL Config for 12.5 to 25 KHz
-#define UDA1380_CLK_INIT_VALUE (EN_ADC | EN_DEC | EN_DAC | EN_INT | ADC_CLK | DAC_CLK | PLL_12K5_25K )
+#define UDA1380_CLK_INIT_VALUE (EN_ADC | EN_DEC | EN_DAC | EN_INT | ADC_CLK | DAC_CLK | PLL_25K_50K)
 #define UDA1380_CLK_INIT_MASK (EN_ADC | EN_DEC | EN_DAC | EN_INT | ADC_CLK | DAC_CLK | SYS_DIV | PLL)
 //Use digital mixer, I2S format
 #define UDA1380_IBUSCFG_INIT_VALUE (SEL_SOURCE | SFORI_I2S_BUS | SFORO_I2S_BUS)

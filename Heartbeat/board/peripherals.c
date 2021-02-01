@@ -6,11 +6,11 @@
 /* clang-format off */
 /* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 !!GlobalInfo
-product: Peripherals v8.0
+product: Peripherals v9.0
 processor: MK64FN1M0xxx12
 package_id: MK64FN1M0VLL12
 mcu_data: ksdk2_0
-processor_version: 8.0.1
+processor_version: 9.0.0
 board: FRDM-K64F
 functionalGroups:
 - name: BOARD_InitPeripherals
@@ -65,7 +65,7 @@ instance:
 static void GPIOB_init(void) {
   /* Make sure, the clock gate for port B is enabled (e. g. in pin_mux.c) */
   /* Interrupt PORTB_IRQn request in the NVIC is not initialized (disabled by default). */
-  /* It can be enabled later by EnableIRQ(PORTB_IRQn); function call. */
+  /* It can be enabled later by EnableIRQ(GPIOB_IRQN);  function call. */
 }
 
 /***********************************************************************************************************************
@@ -94,6 +94,10 @@ instance:
       - enableStopHold: 'false'
       - baudRate_Bps: '100000'
       - glitchFilterWidth: '0'
+    - interrupt_priority:
+      - IRQn: 'I2C0_IRQn'
+      - enable_priority: 'false'
+      - priority: '0'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 i2c_rtos_handle_t I2CA_rtosHandle;
