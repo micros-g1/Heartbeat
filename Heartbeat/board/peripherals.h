@@ -40,8 +40,6 @@ extern "C" {
 #define I2C0_CLOCK_SOURCE I2C0_CLK_SRC
 /* Definition of the clock source frequency */
 #define I2C0_CLK_FREQ CLOCK_GetFreq(I2C0_CLOCK_SOURCE)
-/* I2C0 interrupt vector ID (number). */
-#define I2C0_IRQN I2C0_IRQn
 /* Definition of peripheral ID */
 #define I2S0_PERIPHERAL I2S0
 /* Master clock source frequency used for calculating the master clock divider, not available on all devices. */
@@ -68,7 +66,6 @@ extern sai_handle_t I2S0_Tx_handle;
 /***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
-
 void BOARD_InitPeripherals(void);
 
 /***********************************************************************************************************************

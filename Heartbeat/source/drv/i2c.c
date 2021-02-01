@@ -189,5 +189,5 @@ bool i2c_write_word_addr8_mask(i2c_handle_t *dev, uint8_t devAddress, uint8_t su
 		//write
 		success = i2c_write_word_addr8(dev, devAddress, subAddr, newdata);
 	}
-	return success;
+	return true;
 }

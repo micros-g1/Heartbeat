@@ -37,7 +37,7 @@ product: Clocks v7.0
 processor: MK64FN1M0xxx12
 package_id: MK64FN1M0VLL12
 mcu_data: ksdk2_0
-processor_version: 9.0.0
+processor_version: 8.0.1
 board: FRDM-K64F
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */

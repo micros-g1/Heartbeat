@@ -372,12 +372,12 @@ typedef enum
 #define UDA1380_MIXVOLCTR_INIT_MASK (VC1 | VC2)
 //Mode, all flat
 #define UDA1380_MODESEL_INIT_VALUE FMINMAX_FLAT
-#define UDA1380_MODESEL_INIT_MASK FMINMAX_FLAT
+#define UDA1380_MODESEL_INIT_MASK FMINMAX
 //Disable Mute, Disable de-emphasis
 #define UDA1380_DEEMP_INIT_VALUE (DE1_OFF | DE2_OFF)
 #define UDA1380_DEEMP_INIT_MASK (MTM | MT2 | MT1 | DE2 | DE1)
 //Do not invert polarity, Mixer off, everything off
-#define UDA1380_MIX_INIT_VALUE MIX_NOMIX
+#define UDA1380_MIX_INIT_VALUE MIX_MODE1
 #define UDA1380_MIX_INIT_MASK (DA_POL_INV | MIX)
 //ADC Decimator volume, Maximum
 #define UDA1380_DECVOLCTR_INIT_VALUE (ML_DEC_dB(Mx_DEC_dB_MAX) | MR_DEC_dB(Mx_DEC_dB_MAX))
