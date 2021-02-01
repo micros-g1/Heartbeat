@@ -114,6 +114,7 @@ int main(void) {
 //	vTaskStartScheduler();
 //	for (;;)
 //		;
+    return 0;
 }
 
 void cb(void)
