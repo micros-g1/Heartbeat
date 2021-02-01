@@ -26,19 +26,14 @@ bool uda1380_init()
 	if((success = i2c_init(i2c)))
 	{
 		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_RESET_ADDR, 0x0000, 0x0000) : false;
-		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_PWRCTR_ADDR, UDA1380_PWRCTR_INIT_MASK, UDA1380_PWRCTR_INIT_VALUE) : false;
 		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_CLK_ADDR, UDA1380_CLK_INIT_MASK, UDA1380_CLK_INIT_VALUE) : false;
 		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_IBUSCFG_ADDR, UDA1380_IBUSCFG_INIT_MASK, UDA1380_IBUSCFG_INIT_VALUE) : false;
+		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_PWRCTR_ADDR, UDA1380_PWRCTR_INIT_MASK, UDA1380_PWRCTR_INIT_VALUE) : false;
 		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_AMIXCFG_ADDR, UDA1380_AMIXCFG_INIT_MASK, UDA1380_AMIXCFG_INIT_VALUE) : false;
 		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_HPHAMPCFG_ADDR, UDA1380_HPHAMPCFG_INIT_MASK, UDA1380_HPHAMPCFG_INIT_MASK) : false;
 		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_MVOLCTR_ADDR, UDA1380_MVOLCTR_INIT_MASK, UDA1380_MVOLCTR_INIT_VALUE) : false;
 		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_MIXVOLCTR_ADDR, UDA1380_MIXVOLCTR_INIT_MASK, UDA1380_MIXVOLCTR_INIT_VALUE) : false;
-		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_MODESEL_ADDR, UDA1380_MODESEL_INIT_MASK, UDA1380_MODESEL_INIT_VALUE) : false;
 		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_DEEMP_ADDR, UDA1380_DEEMP_INIT_MASK, UDA1380_DEEMP_INIT_VALUE) : false;
-		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_MIX_ADDR, UDA1380_MIX_INIT_MASK, UDA1380_MIX_INIT_VALUE) : false;
-		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_DECVOLCTR_ADDR, UDA1380_DECVOLCTR_INIT_MASK, UDA1380_DECVOLCTR_INIT_VALUE) : false;
-		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_PGA_ADDR, UDA1380_PGA_INIT_MASK, UDA1380_PGA_INIT_VALUE) : false;
-		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_ADC_ADDR, UDA1380_ADC_INIT_MASK, UDA1380_ADC_INIT_VALUE) : false;
 		I2S0_Tx_handle.callback = callback;
 	}
 	return success;
