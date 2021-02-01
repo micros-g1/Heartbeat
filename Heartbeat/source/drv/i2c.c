@@ -151,12 +151,19 @@ bool i2c_write_bits_addr8(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr
 bool i2c_read_word_addr8(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint16_t *datap)
 {
 	//2 bytes I2C Read
-	return i2c_read_addr8(dev, devAddress, subAddr, 2, (uint8_t* ) datap);
+	//ENDIANNESS FIX
+	uint16_t value;
+	bool result = i2c_read_addr8(dev, devAddress, subAddr, 2, (uint8_t* ) &value);
+	if(result)
+		*datap = (value >> 8) | (value << 8);
+	return result;
 }
 bool i2c_write_word_addr8(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint16_t data)
 {
 	//2 byte I2C write
-	return i2c_write_addr8(dev, devAddress, subAddr, 2, (uint8_t*) &data);
+	//ENDIANNESS FIX
+	uint16_t value = (data >> 8) | (data << 8);
+	return i2c_write_addr8(dev, devAddress, subAddr, 2, (uint8_t*) &value);
 }
 bool i2c_read_word_addr8_mask(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint16_t mask, uint16_t *datap)
 {

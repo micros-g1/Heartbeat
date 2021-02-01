@@ -95,25 +95,25 @@ int main(void) {
     audio_player_init();
 
 
-//    NVIC_SetPriority(I2C_A_IRQn, 5);
+    NVIC_SetPriority(I2C_A_IRQn, 5);
 
 
 
 
-//	/* RTOS Init Tasks. */
-//	if (xTaskCreate(example_task, "example_task",
-//	configMINIMAL_STACK_SIZE + 166, NULL, mainEXAMPLE_TASK_PRIORITY, NULL) != pdPASS) {
-//		PRINTF("Example task creation failed!.\r\n");
-//		while (1)
-//			;
-//	}
-//	else {
-//		setvbuf (stdout, NULL, _IONBF, 0);
-////		PRINTF("Empezo\n");
-//	}
-//	vTaskStartScheduler();
-//	for (;;)
-//		;
+	/* RTOS Init Tasks. */
+	if (xTaskCreate(example_task, "example_task",
+	configMINIMAL_STACK_SIZE + 166, NULL, mainEXAMPLE_TASK_PRIORITY, NULL) != pdPASS) {
+		PRINTF("Example task creation failed!.\r\n");
+		while (1)
+			;
+	}
+	else {
+		setvbuf (stdout, NULL, _IONBF, 0);
+		PRINTF("Empezo\n");
+	}
+	vTaskStartScheduler();
+	for (;;)
+		;
     return 0;
 }
 
