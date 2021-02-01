@@ -7,11 +7,11 @@
 /*
  * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 !!GlobalInfo
-product: Pins v9.0
+product: Pins v8.0
 processor: MK64FN1M0xxx12
 package_id: MK64FN1M0VLL12
 mcu_data: ksdk2_0
-processor_version: 9.0.0
+processor_version: 8.0.1
 board: FRDM-K64F
 pin_labels:
 - {pin_num: '90', pin_signal: PTC16/UART3_RX/ENET0_1588_TMR0/FB_CS5_b/FB_TSIZ1/FB_BE23_16_BLS15_8_b, label: 'J1[2]', identifier: TMR_1588_0}
@@ -149,6 +149,7 @@ BOARD_InitPins:
   - {pin_num: '64', peripheral: I2S0, signal: TX_BCLK, pin_signal: PTB18/CAN0_TX/FTM2_CH0/I2S0_TX_BCLK/FB_AD15/FTM2_QD_PHA}
   - {pin_num: '71', peripheral: I2S0, signal: TXD0, pin_signal: ADC0_SE15/PTC1/LLWU_P6/SPI0_PCS3/UART1_RTS_b/FTM0_CH0/FB_AD13/I2S0_TXD0}
   - {pin_num: '65', peripheral: I2S0, signal: TX_FS, pin_signal: PTB19/CAN0_RX/FTM2_CH1/I2S0_TX_FS/FB_OE_b/FTM2_QD_PHB}
+  - {pin_num: '80', peripheral: I2S0, signal: MCLK, pin_signal: ADC1_SE4b/CMP0_IN2/PTC8/FTM3_CH4/I2S0_MCLK/FB_AD7}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -217,6 +218,9 @@ void BOARD_InitPins(void)
 
     /* PORTC1 (pin 71) is configured as I2S0_TXD0 */
     PORT_SetPinMux(PORTC, 1U, kPORT_MuxAlt6);
+
+    /* PORTC8 (pin 80) is configured as I2S0_MCLK */
+    PORT_SetPinMux(PORTC, 8U, kPORT_MuxAlt4);
 
     /* PORTE24 (pin 31) is configured as I2C0_SCL */
     PORT_SetPinMux(PORTE, 24U, kPORT_MuxAlt5);

@@ -92,7 +92,7 @@ int main(void) {
 #endif
 
 
-    audio_player_init();
+//    audio_player_init();
 
 
     NVIC_SetPriority(I2C_A_IRQn, 5);
