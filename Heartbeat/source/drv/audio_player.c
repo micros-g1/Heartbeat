@@ -40,6 +40,7 @@
 #include <drv/flashmem.h>
 #include "drv/audio_player.h"
 #include "fsl_debug_console.h"
+#include "drivers/fsl_uart.h"
 
 /*
  * Make sure that your code is not (by mistake) re-writing to the Flash
@@ -64,7 +65,3 @@ audio_player_state_t audio_player_init(){
 
 	return AUDIO_PLAYER_SUCCESS;
 }
-
-
-
-
