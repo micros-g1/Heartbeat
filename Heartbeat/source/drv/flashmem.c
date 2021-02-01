@@ -62,13 +62,15 @@ flashmem_state_t flashmem_init(){
 	PRINTF("\r\n Flash Example Start \r\n");
 	/* Print flash information - PFlash. */
 	PRINTF("\r\n Flash Information: ");
-	PRINTF("\r\n Total Program Flash Size:\t%d KB, Hex: (0x%x)", (pflashTotalSize / 1024), pflashTotalSize);
-	PRINTF("\r\n Program Flash Sector Size:\t%d KB, Hex: (0x%x) ", (pflashSectorSize / 1024), pflashSectorSize);
+	PRINTF("\r\n Total Program Flash Size:\t%d KB, Hex: (0x%x)", (unsigned int)(pflashTotalSize / 1024),
+			(unsigned int)pflashTotalSize);
+	PRINTF("\r\n Program Flash Sector Size:\t%d KB, Hex: (0x%x) ", (unsigned int)(pflashSectorSize / 1024),
+			(unsigned int)pflashSectorSize);
 #endif
 
     result = FLASH_GetSecurityState(&config, &sec_status);
     if (result != kStatus_FTFx_Success){
-		PRINTF("FLASH_Init error  result = %d \r\n", result);
+		PRINTF("FLASH_Init error  result = %d \r\n", (int) result);
 		error_trap();
     }
 
@@ -104,7 +106,7 @@ flashmem_state_t flashmem_init(){
 
 #ifdef FLASHMEM_PROGRAM
 flashmem_state_t flashmem_program(){
-    uint32_t i, failAddr, failDat;
+    uint32_t failAddr, failDat;
 
     uint32_t buffer[FLASHMEM_BUFFER_LEN] = {0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD}; /* Buffer for program */
     uint32_t result;
@@ -121,7 +123,8 @@ flashmem_state_t flashmem_program(){
     }
 
     /* Print message for user. */
-    PRINTF("\r\n Successfully Erased Sector 0x%x -> 0x%x\r\n", dest_adrss, (dest_adrss + pflashSectorSize));
+    PRINTF("\r\n Successfully Erased Sector 0x%x -> 0x%x\r\n", (unsigned int)dest_adrss,
+    		(unsigned int)(dest_adrss + pflashSectorSize));
 
     /* Print message for user. */
     PRINTF("\r\n Program a buffer to a sector of flash ");
@@ -137,8 +140,8 @@ flashmem_state_t flashmem_program(){
     if (result != kStatus_FTFx_Success){
         error_trap();
     }
-    PRINTF("\r\n Successfully Programmed and Verified Location 0x%x -> 0x%x \r\n", dest_adrss,
-           (dest_adrss + FLASHMEM_BUFFER_LEN * sizeof(buffer[0])));
+    PRINTF("\r\n Successfully Programmed and Verified Location 0x%x -> 0x%x \r\n", (unsigned int)dest_adrss,
+           (unsigned int)(dest_adrss + FLASHMEM_BUFFER_LEN * sizeof(buffer[0])));
 
     /* Print finished message. */
     PRINTF("\r\n End of Flash Example \r\n");
@@ -151,7 +154,7 @@ flashmem_state_t flashmem_program(){
 *
 * @details Print error message and trap forever.
 */
-void error_trap(){
+static void error_trap(){
     PRINTF("\r\n\r\n\r\n\t---- HALTED DUE TO FLASH ERROR! ----");
     while (1);
 }

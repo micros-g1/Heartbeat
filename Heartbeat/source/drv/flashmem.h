@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define FLASHMEM_PROGRAM
+//#define FLASHMEM_PROGRAM
 #define FLASHMEM_BUFFER_LEN 	4
 #define FLASHMEM_DEST_ADDR	0xFF000
 
