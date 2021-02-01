@@ -40,11 +40,12 @@
 #include "drv/audio_player.h"
 #include "drivers/fsl_flash.h"
 #include "fsl_debug_console.h"
+#include "drivers/fsl_uart.h"
 
 #define BUFFER_LEN 	4
 #define DEST_ADDR	0xFF000
 
-#define PROGRAM_FLASH
+//#define PROGRAM_FLASH
 
 static void error_trap();
 static void flash_init();
@@ -75,7 +76,7 @@ audio_player_state_t audio_player_init(){
 	memcpy(buff_ram, dest_adrss, sizeof(buff_ram));
 
 	for(int i = 0; i < BUFFER_LEN; i++){
-		PRINTF("\r\n%x", buff_ram[i]);
+		PRINTF("%d\r\n", buff_ram[i]);
 	}
 
 	return AUDIO_PLAYER_SUCCESS;
@@ -146,10 +147,6 @@ void flash_init(){
 	}
 	PRINTF("\r\n");
 
-    /* Debug message for user. */
-    /* Erase several sectors on upper pflash block where there is no code */
-    PRINTF("\r\n Erase a sector of flash");
-
     /* Erase a sector from destAdrss. */
     dest_adrss = pflashBlockBase + (pflashTotalSize - pflashSectorSize);
 }
@@ -158,8 +155,20 @@ void flash_init(){
 #ifdef PROGRAM_FLASH
 static void program_flash(){
     uint32_t i, failAddr, failDat;
+    uint32_t buffer[BUFFER_LEN];
 
-    uint32_t buffer[BUFFER_LEN] = {0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD}; /* Buffer for program */
+
+
+    UART_ReadBlocking(UART0, buffer, 4*BUFFER_LEN);
+
+    // aca leer N bytes desde UART.
+    // definir buffer.
+
+
+    /* Debug message for user. */
+    /* Erase several sectors on upper pflash block where there is no code */
+    PRINTF("\r\n Erase a sector of flash");
+
     uint32_t result;
 
     result = FLASH_Erase(&config, dest_adrss, pflashSectorSize, kFTFx_ApiEraseKey);
