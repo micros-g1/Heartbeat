@@ -14,7 +14,7 @@
 #define A1_HIGH	//Comment if A1 pin is not high
 #define UDA1380_I2C_ADDR_A1_HIGH  0x1A
 #define UDA1380_I2C_ADDR_A1_LOW   0x18
-#ifdef A1_HIGH
+//#ifdef A1_HIGH
 #define UDA1380_I2C_ADDR UDA1380_I2C_ADDR_A1_HIGH
 #else
 #define UDA1380_I2C_ADDR UDA1380_I2C_ADDR_A1_LOW

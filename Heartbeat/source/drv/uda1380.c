@@ -25,10 +25,8 @@ bool uda1380_init()
 	i2c = &I2CA_rtosHandle;
 	if((success = i2c_init(i2c)))
 	{
-		//Software reset (?) Read ?? Write ?? Datasheet does not say how to do this..
-		//uint8_t reset = UDA1380_RESET_ADDR;
-		//success = success ? i2c_write(i2c,UDA1380_I2C_ADDR, 1, &reset) : false;
-		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_RESET_ADDR, 0xFFFF, 0xFFFF) : false;
+		//Software reset
+		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_RESET_ADDR, 0x0000, 0x0000) : false;
 		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_PWRCTR_ADDR, UDA1380_PWRCTR_INIT_MASK, UDA1380_PWRCTR_INIT_VALUE) : false;
 		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_CLK_ADDR, UDA1380_CLK_INIT_MASK, UDA1380_CLK_INIT_VALUE) : false;
 		success = success ? i2c_write_word_addr8_mask(i2c,UDA1380_I2C_ADDR, UDA1380_IBUSCFG_ADDR, UDA1380_IBUSCFG_INIT_MASK, UDA1380_IBUSCFG_INIT_VALUE) : false;
