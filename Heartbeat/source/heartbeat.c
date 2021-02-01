@@ -46,6 +46,7 @@
 #include "drv/max30102.h"
 #include "drv/uda1380.h"
 #include "music.h"
+#include "drv/audio_player.h"
 
 /*******************************************************************************
  * TEST SIGNAL
@@ -89,23 +90,30 @@ int main(void) {
     /* Init FSL debug console. */
     BOARD_InitDebugConsole();
 #endif
-    NVIC_SetPriority(I2C_A_IRQn, 5);
 
 
-	/* RTOS Init Tasks. */
-	if (xTaskCreate(example_task, "example_task",
-	configMINIMAL_STACK_SIZE + 166, NULL, mainEXAMPLE_TASK_PRIORITY, NULL) != pdPASS) {
-		PRINTF("Example task creation failed!.\r\n");
-		while (1)
-			;
-	}
-	else {
-		setvbuf (stdout, NULL, _IONBF, 0);
-//		PRINTF("Empezo\n");
-	}
-	vTaskStartScheduler();
-	for (;;)
-		;
+    audio_player_init();
+
+
+//    NVIC_SetPriority(I2C_A_IRQn, 5);
+
+
+
+
+//	/* RTOS Init Tasks. */
+//	if (xTaskCreate(example_task, "example_task",
+//	configMINIMAL_STACK_SIZE + 166, NULL, mainEXAMPLE_TASK_PRIORITY, NULL) != pdPASS) {
+//		PRINTF("Example task creation failed!.\r\n");
+//		while (1)
+//			;
+//	}
+//	else {
+//		setvbuf (stdout, NULL, _IONBF, 0);
+////		PRINTF("Empezo\n");
+//	}
+//	vTaskStartScheduler();
+//	for (;;)
+//		;
 }
 
 void cb(void)

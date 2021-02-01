@@ -35,17 +35,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-//https://community.nxp.com/t5/Kinetis-Microcontrollers/
-// 			How-to-write-my-own-data-to-the-flash-of-K64-above-the-program/td-p/653690
+//https://community.nxp.com/t5/Kinetis-Microcontrollers/How-to-write-my-own-data-to-the-flash-of-K64-above-the-program/td-p/653690
 
 #include "drv/audio_player.h"
 #include "drivers/fsl_flash.h"
 #include "fsl_debug_console.h"
 
-#define BUFFER_LEN 4
+#define BUFFER_LEN 	4
+#define DEST_ADDR	0xFF000
+
+#define PROGRAM_FLASH
 
 static void error_trap();
 static void flash_init();
+
+#ifdef PROGRAM_FLASH
+static void program_flash();
+#endif
+
+static flash_config_t config;
+static uint32_t dest_adrss; /* Address of the target location */
+static uint32_t pflashSectorSize;
 
 /*
  * Make sure that your code is not (by mistake) re-writing to the Flash
@@ -56,34 +66,55 @@ static void flash_init();
  */
 audio_player_state_t audio_player_init(){
 	flash_init();
+
+#ifdef PROGRAM_FLASH
+	program_flash();
+#endif
+
+	uint32_t buff_ram[BUFFER_LEN];
+	memcpy(buff_ram, dest_adrss, sizeof(buff_ram));
+
+	for(int i = 0; i < BUFFER_LEN; i++){
+		PRINTF("\r\n%x", buff_ram[i]);
+	}
+
 	return AUDIO_PLAYER_SUCCESS;
+
 }
 
 
 void flash_init(){
-	flash_config_t config;
-
 	ftfx_security_state_t sec_status = kFTFx_SecurityStateNotSecure;
-    uint32_t dest_adrss; /* Address of the target location */
-    uint32_t i, failAddr, failDat;
-    uint32_t buffer[BUFFER_LEN]; /* Buffer for program */
 
     uint32_t pflashBlockBase = 0;
     uint32_t pflashTotalSize = 0;
-    uint32_t pflashSectorSize = 0;
+    pflashSectorSize = 0;
+
 
 	memset(&config, 0, sizeof(flash_config_t));
 
 	status_t result = FLASH_Init(&config);
 
-	if(result != kStatus_Success)
+	if(result != kStatus_FTFx_Success)
 		error_trap();
 	else
 		PRINTF("FLASH_Init\r\n");
 
-	FLASH_GetProperty(&config, kFLASH_PropertyPflash0BlockBaseAddr, &pflashBlockBase);
-	FLASH_GetProperty(&config, kFLASH_PropertyPflash0TotalSize, &pflashTotalSize);
-	FLASH_GetProperty(&config, kFLASH_PropertyPflash0SectorSize, &pflashSectorSize);
+	result = FLASH_GetProperty(&config, kFLASH_PropertyPflash0BlockBaseAddr, &pflashBlockBase);
+	if(result != kStatus_FTFx_Success)
+		error_trap();
+	else
+		PRINTF("Get Base Address Property\r\n");
+	result = FLASH_GetProperty(&config, kFLASH_PropertyPflash0TotalSize, &pflashTotalSize);
+	if(result != kStatus_FTFx_Success)
+		error_trap();
+	else
+		PRINTF("Get Flash Total Size\r\n");
+	result = FLASH_GetProperty(&config, kFLASH_PropertyPflash0SectorSize, &pflashSectorSize);
+	if(result != kStatus_FTFx_Success)
+		error_trap();
+	else
+		PRINTF("Get Flash Sector Size\r\n");
 
 	/* print welcome message */
 	PRINTF("\r\n Flash Example Start \r\n");
@@ -93,7 +124,7 @@ void flash_init(){
 	PRINTF("\r\n Program Flash Sector Size:\t%d KB, Hex: (0x%x) ", (pflashSectorSize / 1024), pflashSectorSize);
 
     result = FLASH_GetSecurityState(&config, &sec_status);
-    if (result != kStatus_Success){
+    if (result != kStatus_FTFx_Success){
 		PRINTF("FLASH_Init error  result = %d \r\n", result);
 		error_trap();
     }
@@ -121,14 +152,24 @@ void flash_init(){
 
     /* Erase a sector from destAdrss. */
     dest_adrss = pflashBlockBase + (pflashTotalSize - pflashSectorSize);
+}
+
+
+#ifdef PROGRAM_FLASH
+static void program_flash(){
+    uint32_t i, failAddr, failDat;
+
+    uint32_t buffer[BUFFER_LEN] = {0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD}; /* Buffer for program */
+    uint32_t result;
+
     result = FLASH_Erase(&config, dest_adrss, pflashSectorSize, kFTFx_ApiEraseKey);
-    if (result != kStatus_Success){
+    if (result != kStatus_FTFx_Success){
         error_trap();
     }
 
     /* Verify sector if it's been erased. */
     result = FLASH_VerifyErase(&config, dest_adrss, pflashSectorSize, kFTFx_MarginValueUser);
-    if (result != kStatus_Success){
+    if (result != kStatus_FTFx_Success){
         error_trap();
     }
 
@@ -138,31 +179,25 @@ void flash_init(){
     /* Print message for user. */
     PRINTF("\r\n Program a buffer to a sector of flash ");
 
-    /* Prepare buffer. */
-    for (i = 0; i < BUFFER_LEN; i++){
-        buffer[i] = i;
-    }
-    dest_adrss = pflashBlockBase + (pflashTotalSize - pflashSectorSize);
-    result = FLASH_Program(&config, dest_adrss, buffer, sizeof(buffer));
+    result = FLASH_Program(&config, dest_adrss, (uint8_t *)buffer, BUFFER_LEN * sizeof(buffer[0]));
     if (kStatus_FLASH_Success != result){
         error_trap();
     }
 
     /* Program Check user margin levels */
-    result = FLASH_VerifyProgram(&config, dest_adrss, sizeof(buffer), buffer, kFTFx_MarginValueUser, &failAddr,
+    result = FLASH_VerifyProgram(&config, dest_adrss, BUFFER_LEN * sizeof(buffer[0]), (uint8_t *)buffer, kFTFx_MarginValueUser, &failAddr,
                                  &failDat);
-    if (result != kStatus_Success){
+    if (result != kStatus_FTFx_Success){
         error_trap();
     }
     PRINTF("\r\n Successfully Programmed and Verified Location 0x%x -> 0x%x \r\n", dest_adrss,
-           (dest_adrss + sizeof(buffer)));
+           (dest_adrss + BUFFER_LEN * sizeof(buffer[0])));
 
     /* Print finished message. */
     PRINTF("\r\n End of Flash Example \r\n");
-    while (1)
-    {
-    }
+
 }
+#endif
 /*
 * @brief Gets called when an error occurs.
 *
