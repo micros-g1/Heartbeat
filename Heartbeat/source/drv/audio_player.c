@@ -44,7 +44,7 @@
 #define BUFFER_LEN 	4
 #define DEST_ADDR	0xFF000
 
-#define PROGRAM_FLASH
+//#define PROGRAM_FLASH
 
 static void error_trap();
 static void flash_init();
@@ -97,22 +97,31 @@ void flash_init(){
 
 	if(result != kStatus_FTFx_Success)
 		error_trap();
+
+#ifdef PROGRAM_FLASH
 	else
 		PRINTF("FLASH_Init\r\n");
+#endif
 
 	result = FLASH_GetProperty(&config, kFLASH_PropertyPflash0BlockBaseAddr, &pflashBlockBase);
 	if(result != kStatus_FTFx_Success)
 		error_trap();
+#ifdef PROGRAM_FLASH
 	else
 		PRINTF("Get Base Address Property\r\n");
+#endif
 	result = FLASH_GetProperty(&config, kFLASH_PropertyPflash0TotalSize, &pflashTotalSize);
 	if(result != kStatus_FTFx_Success)
 		error_trap();
+#ifdef PROGRAM_FLASH
 	else
 		PRINTF("Get Flash Total Size\r\n");
+#endif
+
 	result = FLASH_GetProperty(&config, kFLASH_PropertyPflash0SectorSize, &pflashSectorSize);
 	if(result != kStatus_FTFx_Success)
 		error_trap();
+#ifdef PROGRAM_FLASH
 	else
 		PRINTF("Get Flash Sector Size\r\n");
 
@@ -122,6 +131,7 @@ void flash_init(){
 	PRINTF("\r\n Flash Information: ");
 	PRINTF("\r\n Total Program Flash Size:\t%d KB, Hex: (0x%x)", (pflashTotalSize / 1024), pflashTotalSize);
 	PRINTF("\r\n Program Flash Sector Size:\t%d KB, Hex: (0x%x) ", (pflashSectorSize / 1024), pflashSectorSize);
+#endif
 
     result = FLASH_GetSecurityState(&config, &sec_status);
     if (result != kStatus_FTFx_Success){
@@ -129,6 +139,7 @@ void flash_init(){
 		error_trap();
     }
 
+#ifdef PROGRAM_FLASH
 	/* Print security status. */
 	switch (sec_status)
 	{
@@ -149,7 +160,7 @@ void flash_init(){
     /* Debug message for user. */
     /* Erase several sectors on upper pflash block where there is no code */
     PRINTF("\r\n Erase a sector of flash");
-
+#endif
     /* Erase a sector from destAdrss. */
     dest_adrss = pflashBlockBase + (pflashTotalSize - pflashSectorSize);
 }
