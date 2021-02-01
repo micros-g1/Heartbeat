@@ -50,10 +50,14 @@
  * where debuggers will tend to display the content as "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- ").
  */
 audio_player_state_t audio_player_init(){
-	flashmem_init();
+
+	audio_player_state_t correct_init =
+			flashmem_init() == FLASHMEM_SUCCESS ? AUDIO_PLAYER_SUCCESS : AUDIO_PLAYER_FAILURE;
 
 #ifdef FLASHMEM_PROGRAM
-	flashmem_program();
+	if(correct_init == AUDIO_PLAYER_SUCCESS)
+		correct_init = flashmem_program() == FLASHMEM_SUCCESS ?
+				AUDIO_PLAYER_SUCCESS : AUDIO_PLAYER_FAILURE;
 #endif
 
 	uint32_t buff_ram[FLASHMEM_BUFFER_LEN];
@@ -63,5 +67,5 @@ audio_player_state_t audio_player_init(){
 		PRINTF("\r\n%x", (unsigned int) buff_ram[i]);
 	}
 
-	return AUDIO_PLAYER_SUCCESS;
+	return correct_init;
 }
