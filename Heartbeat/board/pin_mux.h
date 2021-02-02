@@ -29,19 +29,6 @@ void BOARD_InitBootPins(void);
 #define SOPT7_ADC0PRETRGSEL_A 0x00u  /*!<@brief ADC0 pretrigger select: Pre-trigger A */
 #define SOPT7_ADC0TRGSEL_PIT0 0x04u  /*!<@brief ADC0 trigger select: PIT trigger 0 */
 
-/*! @name PORTB23 (number 69), J1[10]
-  @{ */
-
-/* Symbols to be used with GPIO driver */
-#define BOARD_HC05_STATE_GPIO GPIOB                /*!<@brief GPIO peripheral base pointer */
-#define BOARD_HC05_STATE_GPIO_PIN_MASK (1U << 23U) /*!<@brief GPIO pin mask */
-
-/* Symbols to be used with PORT driver */
-#define BOARD_HC05_STATE_PORT PORTB                /*!<@brief PORT peripheral base pointer */
-#define BOARD_HC05_STATE_PIN 23U                   /*!<@brief PORT pin number */
-#define BOARD_HC05_STATE_PIN_MASK (1U << 23U)      /*!<@brief PORT pin mask */
-                                                   /* @} */
-
 /*! @name PORTB9 (number 57), J1[6]
   @{ */
 
@@ -55,6 +42,15 @@ void BOARD_InitBootPins(void);
 #define BOARD_MAX30102_INT_PIN_PIN_MASK (1U << 9U)      /*!<@brief PORT pin mask */
                                                         /* @} */
 
+/*! @name PORTC17 (number 91), J1[4]
+  @{ */
+
+/* Symbols to be used with PORT driver */
+#define BOARD_TMR_1588_1_PORT PORTC                /*!<@brief PORT peripheral base pointer */
+#define BOARD_TMR_1588_1_PIN 17U                   /*!<@brief PORT pin number */
+#define BOARD_TMR_1588_1_PIN_MASK (1U << 17U)      /*!<@brief PORT pin mask */
+                                                   /* @} */
+
 /*! @name PORTC16 (number 90), J1[2]
   @{ */
 
@@ -64,13 +60,17 @@ void BOARD_InitBootPins(void);
 #define BOARD_TMR_1588_0_PIN_MASK (1U << 16U)      /*!<@brief PORT pin mask */
                                                    /* @} */
 
-/*! @name PORTC17 (number 91), J1[4]
+/*! @name PORTB23 (number 69), J1[10]
   @{ */
 
+/* Symbols to be used with GPIO driver */
+#define BOARD_HC05_STATE_GPIO GPIOB                /*!<@brief GPIO peripheral base pointer */
+#define BOARD_HC05_STATE_GPIO_PIN_MASK (1U << 23U) /*!<@brief GPIO pin mask */
+
 /* Symbols to be used with PORT driver */
-#define BOARD_TMR_1588_1_PORT PORTC                /*!<@brief PORT peripheral base pointer */
-#define BOARD_TMR_1588_1_PIN 17U                   /*!<@brief PORT pin number */
-#define BOARD_TMR_1588_1_PIN_MASK (1U << 17U)      /*!<@brief PORT pin mask */
+#define BOARD_HC05_STATE_PORT PORTB                /*!<@brief PORT peripheral base pointer */
+#define BOARD_HC05_STATE_PIN 23U                   /*!<@brief PORT pin number */
+#define BOARD_HC05_STATE_PIN_MASK (1U << 23U)      /*!<@brief PORT pin mask */
                                                    /* @} */
 
 /*!

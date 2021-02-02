@@ -10,15 +10,16 @@
  * Included files
  **********************************************************************************************************************/
 #include "fsl_common.h"
-#include "fsl_adc16.h"
 #include "fsl_gpio.h"
 #include "fsl_port.h"
 #include "fsl_i2c.h"
 #include "fsl_i2c_freertos.h"
+#include "fsl_sai.h"
+#include "fsl_clock.h"
+#include "fsl_adc16.h"
 #include "fsl_pit.h"
 #include "fsl_uart.h"
 #include "fsl_uart_freertos.h"
-#include "fsl_clock.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -28,14 +29,6 @@ extern "C" {
  * Definitions
  **********************************************************************************************************************/
 /* Definitions for BOARD_InitPeripherals functional group */
-/* Alias for ADC0 peripheral */
-#define ADC0_PERIPHERAL ADC0
-/* ADC0 interrupt vector ID (number). */
-#define ADC0_IRQN ADC0_IRQn
-/* ADC0 interrupt handler identifier. */
-#define ADC0_IRQHANDLER ADC0_IRQHandler
-/* Channel 0 (SE.19) conversion control group. */
-#define ADC0_CH0_CONTROL_GROUP 0
 /* Alias for GPIOB peripheral */
 #define GPIOB_GPIO GPIOB
 /* Alias for PORTB */
@@ -51,8 +44,28 @@ extern "C" {
 #define I2C0_CLOCK_SOURCE I2C0_CLK_SRC
 /* Definition of the clock source frequency */
 #define I2C0_CLK_FREQ CLOCK_GetFreq(I2C0_CLOCK_SOURCE)
-/* I2C0 interrupt vector ID (number). */
-#define I2C0_IRQN I2C0_IRQn
+/* Definition of peripheral ID */
+#define I2S0_PERIPHERAL I2S0
+/* Master clock source frequency used for calculating the master clock divider, not available on all devices. */
+#define I2S0_MCLK_SOURCE_CLOCK_HZ 120000000UL
+/* Master clock value set by the user to the Master clock frequency item. */
+#define I2S0_USER_MCLK_HZ 6144000UL
+/* Bit clock source frequency used for calculating the bit clock divider in the TxSetBitClockRate function. */
+#define I2S0_TX_BCLK_SOURCE_CLOCK_HZ 6144000UL
+/* Sample rate used for calculating the bit clock divider in the TxSetBitClockRate function. */
+#define I2S0_TX_SAMPLE_RATE 16000UL
+/* Word width used for calculating the bit clock divider in the TxSetBitClockRate function. */
+#define I2S0_TX_WORD_WIDTH 16U
+/* Number of words within frame used for calculating the bit clock divider in the TxSetBitClockRate function. */
+#define I2S0_TX_WORDS_PER_FRAME 2U
+/* Alias for ADC0 peripheral */
+#define ADC0_PERIPHERAL ADC0
+/* ADC0 interrupt vector ID (number). */
+#define ADC0_IRQN ADC0_IRQn
+/* ADC0 interrupt handler identifier. */
+#define ADC0_IRQHANDLER ADC0_IRQHandler
+/* Channel 0 (SE.19) conversion control group. */
+#define ADC0_CH0_CONTROL_GROUP 0
 /* BOARD_InitPeripherals defines for PIT */
 /* Definition of peripheral ID. */
 #define PIT_PERIPHERAL PIT
@@ -67,43 +80,24 @@ extern "C" {
 /* Definition of ticks count for channel 0. */
 #define PIT_CHANNEL_0_TICKS 333299U
 /* Definition of peripheral ID */
-#define UART0_PERIPHERAL UART0
-/* Definition of the clock source frequency */
-#define UART0_CLOCK_SOURCE CLOCK_GetFreq(UART0_CLK_SRC)
-/* Definition of the backround buffer size */
-#define UART0_BACKGROUND_BUFFER_SIZE 100
-/* UART0 interrupt vector ID (number). */
-#define UART0_SERIAL_RX_TX_IRQN UART0_RX_TX_IRQn
-/* UART0 interrupt vector ID (number). */
-#define UART0_SERIAL_ERROR_IRQN UART0_ERR_IRQn
-/* Definition of peripheral ID */
 #define UART3_PERIPHERAL UART3
 /* Definition of the clock source frequency */
 #define UART3_CLOCK_SOURCE CLOCK_GetFreq(UART3_CLK_SRC)
 /* Definition of the backround buffer size */
 #define UART3_BACKGROUND_BUFFER_SIZE 100
-/* UART3 interrupt vector ID (number). */
-#define UART3_SERIAL_RX_TX_IRQN UART3_RX_TX_IRQn
-/* UART3 interrupt vector priority. */
-#define UART3_SERIAL_RX_TX_IRQ_PRIORITY 5
-/* UART3 interrupt vector ID (number). */
-#define UART3_SERIAL_ERROR_IRQN UART3_ERR_IRQn
-/* UART3 interrupt vector priority. */
-#define UART3_SERIAL_ERROR_IRQ_PRIORITY 5
 
 /***********************************************************************************************************************
  * Global variables
  **********************************************************************************************************************/
+extern i2c_rtos_handle_t I2CA_rtosHandle;
+extern const i2c_master_config_t I2C0_config;
+extern sai_transceiver_t I2S0_Tx_config;
+extern sai_handle_t I2S0_Tx_handle;
 extern adc16_channel_config_t ADC0_channelsConfig[1];
 extern const adc16_config_t ADC0_config;
 extern const adc16_channel_mux_mode_t ADC0_muxMode;
 extern const adc16_hardware_average_mode_t ADC0_hardwareAverageMode;
-extern i2c_rtos_handle_t I2CA_rtosHandle;
-extern const i2c_master_config_t I2C0_config;
 extern const pit_config_t PIT_config;
-extern uart_rtos_handle_t UART0_rtos_handle;
-extern uart_handle_t UART0_uart_handle;
-extern uart_rtos_config_t UART0_rtos_config;
 extern uart_rtos_handle_t UART3_rtos_handle;
 extern uart_handle_t UART3_uart_handle;
 extern uart_rtos_config_t UART3_rtos_config;
@@ -111,7 +105,6 @@ extern uart_rtos_config_t UART3_rtos_config;
 /***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
-
 void BOARD_InitPeripherals(void);
 
 /***********************************************************************************************************************

@@ -7,11 +7,11 @@
 /*
  * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 !!GlobalInfo
-product: Pins v9.0
+product: Pins v8.0
 processor: MK64FN1M0xxx12
 package_id: MK64FN1M0VLL12
 mcu_data: ksdk2_0
-processor_version: 9.0.0
+processor_version: 8.0.1
 board: FRDM-K64F
 pin_labels:
 - {pin_num: '90', pin_signal: PTC16/UART3_RX/ENET0_1588_TMR0/FB_CS5_b/FB_TSIZ1/FB_BE23_16_BLS15_8_b, label: 'J1[2]', identifier: TMR_1588_0}
@@ -144,13 +144,18 @@ BOARD_InitPins:
   - {pin_num: '36', peripheral: TPIU, signal: SWO, pin_signal: PTA2/UART0_TX/FTM0_CH7/JTAG_TDO/TRACE_SWO/EZP_DO, drive_strength: low, pull_select: down, pull_enable: disable}
   - {pin_num: '31', peripheral: I2C0, signal: SCL, pin_signal: ADC0_SE17/PTE24/UART4_TX/I2C0_SCL/EWM_OUT_b, identifier: ''}
   - {pin_num: '32', peripheral: I2C0, signal: SDA, pin_signal: ADC0_SE18/PTE25/UART4_RX/I2C0_SDA/EWM_IN, identifier: ''}
+  - {pin_num: '57', peripheral: GPIOB, signal: 'GPIO, 9', pin_signal: PTB9/SPI1_PCS1/UART3_CTS_b/FB_AD20, direction: INPUT, gpio_interrupt: kPORT_InterruptLogicZero,
+    pull_select: up}
+  - {pin_num: '64', peripheral: I2S0, signal: TX_BCLK, pin_signal: PTB18/CAN0_TX/FTM2_CH0/I2S0_TX_BCLK/FB_AD15/FTM2_QD_PHA}
+  - {pin_num: '71', peripheral: I2S0, signal: TXD0, pin_signal: ADC0_SE15/PTC1/LLWU_P6/SPI0_PCS3/UART1_RTS_b/FTM0_CH0/FB_AD13/I2S0_TXD0}
+  - {pin_num: '65', peripheral: I2S0, signal: TX_FS, pin_signal: PTB19/CAN0_RX/FTM2_CH1/I2S0_TX_FS/FB_OE_b/FTM2_QD_PHB}
+  - {pin_num: '80', peripheral: I2S0, signal: MCLK, pin_signal: ADC1_SE4b/CMP0_IN2/PTC8/FTM3_CH4/I2S0_MCLK/FB_AD7}
   - {peripheral: ADC0, signal: 'TRG, A', pin_signal: PIT_trigger_0}
   - {pin_num: '19', peripheral: ADC0, signal: 'SE, 19', pin_signal: ADC0_DM0/ADC1_DM3}
-  - {pin_num: '23', peripheral: ADC0, signal: VREFH, pin_signal: VREFH}
-  - {pin_num: '69', peripheral: GPIOB, signal: 'GPIO, 23', pin_signal: PTB23/SPI2_SIN/SPI0_PCS5/FB_AD28}
-  - {pin_num: '57', peripheral: GPIOB, signal: 'GPIO, 9', pin_signal: PTB9/SPI1_PCS1/UART3_CTS_b/FB_AD20, direction: INPUT, gpio_interrupt: kPORT_InterruptFallingEdge}
-  - {pin_num: '90', peripheral: UART3, signal: RX, pin_signal: PTC16/UART3_RX/ENET0_1588_TMR0/FB_CS5_b/FB_TSIZ1/FB_BE23_16_BLS15_8_b}
+  - {pin_num: '19', peripheral: ADC0, signal: 'DM, 0', pin_signal: ADC0_DM0/ADC1_DM3}
   - {pin_num: '91', peripheral: UART3, signal: TX, pin_signal: PTC17/UART3_TX/ENET0_1588_TMR1/FB_CS4_b/FB_TSIZ0/FB_BE31_24_BLS7_0_b}
+  - {pin_num: '90', peripheral: UART3, signal: RX, pin_signal: PTC16/UART3_RX/ENET0_1588_TMR0/FB_CS5_b/FB_TSIZ1/FB_BE23_16_BLS15_8_b}
+  - {pin_num: '69', peripheral: GPIOB, signal: 'GPIO, 23', pin_signal: PTB23/SPI2_SIN/SPI0_PCS5/FB_AD28}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -197,20 +202,40 @@ void BOARD_InitPins(void)
                       * is configured as a digital output. */
                      | PORT_PCR_DSE(kPORT_LowDriveStrength));
 
+    /* PORTB18 (pin 64) is configured as I2S0_TX_BCLK */
+    PORT_SetPinMux(PORTB, 18U, kPORT_MuxAlt4);
+
+    /* PORTB19 (pin 65) is configured as I2S0_TX_FS */
+    PORT_SetPinMux(PORTB, 19U, kPORT_MuxAlt4);
+
     /* PORTB23 (pin 69) is configured as PTB23 */
     PORT_SetPinMux(BOARD_HC05_STATE_PORT, BOARD_HC05_STATE_PIN, kPORT_MuxAsGpio);
 
     /* PORTB9 (pin 57) is configured as PTB9 */
     PORT_SetPinMux(BOARD_MAX30102_INT_PIN_PORT, BOARD_MAX30102_INT_PIN_PIN, kPORT_MuxAsGpio);
 
-    /* Interrupt configuration on PORTB9 (pin 57): Interrupt on falling edge */
-    PORT_SetPinInterruptConfig(BOARD_MAX30102_INT_PIN_PORT, BOARD_MAX30102_INT_PIN_PIN, kPORT_InterruptFallingEdge);
+    /* Interrupt configuration on PORTB9 (pin 57): Interrupt when logic zero */
+    PORT_SetPinInterruptConfig(BOARD_MAX30102_INT_PIN_PORT, BOARD_MAX30102_INT_PIN_PIN, kPORT_InterruptLogicZero);
+
+    PORTB->PCR[9] = ((PORTB->PCR[9] &
+                      /* Mask bits to zero which are setting */
+                      (~(PORT_PCR_PS_MASK | PORT_PCR_ISF_MASK)))
+
+                     /* Pull Select: Internal pullup resistor is enabled on the corresponding pin, if the
+                      * corresponding PE field is set. */
+                     | PORT_PCR_PS(kPORT_PullUp));
+
+    /* PORTC1 (pin 71) is configured as I2S0_TXD0 */
+    PORT_SetPinMux(PORTC, 1U, kPORT_MuxAlt6);
 
     /* PORTC16 (pin 90) is configured as UART3_RX */
     PORT_SetPinMux(BOARD_TMR_1588_0_PORT, BOARD_TMR_1588_0_PIN, kPORT_MuxAlt3);
 
     /* PORTC17 (pin 91) is configured as UART3_TX */
     PORT_SetPinMux(BOARD_TMR_1588_1_PORT, BOARD_TMR_1588_1_PIN, kPORT_MuxAlt3);
+
+    /* PORTC8 (pin 80) is configured as I2S0_MCLK */
+    PORT_SetPinMux(PORTC, 8U, kPORT_MuxAlt4);
 
     /* PORTE24 (pin 31) is configured as I2C0_SCL */
     PORT_SetPinMux(PORTE, 24U, kPORT_MuxAlt5);

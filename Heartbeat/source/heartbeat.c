@@ -39,10 +39,9 @@ int main(void)
 	BOARD_InitDebugConsole();
 	#endif
 
-    NVIC_SetPriority(I2C0_IRQn, 4);
+//    NVIC_SetPriority(I2C0_IRQn, 4);
 //    NVIC_SetPriority(PORTB_IRQn, 4);
     NVIC_SetPriority(ADC0_IRQn, 4);
-
 
     //TODO: ver si las inicilaizaciones de sensores van aca o en la sensor_task
 
@@ -66,18 +65,18 @@ void sensors_task(void *pvParameters)
 {
 //	NVIC_EnableIRQ(PORTB_IRQn);
 
-	sensors[0] = new_temperature_sensor();
-	sensors[0]->init(TEMP_SAMPLING_PERIOD_MS);
+//	sensors[0] = new_temperature_sensor();
+//	sensors[0]->init(TEMP_SAMPLING_PERIOD_MS);
 //
 //	sensors[1] = new_spo2_sensor();
 //	sensors[1]->init(SPO2_TASK_PRIORITY);
 
-//	sensors[2] = new_ekg_sensor();
-//	sensors[2]->init(EKG_SAMPLING_PERIOD_MS);
+	sensors[2] = new_ekg_sensor();
+	sensors[2]->init(EKG_SAMPLING_PERIOD_MS);
 
 //
 	sensor_event_t ev;
-	sensors[0]->start_sampling();
+	sensors[2]->start_sampling();
 //	for (unsigned int i = 0; i < N_SENSORS; i++) {
 //		sensors[i]->start_sampling();
 //	}

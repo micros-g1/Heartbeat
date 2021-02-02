@@ -24,4 +24,11 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>doc/freertos/freertos_kernel/portable/readme.txt</name>
+			<type>1</type>
+			<locationURI>SDK_2_x_FRDM_K64F/rtos/freertos/freertos_kernel/portable/readme.txt</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>
