@@ -203,7 +203,7 @@
                   <pin peripheral="GPIOB" signal="GPIO, 9" pin_num="57" pin_signal="PTB9/SPI1_PCS1/UART3_CTS_b/FB_AD20">
                      <pin_features>
                         <pin_feature name="direction" value="INPUT"/>
-                        <pin_feature name="gpio_interrupt" value="kPORT_InterruptLogicZero"/>
+                        <pin_feature name="gpio_interrupt" value="kPORT_InterruptFallingEdge"/>
                         <pin_feature name="pull_select" value="up"/>
                      </pin_features>
                   </pin>
