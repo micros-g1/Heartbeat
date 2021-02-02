@@ -320,11 +320,11 @@ instance:
     - interrupt_rx_tx:
       - IRQn: 'UART3_RX_TX_IRQn'
       - enable_priority: 'true'
-      - priority: '0'
+      - priority: '5'
     - interrupt_err:
       - IRQn: 'UART3_ERR_IRQn'
       - enable_priority: 'true'
-      - priority: '0'
+      - priority: '5'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 uart_rtos_handle_t UART3_rtos_handle;

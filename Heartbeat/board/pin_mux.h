@@ -55,6 +55,24 @@ void BOARD_InitBootPins(void);
 #define BOARD_MAX30102_INT_PIN_PIN_MASK (1U << 9U)      /*!<@brief PORT pin mask */
                                                         /* @} */
 
+/*! @name PORTC16 (number 90), J1[2]
+  @{ */
+
+/* Symbols to be used with PORT driver */
+#define BOARD_TMR_1588_0_PORT PORTC                /*!<@brief PORT peripheral base pointer */
+#define BOARD_TMR_1588_0_PIN 16U                   /*!<@brief PORT pin number */
+#define BOARD_TMR_1588_0_PIN_MASK (1U << 16U)      /*!<@brief PORT pin mask */
+                                                   /* @} */
+
+/*! @name PORTC17 (number 91), J1[4]
+  @{ */
+
+/* Symbols to be used with PORT driver */
+#define BOARD_TMR_1588_1_PORT PORTC                /*!<@brief PORT peripheral base pointer */
+#define BOARD_TMR_1588_1_PIN 17U                   /*!<@brief PORT pin number */
+#define BOARD_TMR_1588_1_PIN_MASK (1U << 17U)      /*!<@brief PORT pin mask */
+                                                   /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *

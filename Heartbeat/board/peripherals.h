@@ -85,11 +85,11 @@ extern "C" {
 /* UART3 interrupt vector ID (number). */
 #define UART3_SERIAL_RX_TX_IRQN UART3_RX_TX_IRQn
 /* UART3 interrupt vector priority. */
-#define UART3_SERIAL_RX_TX_IRQ_PRIORITY 0
+#define UART3_SERIAL_RX_TX_IRQ_PRIORITY 5
 /* UART3 interrupt vector ID (number). */
 #define UART3_SERIAL_ERROR_IRQN UART3_ERR_IRQn
 /* UART3 interrupt vector priority. */
-#define UART3_SERIAL_ERROR_IRQ_PRIORITY 0
+#define UART3_SERIAL_ERROR_IRQ_PRIORITY 5
 
 /***********************************************************************************************************************
  * Global variables

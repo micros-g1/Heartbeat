@@ -3,9 +3,9 @@
 
 
 static __volatile__ Sensor sensor;
-static TaskHandle_t xTaskTemperature = NULL;
+static TimerHandle_t xTimer = NULL;
 
-void read_temp_callback(void *pvParameters);
+void read_temp_callback(TimerHandle_t xTimer);
 
 void temperature_start_sampling(void);
 void temperature_stop_sampling(void);
@@ -31,26 +31,17 @@ void temperature_init(uint32_t sampling_rate_ms)
 		return;
 	}
 
-	sensor.status = xTaskCreate(
-		read_temp_callback, "temperature task",
-		configMINIMAL_STACK_SIZE + 166, NULL,
-		configTIMER_TASK_PRIORITY, &xTaskTemperature) == pdTRUE;
-	if (!sensor.status) {
-		PRINTF("Temperature task creation failed!.\r\n");
-		return;
+	xTimer = xTimerCreate(
+		"max30205_timer", 		// name for debugging purposes only
+		pdMS_TO_TICKS(sampling_rate_ms),	// period
+		pdTRUE,					// auto-reload timer (as opposed to one-shot)
+		NULL,	            // timer id. it can be NULL if we don't want to use it
+		read_temp_callback		// callback
+	);
+	if (xTimer == NULL) {
+		PRINTF("Temperature sensor could not be initialized!\n");
+		sensor.status = false;
 	}
-
-	// xTimer = xTimerCreate(
-	// 	"max30205_timer", 		// name for debugging purposes only
-	// 	pdMS_TO_TICKS(sampling_rate_ms),	// period
-	// 	pdTRUE,					// auto-reload timer (as opposed to one-shot)
-	// 	NULL,	            // timer id. it can be NULL if we don't want to use it
-	// 	read_temp_callback		// callback
-	// );
-	// if (xTimer == NULL) {
-	// 	PRINTF("Temperature sensor could not be initialized!\n");
-	// 	sensor.status = false;
-	// }
 }
 
 void temperature_stop_sampling(void)
@@ -60,27 +51,19 @@ void temperature_stop_sampling(void)
     
 void temperature_start_sampling(void)
 {
-
-    // sensor.status = xTimerStart(xTimer, 0) == pdTRUE;  // if timer can't be started return immediately
-    // if (!sensor.status) {
-    // 	PRINTF("Temperature sensor timer could not be started!\n");
-    // }
-	// if (xTimerIsTimerActive(xTimer) == pdTRUE) {
-	// 	PRINTF("timer is active :)");
-	// }
+    sensor.status = xTimerStart(xTimer, 0) == pdTRUE;  // if timer can't be started return immediately
+    if (!sensor.status) {
+    	PRINTF("Temperature sensor timer could not be started!\n");
+    }
 }
 
 
 // temperature sensor timer callback
-void read_temp_callback(void *pvParameters)
+void read_temp_callback(TimerHandle_t xTimer)
 {
 	float sample;
-	while (true) {
-		bool status = max30205_temp_read(&sample) == MAX30205_SUCCESS;
-		if (status) {
-			sensor.status = write_sample(sample, EVENT_TEMPERATURE, NULL);
-		}
-
-		vTaskDelay(pdMS_TO_TICKS(50));
+	bool status = max30205_temp_read(&sample) == MAX30205_SUCCESS;
+	if (status) {
+        sensor.status = write_sample(sample, EVENT_TEMPERATURE, NULL);
 	}
 }
