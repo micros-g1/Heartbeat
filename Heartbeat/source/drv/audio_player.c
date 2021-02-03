@@ -82,7 +82,7 @@ audio_player_state_t audio_player_init(uint32_t task_priority){
 	audio_player_state_t correct_init = AUDIO_PLAYER_SUCCESS;
 //	correct_init = flashmem_init() == FLASHMEM_SUCCESS ?
 //			AUDIO_PLAYER_SUCCESS : AUDIO_PLAYER_FAILURE;
-//
+////
 #ifdef FLASHMEM_PROGRAM
 //	if(correct_init == AUDIO_PLAYER_SUCCESS)
 //		correct_init = flashmem_program() == FLASHMEM_SUCCESS ?
@@ -138,9 +138,9 @@ audio_player_state_t audio_player_init(uint32_t task_priority){
 
 audio_player_state_t audio_player_play_audio(audio_player_audio_id_t audio_id){
 	if(!playing){
-//		curr_track = flashmem_get_file((flashmem_file_id_t) audio_id);
-		curr_track.length = MUSIC_LEN;
-		curr_track.start_address = (uint32_t) music;
+		curr_track = flashmem_get_file((flashmem_file_id_t) audio_id);
+//		curr_track.length = MUSIC_LEN;
+//		curr_track.start_address = (uint32_t) music;
 		curr_address = curr_track.start_address;
 		curr_remaining_bytes = curr_track.length;
 		playing = true;
