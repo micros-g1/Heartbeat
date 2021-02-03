@@ -28,22 +28,19 @@ bt_com_state_t BT_com_send_meas(sensor_event_t sens_ev){
 	sens_ev.value = (float)sens_ev.value;
 	bt_com_state_t success = BT_COM_FAILURE;
 	if (BT_com_is_connected()){
-		int j = 0;
+		int i = 0;
 		// header
-		for (int i = 0; i < HEADER_LEN; i++){
+		for (i = 0; i < HEADER_LEN; i++)
 			buffer[i] = (uint8_t)'F';
-			j++;
-		}
+
 		//tag
-		buffer[j++] = BT_com_get_tag(sens_ev.type);
+		buffer[i++] = BT_com_get_tag(sens_ev.type);
 		// length
-		buffer[j++] = (uint8_t)sizeof(sens_ev.value);
+		buffer[i++] = (uint8_t)sizeof(sens_ev.value);
 		// value
-		UART_RTOS_Send(&UART3_rtos_handle, buffer, j);
-		uint8_t * temp = (uint8_t *) &sens_ev.value;
-		for (int i = 0; i < sizeof(sens_ev.value); i ++){
-			UART_RTOS_Send(&UART3_rtos_handle, &temp[i], 1);
-		}
+		memcpy(&buffer[i], &(sens_ev.value), sizeof(sens_ev.value));
+
+		UART_RTOS_Send(&UART3_rtos_handle, buffer, i + sizeof(sens_ev.value));
 
 		success = BT_COM_SUCCESS;
 	}
@@ -106,5 +103,6 @@ uint8_t BT_com_get_tag(sensor_event_type_t event){
 
 bool BT_com_is_connected(){
 	bool ret = GPIO_PinRead(BOARD_HC05_STATE_GPIO, BOARD_HC05_STATE_PIN);
-	return (bool)ret;
+//	return (bool)ret;
+	return true;
 }

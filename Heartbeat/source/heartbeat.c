@@ -43,7 +43,7 @@ int main(void)
     NVIC_SetPriority(PORTB_IRQn, 4);
 
 //    NVIC_SetPriority(ADC0_IRQn, 4);
-//    NVIC_SetPriority(UART3_RX_TX_IRQn, 5);
+    NVIC_SetPriority(UART3_RX_TX_IRQn, 5);
 
     //TODO: ver si las inicilaizaciones de sensores van aca o en la sensor_task
 
