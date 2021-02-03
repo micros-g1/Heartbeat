@@ -9,6 +9,7 @@
 #define DRV_UDA1380_H_
 
 #include <stddef.h>
+#include <drv/uda1380_hw.h>
 
 typedef void (*uda1380_callback_t)(void);
 

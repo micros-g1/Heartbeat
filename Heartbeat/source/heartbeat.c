@@ -34,7 +34,7 @@
  */
 
 /* Default includes. */
-#include <drv/uda1380_hw.h>
+#include <drv/uda1380.h>
 #include <stdio.h>
 #include "board.h"
 #include "peripherals.h"
@@ -43,10 +43,9 @@
 #include "MK64F12.h"
 #include "fsl_debug_console.h"
 /* other includes. */
-#include "music.h"
 #include "drv/audio_player.h"
 #include "drv/flashmem.h"
-
+//#include "music.h"
 /*******************************************************************************
  * TEST SIGNAL
  ******************************************************************************/
@@ -90,8 +89,8 @@ int main(void) {
     BOARD_InitDebugConsole();
 #endif
 
-    if(flashmem_init() == FLASHMEM_SUCCESS)
-    	flashmem_program();
+//    if(flashmem_init() == FLASHMEM_SUCCESS)
+//    	flashmem_program();
 
     NVIC_SetPriority(I2C_A_IRQn, 5);
 
@@ -112,9 +111,17 @@ int main(void) {
     return 0;
 }
 
+void cb(void)
+{
+//	uda1380_playback(music, MUSIC_LEN);
+}
+
 static void example_task(void *pvParameters) {
 	if(audio_player_init(4)==AUDIO_PLAYER_SUCCESS)
 		audio_player_play_audio(AUDIO_PLAYER_BAD_SPO2);
+//	uda1380_init();
+//	uda1380_finished_set_callback(cb);
+//	uda1380_playback(music, MUSIC_LEN);
 
 	for (;;) {
 		vTaskSuspend(NULL);
