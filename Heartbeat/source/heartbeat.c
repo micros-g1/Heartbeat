@@ -43,10 +43,9 @@
 #include "MK64F12.h"
 #include "fsl_debug_console.h"
 /* other includes. */
-#include "drv/max30102.h"
-#include "drv/uda1380.h"
 #include "music.h"
 #include "drv/audio_player.h"
+#include "drv/flashmem.h"
 
 /*******************************************************************************
  * TEST SIGNAL
@@ -91,14 +90,10 @@ int main(void) {
     BOARD_InitDebugConsole();
 #endif
 
-
-//    audio_player_init();
-
+    if(flashmem_init() == FLASHMEM_SUCCESS)
+    	flashmem_program();
 
     NVIC_SetPriority(I2C_A_IRQn, 5);
-
-
-
 
 	/* RTOS Init Tasks. */
 	if (xTaskCreate(example_task, "example_task",
@@ -117,14 +112,10 @@ int main(void) {
     return 0;
 }
 
-void cb(void)
-{
-	uda1380_playback(music, MUSIC_LEN);
-}
 static void example_task(void *pvParameters) {
-	uda1380_init();
-	uda1380_finished_set_callback(cb);
-	uda1380_playback(music, MUSIC_LEN);
+	if(audio_player_init(4)==AUDIO_PLAYER_SUCCESS)
+		audio_player_play_audio(AUDIO_PLAYER_BAD_SPO2);
+
 	for (;;) {
 		vTaskSuspend(NULL);
 	}
