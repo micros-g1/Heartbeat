@@ -38,8 +38,8 @@
 //https://community.nxp.com/t5/Kinetis-Microcontrollers/How-to-write-my-own-data-to-the-flash-of-K64-above-the-program/td-p/653690
 
 #include <drv/flashmem.h>
-#include <drv/uda1380.h>
 #include <drv/audio_player.h>
+#include <drv/uda1380.h>
 #include "fsl_debug_console.h"
 #include "drivers/fsl_uart.h"
 #include <stddef.h>
@@ -60,12 +60,13 @@
 
 typedef flashmem_file_t audio_player_track_t;
 
+static TaskHandle_t xTaskAudioPlayer = NULL;
+static SemaphoreHandle_t xBinarySemaphore = NULL;
+
 static audio_player_track_t curr_track;
 static uint32_t curr_address = (uint32_t)NULL;
 static uint32_t curr_remaining_bytes = 0;
 static bool playing = false;
-static TaskHandle_t xTaskAudioPlayer = NULL;
-static SemaphoreHandle_t xBinarySemaphore = NULL;
 
 static uint8_t buffer1[AUDIO_PLAYER_DATA_CHUNK];
 static uint8_t buffer2[AUDIO_PLAYER_DATA_CHUNK];
@@ -140,8 +141,8 @@ audio_player_state_t audio_player_play_audio(audio_player_audio_id_t audio_id){
 //		curr_track = flashmem_get_file((flashmem_file_id_t) audio_id);
 		curr_track.length = MUSIC_LEN;
 		curr_track.start_address = (uint32_t) music;
-//		curr_address = curr_track.start_address;
-//		curr_remaining_bytes = curr_track.length;
+		curr_address = curr_track.start_address;
+		curr_remaining_bytes = curr_track.length;
 		playing = true;
 		xSemaphoreGive(xBinarySemaphore);
 		return AUDIO_PLAYER_SUCCESS;
@@ -172,28 +173,28 @@ void audio_player_task(void *pvParameters)
 		xSemaphoreTake(xBinarySemaphore, portMAX_DELAY);
 		if(playing){
 			if(curr_remaining_bytes <= 0){
-				curr_track.length = MUSIC_LEN;
-				curr_track.start_address = (uint32_t) music;
-		//		curr_address = curr_track.start_address;
-		//		curr_remaining_bytes = curr_track.length;
+				curr_address = curr_track.start_address;
+				curr_remaining_bytes = curr_track.length;
 			}
-//			for(int i = 0; i < AUDIO_PLAYER_N_BUFFERS; i++){
-//				if(buffer_availables[i] && (curr_remaining_bytes > 0)){
-//					n_bytes_to_cpy = (curr_remaining_bytes > AUDIO_PLAYER_DATA_CHUNK) ?
-//							AUDIO_PLAYER_DATA_CHUNK: curr_remaining_bytes;
-//					memcpy(buffers[i], (uint32_t *)curr_address, n_bytes_to_cpy);
-//					buffer_availables[i] = false;
-//					curr_address += n_bytes_to_cpy;
-//					curr_remaining_bytes -= n_bytes_to_cpy;
-//				}
-//			}
-//			decompress(buffers[curr_decompressing], decompressed_buffers[curr_decompressing]);
-//			uda1380_playback(decompressed_buffers[curr_decompressing], AUDIO_PLAYER_DATA_CHUNK);
-//			uda1380_playback(buffers[curr_decompressing], n_bytes_to_cpy);
-			uda1380_playback(music, MUSIC_LEN);
+			for(int i = 0; i < AUDIO_PLAYER_N_BUFFERS; i++){
+				if(buffer_availables[i] && (curr_remaining_bytes > 0)){
+					n_bytes_to_cpy = (curr_remaining_bytes > AUDIO_PLAYER_DATA_CHUNK) ?
+							AUDIO_PLAYER_DATA_CHUNK: curr_remaining_bytes;
+					memcpy(buffers[i], (uint32_t *)curr_address, n_bytes_to_cpy);
+					buffer_availables[i] = false;
+					curr_address += n_bytes_to_cpy;
+					curr_remaining_bytes -= n_bytes_to_cpy;
+//					decompress(buffers[curr_decompressing], decompressed_buffers[curr_decompressing]);
+				}
+			}
 
-//			curr_decompressing = (curr_decompressing ==
-//					(AUDIO_PLAYER_N_BUFFERS-1)) ? 0 : curr_decompressing + 1;
+//			uda1380_playback(decompressed_buffers[curr_decompressing], AUDIO_PLAYER_DATA_CHUNK);
+			uda1380_playback(buffers[curr_decompressing], n_bytes_to_cpy);
+			buffer_availables[curr_decompressing] = true;
+//			uda1380_playback(music, MUSIC_LEN);
+
+			curr_decompressing = (curr_decompressing ==
+					(AUDIO_PLAYER_N_BUFFERS-1)) ? 0 : curr_decompressing + 1;
 
 		}
 	}
@@ -202,8 +203,7 @@ void audio_player_task(void *pvParameters)
 //called inside an interrupt
 static void uda_finished_chunk(){
 	BaseType_t xHigherPriorityTaskWoken;
-//	xHigherPriorityTaskWoken = pdFALSE;
-	uda1380_playback(music, MUSIC_LEN);
+
 //	buffer_availables[curr_decompressing] = true;
 	xSemaphoreGiveFromISR(xBinarySemaphore, &xHigherPriorityTaskWoken);
 	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
