@@ -4,17 +4,21 @@
  *  Created on: 1 feb. 2021
  *      Author: Tomas
  */
-#include "fsl_debug_console.h"
+//#include "fsl_debug_console.h"
 #include <drv/flashmem.h>
 #include "drivers/fsl_flash.h"
+#include "drivers/fsl_uart.h"
+#include "fsl_ftfx_adapter.h"
 
+#define START_ADDRESS	0x3E800
+#define LAST_ADDRESS	0xFFFF0
 
 static void error_trap();
 
 static flash_config_t config;
-static uint32_t dest_adrss; /* Address of the target location */
 static uint32_t pflashSectorSize;
 
+static flashmem_file_t file_array[FLASHMEM_FILE_COUNT];
 
 flashmem_state_t flashmem_init(){
 	ftfx_security_state_t sec_status = kFTFx_SecurityStateNotSecure;
@@ -32,45 +36,45 @@ flashmem_state_t flashmem_init(){
 		error_trap();
 
 #ifdef FLASHMEM_PROGRAM
-	else
-		PRINTF("FLASH_Init\r\n");
+//	else
+//		PRINTF("FLASH_Init\r\n");
 #endif
 
 	result = FLASH_GetProperty(&config, kFLASH_PropertyPflash0BlockBaseAddr, &pflashBlockBase);
 	if(result != kStatus_FTFx_Success)
 		error_trap();
 #ifdef FLASHMEM_PROGRAM
-	else
-		PRINTF("Get Base Address Property\r\n");
+//	else
+//		PRINTF("Get Base Address Property\r\n");
 #endif
 	result = FLASH_GetProperty(&config, kFLASH_PropertyPflash0TotalSize, &pflashTotalSize);
 	if(result != kStatus_FTFx_Success)
 		error_trap();
 #ifdef FLASHMEM_PROGRAM
-	else
-		PRINTF("Get Flash Total Size\r\n");
+//	else
+//		PRINTF("Get Flash Total Size\r\n");
 #endif
 
 	result = FLASH_GetProperty(&config, kFLASH_PropertyPflash0SectorSize, &pflashSectorSize);
 	if(result != kStatus_FTFx_Success)
 		error_trap();
 #ifdef FLASHMEM_PROGRAM
-	else
-		PRINTF("Get Flash Sector Size\r\n");
+//	else
+//		PRINTF("Get Flash Sector Size\r\n");
 
 	/* print welcome message */
-	PRINTF("\r\n Flash Example Start \r\n");
+//	PRINTF("\r\n Flash Example Start \r\n");
 	/* Print flash information - PFlash. */
-	PRINTF("\r\n Flash Information: ");
-	PRINTF("\r\n Total Program Flash Size:\t%d KB, Hex: (0x%x)", (unsigned int)(pflashTotalSize / 1024),
-			(unsigned int)pflashTotalSize);
-	PRINTF("\r\n Program Flash Sector Size:\t%d KB, Hex: (0x%x) ", (unsigned int)(pflashSectorSize / 1024),
-			(unsigned int)pflashSectorSize);
+//	PRINTF("\r\n Flash Information: ");
+//	PRINTF("\r\n Total Program Flash Size:\t%d KB, Hex: (0x%x)", (unsigned int)(pflashTotalSize / 1024),
+//			(unsigned int)pflashTotalSize);
+//	PRINTF("\r\n Program Flash Sector Size:\t%d KB, Hex: (0x%x) ", (unsigned int)(pflashSectorSize / 1024),
+//			(unsigned int)pflashSectorSize);
 #endif
 
     result = FLASH_GetSecurityState(&config, &sec_status);
     if (result != kStatus_FTFx_Success){
-		PRINTF("FLASH_Init error  result = %d \r\n", (int) result);
+//		PRINTF("FLASH_Init error  result = %d \r\n", (int) result);
 		error_trap();
     }
 
@@ -79,25 +83,23 @@ flashmem_state_t flashmem_init(){
 	switch (sec_status)
 	{
 		case kFTFx_SecurityStateNotSecure:
-			PRINTF("\r\n Flash is UNSECURE!");
+//			PRINTF("\r\n Flash is UNSECURE!");
 			break;
 		case kFTFx_SecurityStateBackdoorEnabled:
-			PRINTF("\r\n Flash is SECURE, BACKDOOR is ENABLED!");
+//			PRINTF("\r\n Flash is SECURE, BACKDOOR is ENABLED!");
 			break;
 		case kFTFx_SecurityStateBackdoorDisabled:
-			PRINTF("\r\n Flash is SECURE, BACKDOOR is DISABLED!");
+//			PRINTF("\r\n Flash is SECURE, BACKDOOR is DISABLED!");
 			break;
 		default:
 			break;
 	}
-	PRINTF("\r\n");
+//	PRINTF("\r\n");
 
     /* Debug message for user. */
     /* Erase several sectors on upper pflash block where there is no code */
-    PRINTF("\r\n Erase a sector of flash");
+//    PRINTF("\r\n Erase a sector of flash");
 #endif
-    /* Erase a sector from destAdrss. */
-    dest_adrss = pflashBlockBase + (pflashTotalSize - pflashSectorSize);
 
     return result == kStatus_FTFx_Success ? FLASHMEM_SUCCESS : FLASHMEM_FAILURE;
 
@@ -106,55 +108,91 @@ flashmem_state_t flashmem_init(){
 
 #ifdef FLASHMEM_PROGRAM
 flashmem_state_t flashmem_program(){
-    uint32_t failAddr, failDat;
 
-    uint32_t buffer[FLASHMEM_BUFFER_LEN] = {0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD}; /* Buffer for program */
+	// Borrar la flash
     uint32_t result;
 
-    result = FLASH_Erase(&config, dest_adrss, pflashSectorSize, kFTFx_ApiEraseKey);
+    result = FLASH_Erase(&config, START_ADDRESS, LAST_ADDRESS - START_ADDRESS, kFTFx_ApiEraseKey);
     if (result != kStatus_FTFx_Success){
         error_trap();
     }
 
     /* Verify sector if it's been erased. */
-    result = FLASH_VerifyErase(&config, dest_adrss, pflashSectorSize, kFTFx_MarginValueUser);
+    result = FLASH_VerifyErase(&config, START_ADDRESS, LAST_ADDRESS - START_ADDRESS, kFTFx_MarginValueUser);
     if (result != kStatus_FTFx_Success){
         error_trap();
     }
 
     /* Print message for user. */
-    PRINTF("\r\n Successfully Erased Sector 0x%x -> 0x%x\r\n", (unsigned int)dest_adrss,
-    		(unsigned int)(dest_adrss + pflashSectorSize));
+//    PRINTF("\r\n Successfully Erased Sector 0x%x -> 0x%x\r\n", (unsigned int)START_ADDRESS,
+//    		(unsigned int)(START_ADDRESS + (LAST_ADDRESS - START_ADDRESS)));
 
-    /* Print message for user. */
-    PRINTF("\r\n Program a buffer to a sector of flash ");
 
-    result = FLASH_Program(&config, dest_adrss, (uint8_t *)buffer, FLASHMEM_BUFFER_LEN * sizeof(buffer[0]));
-    if (kStatus_FLASH_Success != result){
-        error_trap();
-    }
+    // programar flash
+	uint8_t n_sectors;
+	uint8_t temp_buffer[FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE];
+	uint32_t flashed_sectors_counter = 0;
+    uint32_t failAddr, failDat;
 
-    /* Program Check user margin levels */
-    result = FLASH_VerifyProgram(&config, dest_adrss, FLASHMEM_BUFFER_LEN * sizeof(buffer[0]), (uint8_t *)buffer, kFTFx_MarginValueUser, &failAddr,
-                                 &failDat);
-    if (result != kStatus_FTFx_Success){
-        error_trap();
-    }
-    PRINTF("\r\n Successfully Programmed and Verified Location 0x%x -> 0x%x \r\n", (unsigned int)dest_adrss,
-           (unsigned int)(dest_adrss + FLASHMEM_BUFFER_LEN * sizeof(buffer[0])));
+	UART_WriteBlocking(UART0, "Go\n", strlen("Go\n"));
 
-    /* Print finished message. */
-    PRINTF("\r\n End of Flash Example \r\n");
+	for(int j = 0; j < FLASHMEM_FILE_COUNT; j++){
+		// esperar el numero de sectores que debo recibir
+		UART_ReadBlocking(UART0, &n_sectors, 1);
+		file_array[j].length = FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE * n_sectors;
+		file_array[j].start_address = START_ADDRESS + flashed_sectors_counter * FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE;
+		for(int i = 0; i < n_sectors; i++){
+			UART_ReadBlocking(UART0, &temp_buffer, FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE);
+
+			/* Print message for user. */
+//			PRINTF("\r\n Program a buffer to a sector of flash ");
+
+			uint32_t dest_address = START_ADDRESS + flashed_sectors_counter * FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE;
+
+			result = FLASH_Program(&config, dest_address, temp_buffer, sizeof(temp_buffer));
+			if (kStatus_FLASH_Success != result){
+				error_trap();
+			}
+
+			/* Program Check user margin levels */
+			result = FLASH_VerifyProgram(&config, dest_address, sizeof(temp_buffer), temp_buffer, kFTFx_MarginValueUser, &failAddr,
+										 &failDat);
+			if (result != kStatus_FTFx_Success){
+				error_trap();
+			}
+//			PRINTF("\r\n Successfully Programmed and Verified Location 0x%x -> 0x%x \r\n", (unsigned int)dest_address,
+//			           (unsigned int)(dest_address + sizeof(temp_buffer)));
+
+			UART_WriteBlocking(UART0, "OK\n", strlen("OK\n"));
+
+			flashed_sectors_counter++;
+//			PRINTF("\r\nChunk Numero %d", flashed_sectors_counter);
+		}
+	}
 
     return result == kStatus_FTFx_Success ? FLASHMEM_SUCCESS : FLASHMEM_FAILURE;
 }
 #endif
+
+flashmem_file_t flashmem_get_file(flashmem_file_id_t file_id){
+	// Check if file id is in range
+	flashmem_file_t ret;
+	if(file_id < FLASHMEM_FILE_COUNT)
+		ret =  file_array[file_id];
+	else{
+		ret.start_address = 0x00;
+		ret.length = 0U;
+	}
+	return ret;
+
+}
+
 /*
 * @brief Gets called when an error occurs.
 *
 * @details Print error message and trap forever.
 */
 static void error_trap(){
-    PRINTF("\r\n\r\n\r\n\t---- HALTED DUE TO FLASH ERROR! ----");
+//    PRINTF("\r\n\r\n\r\n\t---- HALTED DUE TO FLASH ERROR! ----");
     while (1);
 }
