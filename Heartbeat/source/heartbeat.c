@@ -47,6 +47,9 @@
 #include "drv/uda1380.h"
 #include "music.h"
 #include "drv/audio_player.h"
+#include "libs/helix/pub/mp3dec.h"
+#include "mp3_sample.h"
+#include "drv/mp3wrap.h"
 
 /*******************************************************************************
  * TEST SIGNAL
@@ -80,9 +83,11 @@ static void example_task(void *pvParameters);
  */
 
 
-int main(void) {
+uint8_t decoded[100000] = {};
 
+int main(void) {
   	/* Init board hardware. */
+	uint8_t* dataout = decoded;
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
@@ -90,44 +95,16 @@ int main(void) {
     /* Init FSL debug console. */
     BOARD_InitDebugConsole();
 #endif
-
-
-//    audio_player_init();
-
-
-    NVIC_SetPriority(I2C_A_IRQn, 5);
-
-
-
-
-	/* RTOS Init Tasks. */
-	if (xTaskCreate(example_task, "example_task",
-	configMINIMAL_STACK_SIZE + 166, NULL, mainEXAMPLE_TASK_PRIORITY, NULL) != pdPASS) {
-		PRINTF("Example task creation failed!.\r\n");
-		while (1)
-			;
-	}
-	else {
-		setvbuf (stdout, NULL, _IONBF, 0);
-		PRINTF("Empezo\n");
-	}
-	vTaskStartScheduler();
-	for (;;)
-		;
-    return 0;
-}
-
-void cb(void)
-{
-	uda1380_playback(music, MUSIC_LEN);
-}
-static void example_task(void *pvParameters) {
-	uda1380_init();
-	uda1380_finished_set_callback(cb);
-	uda1380_playback(music, MUSIC_LEN);
-	for (;;) {
-		vTaskSuspend(NULL);
-	}
-
+    mp3wrap_init();
+    mp3wrap_setdata(mp3_sample, sizeof(mp3_sample)/sizeof(mp3_sample[0]));
+    int size = 0;
+    while(!mp3wrap_finished())
+    {
+    	size_t bytesread = 0;
+    	mp3wrap_decode_next(dataout, &bytesread);
+    	dataout += bytesread;
+    	size += bytesread;
+    }
+    mp3wrap_deinit();
 }
 
