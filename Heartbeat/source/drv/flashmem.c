@@ -130,7 +130,7 @@ flashmem_state_t flashmem_program(){
 
     // programar flash
 	uint8_t n_sectors;
-	uint8_t temp_buffer[FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE];
+	uint8_t temp_buffer[FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE + 1];
 	uint32_t flashed_sectors_counter = 0;
     uint32_t failAddr, failDat;
 
@@ -142,7 +142,11 @@ flashmem_state_t flashmem_program(){
 		file_array[j].length = FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE * n_sectors;
 		file_array[j].start_address = START_ADDRESS + flashed_sectors_counter * FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE;
 		for(int i = 0; i < n_sectors; i++){
-			UART_ReadBlocking(UART0, &temp_buffer, FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE);
+			UART_ReadBlocking(UART0, &temp_buffer, FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE + 1);
+
+			if (flashmem_checksum(temp_buffer, FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE + 1) != 0x00){
+				error_trap();
+			}
 
 			/* Print message for user. */
 //			PRINTF("\r\n Program a buffer to a sector of flash ");
@@ -187,6 +191,17 @@ flashmem_file_t flashmem_get_file(flashmem_file_id_t file_id){
 
 }
 
+/*
+If you pass it a block of data without a checksum on the end, it will give you the checksum.
+If you pass it a block with the checksum on the end, it will give you zero for a good checksum, or non-zero if the checksum is bad.
+*/
+
+uint8_t flashmem_checksum (uint8_t *ptr, uint32_t sz) {
+    unsigned char chk = 0;
+    while (sz-- != 0)
+        chk -= *ptr++;
+    return chk;
+}
 /*
 * @brief Gets called when an error occurs.
 *
