@@ -1,11 +1,18 @@
-#include "defs.h"
+#include <stdio.h>
 #include "board.h"
 #include "peripherals.h"
+#include "pin_mux.h"
+#include "clock_config.h"
+#include "MK64F12.h"
+#include "fsl_debug_console.h"
+
+//other includes
+#include "defs.h"
 #include "sensors/EkgSensor.h"
 #include "sensors/Spo2Sensor.h"
 #include "sensors/TemperatureSensor.h"
 #include "bt_com.h"
-#include "fsl_debug_console.h"
+
 
 QueueHandle_t xSensorQueue = NULL;
 QueueHandle_t xCommsQueue = NULL;
@@ -63,7 +70,7 @@ int main(void)
 
 	xCommsQueue = xQueueCreate(UI_SENSOR_QUEUE_LENGTH, sizeof(sensor_event_t));
 
-	xTaskCreate(sensors_task, "sensor task", configMINIMAL_STACK_SIZE + 166, NULL, SENSOR_TASK_PRIORITY, NULL);
+	xTaskCreate(sensors_task, "sensor task", configMINIMAL_STACK_SIZE + 500, NULL, SENSOR_TASK_PRIORITY, NULL);
 //	xTaskCreate(comms_task, "comms task", configMINIMAL_STACK_SIZE + 166, NULL, COMMS_TASK_PRIORITY, NULL);
 
 	vTaskStartScheduler();

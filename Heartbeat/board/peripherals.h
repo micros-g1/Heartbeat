@@ -44,6 +44,8 @@ extern "C" {
 #define I2C0_CLOCK_SOURCE I2C0_CLK_SRC
 /* Definition of the clock source frequency */
 #define I2C0_CLK_FREQ CLOCK_GetFreq(I2C0_CLOCK_SOURCE)
+/* I2C0 interrupt vector ID (number). */
+#define I2C0_IRQN I2C0_IRQn
 /* Definition of peripheral ID */
 #define I2S0_PERIPHERAL I2S0
 /* Master clock source frequency used for calculating the master clock divider, not available on all devices. */
@@ -68,6 +70,10 @@ extern "C" {
 #define UART3_CLOCK_SOURCE CLOCK_GetFreq(UART3_CLK_SRC)
 /* Definition of the backround buffer size */
 #define UART3_BACKGROUND_BUFFER_SIZE 2000
+/* UART3 interrupt vector ID (number). */
+#define UART3_SERIAL_RX_TX_IRQN UART3_RX_TX_IRQn
+/* UART3 interrupt vector ID (number). */
+#define UART3_SERIAL_ERROR_IRQN UART3_ERR_IRQn
 /* Alias for ADC0 peripheral */
 #define ADC0_PERIPHERAL ADC0
 /* ADC0 interrupt vector ID (number). */
@@ -110,6 +116,7 @@ extern const pit_config_t PIT_config;
 /***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
+
 void BOARD_InitPeripherals(void);
 
 /***********************************************************************************************************************

@@ -8,7 +8,10 @@
 
 static __volatile__ Sensor sensor;
 static TaskHandle_t xTaskSpo2 = NULL;
+static TaskHandle_t xTaskHrSpo2 = NULL;
+
 static SemaphoreHandle_t xBinarySemaphore = NULL;
+static SemaphoreHandle_t xBinarySemaphore_calculus = NULL;
 
 
 /*******************************************************************************
@@ -17,6 +20,8 @@ static SemaphoreHandle_t xBinarySemaphore = NULL;
 #define MAX_SAMP_CHARS 9
 #define RF_SAMPLES 100
 #define RF_SAMPLES_MARGIN 20
+
+#define SPO2_SENSOR_N_BUFFERS 2
 
 #define UINT18_MAX	((0x00000001<<18) - 1)
 
@@ -30,8 +35,15 @@ char spo2[5];
 
 static uint32_t curr_buffer_n_samples = 0;
 
-uint32_t ir_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
-uint32_t red_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
+static uint32_t ir_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
+static uint32_t red_led_samples[RF_SAMPLES + RF_SAMPLES_MARGIN];
+static uint32_t ir_led_samples1[RF_SAMPLES + RF_SAMPLES_MARGIN];
+static uint32_t red_led_samples1[RF_SAMPLES + RF_SAMPLES_MARGIN];
+
+static uint32_t * ir_buffers[SPO2_SENSOR_N_BUFFERS] = {ir_led_samples, ir_led_samples1};
+static uint32_t * red_buffers[SPO2_SENSOR_N_BUFFERS] = {red_led_samples, red_led_samples1};
+
+static int curr_buffer = 0;	//buffer that is being filled.
 
 static int32_t curr_heart_rate = 0;
 static int8_t curr_hr_valid = 0;
@@ -40,7 +52,7 @@ static int8_t curr_spo2_valid = 0;
 static float curr_ratio = 0;
 static float curr_correl = 0;
 
-
+void hr_spo2_task(void *pvParameters);
 void spo2_task(void *pvParameters);
 
 void spo2_init(uint32_t task_priority);
@@ -105,12 +117,21 @@ void spo2_init(uint32_t task_priority)
 			spo2_task, "spo2 task",
 			configMINIMAL_STACK_SIZE + 166, NULL,
 			task_priority, &xTaskSpo2) == pdTRUE;
+
+	sensor.status = xTaskCreate(
+			hr_spo2_task, "hr spo2 task",
+			configMINIMAL_STACK_SIZE + 500, NULL,
+			task_priority-1, &xTaskHrSpo2) == pdTRUE;
+
 	if (!sensor.status) {
 		PRINTF("Spo2 task creation failed!.\r\n");
 		return;
 	}
 
 	sensor.status = (xBinarySemaphore = xSemaphoreCreateBinary()) != NULL;
+	if(sensor.status)
+		sensor.status = (xBinarySemaphore_calculus = xSemaphoreCreateBinary()) != NULL;
+
 	if (!sensor.status) {
 		PRINTF("Spo2 semaphore creation failed!.\r\n");
 		return;
@@ -118,7 +139,9 @@ void spo2_init(uint32_t task_priority)
 
 	for(int i=0; i < RF_SAMPLES + RF_SAMPLES_MARGIN;i++){
 		ir_led_samples[i] = 0;
+		ir_led_samples1[i] = 0;
 		red_led_samples[i] = 0;
+		red_led_samples1[i] = 0;
 	}
 
 	set_limits(EVENT_SPO2_EKG, 0.0, 1.0);
@@ -141,6 +164,20 @@ void spo2_stop_sampling(void)
 	vTaskSuspend(xTaskSpo2);
 }
 
+void hr_spo2_task(void *pvParameters){
+	uint8_t curr_debuffer = 0;
+	while(true){
+		xSemaphoreTake(xBinarySemaphore_calculus, portMAX_DELAY);
+		curr_debuffer = ((curr_buffer-1) == -1) ? (SPO2_SENSOR_N_BUFFERS-1): curr_buffer-1;
+		rf_heart_rate_and_oxygen_saturation(red_buffers[curr_debuffer], RF_SAMPLES, ir_buffers[curr_debuffer],
+			&curr_spo2, &curr_spo2_valid, &curr_heart_rate, &curr_hr_valid, &curr_ratio, &curr_correl);
+
+		if(curr_hr_valid && curr_spo2_valid){
+			write_sample((float)curr_heart_rate, EVENT_SPO2_BPM, NULL);
+			write_sample((float)curr_spo2, EVENT_SPO2_SPO2, NULL);
+		}
+	}
+}
 
 void spo2_task(void *pvParameters)
 {
@@ -162,25 +199,19 @@ void spo2_task(void *pvParameters)
 				uint32_t aux_sample_ir = 0;
 
 				max30102_read_sample(&aux_sample_ir, &aux_sample_red);
-				ir_led_samples[curr_buffer_n_samples] = aux_sample_ir;
-				red_led_samples[curr_buffer_n_samples] = aux_sample_red;
+				ir_buffers[curr_buffer][curr_buffer_n_samples] = aux_sample_ir;
+				red_buffers[curr_buffer][curr_buffer_n_samples] = aux_sample_red;
 
 				write_sample(((float)aux_sample_ir) / ((float)UINT18_MAX), EVENT_SPO2_EKG, NULL);
 
 				curr_buffer_n_samples++;
 
-
 				//is the buffer full ? (should the accumulated samples be processed?)
 				if(curr_buffer_n_samples >= RF_SAMPLES){
-					//the red led is switched with the ir led on the board.
-					rf_heart_rate_and_oxygen_saturation(red_led_samples, RF_SAMPLES, ir_led_samples,
-						&curr_spo2, &curr_spo2_valid, &curr_heart_rate, &curr_hr_valid, &curr_ratio, &curr_correl);
-
-					if(curr_hr_valid && curr_spo2_valid){
-						write_sample((float)curr_heart_rate, EVENT_SPO2_BPM, NULL);
-						write_sample((float)curr_spo2, EVENT_SPO2_SPO2, NULL);
-					}
+					curr_buffer = curr_buffer == (SPO2_SENSOR_N_BUFFERS-1) ? 0 : curr_buffer + 1;
 					curr_buffer_n_samples = 0;
+					//the red led is switched with the ir led on the board.
+					xSemaphoreGive(xBinarySemaphore_calculus);
 				}
 			}
 			if(max30102_interrupts.alc_ovf){

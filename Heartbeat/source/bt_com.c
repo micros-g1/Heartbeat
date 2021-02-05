@@ -8,7 +8,7 @@
 #include "board/peripherals.h"
 #include "board/pin_mux.h"
 
-#define HEADER_LEN	4
+#define HEADER_LEN	1
 
 uint8_t BT_com_get_tag(sensor_event_type_t event);
 
