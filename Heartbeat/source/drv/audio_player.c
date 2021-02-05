@@ -74,7 +74,7 @@ static uint8_t * buffers[AUDIO_PLAYER_N_BUFFERS] = {buffer1, buffer2};
 static bool buffer_availables[AUDIO_PLAYER_N_BUFFERS] = {true, true};
 static int curr_decompressing = 0;
 static uint8_t decoded[100000] = {};
-
+static uint8_t *dataout = decoded;
 static void uda_finished_chunk();
 
 void audio_player_task(void *pvParameters);
@@ -197,7 +197,7 @@ void audio_player_task(void *pvParameters)
 		    while(!mp3wrap_finished())
 		    {
 		    	size_t bytesread = 0;
-		    	mp3wrap_decode_next(decoded, &bytesread);
+		    	mp3wrap_decode_next(dataout, &bytesread);
 		    	dataout += bytesread;
 		    	size += bytesread;
 		    }

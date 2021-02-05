@@ -11,6 +11,8 @@ def _wait_4_rdy(s, num):
             if response == "OK\n":
                 ready = True
                 print('OK: ', num)
+            else:
+                Exception('Error')
 
         except:
             pass
@@ -42,11 +44,15 @@ def send_file(filename):
         with serial.Serial('COM5', 115200, timeout=100) as s:
 
             s.write(amount_sectors.to_bytes(length=1, byteorder='little'))
-
             for sector in range(amount_sectors - augment):
                 for _ in range(bytes_per_sector // bytes_per_data):
-                    s.write(file.read(bytes_per_data))
-                _wait_4_rdy(s, sector+1)
+                    aux = file.read(bytes_per_data)
+                    s.write(aux)
+                    if aux == s.read(bytes_per_data):
+                        s.write(b'ACK\n')
+                    else:
+                        s.write(b'NAK\n')
+                    _wait_4_rdy(s, sector+1)
 
             # missing one (incomplete) sector?
             if augment == 1:
@@ -57,4 +63,8 @@ def send_file(filename):
                 for _ in range(bytes_per_sector - amount_bytes % bytes_per_sector):
                     for i in range(bytes_per_data):
                         s.write(b'\x00')
-                _wait_4_rdy(s, amount_sectors)
+                    if s.read(bytes_per_data) != b'\x00\x00':
+                        s.write(b'ACK\n')
+                    else:
+                        s.write(b'NAK\n')
+                    _wait_4_rdy(s, amount_sectors)
