@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 /**
  * @file    heartbeat.c
  * @brief   Application entry point.
@@ -44,7 +44,10 @@
 
 /* other includes. */
 #include "drv/audio_player.h"
-#include "drv/flashmem.h"
+#include "libs/helix/pub/mp3dec.h"
+#include "mp3_sample.h"
+#include "drv/mp3wrap.h"
+
 /*******************************************************************************
  * TEST SIGNAL
  ******************************************************************************/
@@ -77,9 +80,11 @@ static void example_task(void *pvParameters);
  */
 
 
-int main(void) {
+uint8_t decoded[100000] = {};
 
+int main(void) {
   	/* Init board hardware. */
+	uint8_t* dataout = decoded;
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
@@ -126,5 +131,16 @@ static void example_task(void *pvParameters) {
 		vTaskSuspend(NULL);
 	}
 
-}
 
+    mp3wrap_init();
+    mp3wrap_setdata(mp3_sample, sizeof(mp3_sample)/sizeof(mp3_sample[0]));
+    int size = 0;
+    while(!mp3wrap_finished())
+    {
+    	size_t bytesread = 0;
+    	mp3wrap_decode_next(dataout, &bytesread);
+    	dataout += bytesread;
+    	size += bytesread;
+    }
+    mp3wrap_deinit();
+}
