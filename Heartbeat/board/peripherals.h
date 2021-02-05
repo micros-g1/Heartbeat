@@ -67,7 +67,7 @@ extern "C" {
 /* Definition of the clock source frequency */
 #define UART3_CLOCK_SOURCE CLOCK_GetFreq(UART3_CLK_SRC)
 /* Definition of the backround buffer size */
-#define UART3_BACKGROUND_BUFFER_SIZE 100
+#define UART3_BACKGROUND_BUFFER_SIZE 2000
 /* Alias for ADC0 peripheral */
 #define ADC0_PERIPHERAL ADC0
 /* ADC0 interrupt vector ID (number). */

@@ -178,7 +178,7 @@ void spo2_task(void *pvParameters)
 
 					if(curr_hr_valid && curr_spo2_valid){
 						write_sample((float)curr_heart_rate, EVENT_SPO2_BPM, NULL);
-						write_sample(((float)curr_spo2)/100.0, EVENT_SPO2_SPO2, NULL);
+						write_sample((float)curr_spo2, EVENT_SPO2_SPO2, NULL);
 					}
 					curr_buffer_n_samples = 0;
 				}

@@ -324,7 +324,7 @@ instance:
       - baudrate: '9600'
       - parity: 'kUART_ParityDisabled'
       - stopbits: 'kUART_OneStopBit'
-      - buffer_size: '100'
+      - buffer_size: '2000'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 uart_rtos_handle_t UART3_rtos_handle;
