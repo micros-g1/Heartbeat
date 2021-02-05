@@ -43,10 +43,10 @@
 #include "fsl_debug_console.h"
 
 /* other includes. */
+#include "drv/flashmem.h"
 #include "drv/audio_player.h"
 #include "libs/helix/pub/mp3dec.h"
 #include "mp3_sample.h"
-#include "drv/mp3wrap.h"
 
 /*******************************************************************************
  * TEST SIGNAL
@@ -80,11 +80,10 @@ static void example_task(void *pvParameters);
  */
 
 
-uint8_t decoded[100000] = {};
+
 
 int main(void) {
   	/* Init board hardware. */
-	uint8_t* dataout = decoded;
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
@@ -127,20 +126,9 @@ static void example_task(void *pvParameters) {
 //	vTaskDelay(pdMS_TO_TICKS(2000));
 //	audio_player_play_audio(AUDIO_PLAYER_BAD_SPO2);
 
+
+
 	for (;;) {
 		vTaskSuspend(NULL);
 	}
-
-
-    mp3wrap_init();
-    mp3wrap_setdata(mp3_sample, sizeof(mp3_sample)/sizeof(mp3_sample[0]));
-    int size = 0;
-    while(!mp3wrap_finished())
-    {
-    	size_t bytesread = 0;
-    	mp3wrap_decode_next(dataout, &bytesread);
-    	dataout += bytesread;
-    	size += bytesread;
-    }
-    mp3wrap_deinit();
 }

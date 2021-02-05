@@ -37,7 +37,7 @@ typedef enum{
 
 flashmem_state_t flashmem_init();
 flashmem_file_t flashmem_get_file(flashmem_file_id_t file_id);
-
+uint8_t flashmem_checksum (uint8_t *ptr, uint32_t sz);
 
 #ifdef FLASHMEM_PROGRAM
 flashmem_state_t flashmem_program();

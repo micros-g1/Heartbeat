@@ -45,8 +45,8 @@
 #include <stddef.h>
 #include "semphr.h"
 #include "task.h"
-
 #include "music.h"
+#include "drv/mp3wrap.h"
 
 #define AUDIO_PLAYER_DATA_CHUNK 4096
 #define AUDIO_PLAYER_N_BUFFERS 2
@@ -73,6 +73,7 @@ static uint8_t buffer2[AUDIO_PLAYER_DATA_CHUNK];
 static uint8_t * buffers[AUDIO_PLAYER_N_BUFFERS] = {buffer1, buffer2};
 static bool buffer_availables[AUDIO_PLAYER_N_BUFFERS] = {true, true};
 static int curr_decompressing = 0;
+static uint8_t decoded[100000] = {};
 
 static void uda_finished_chunk();
 
@@ -133,6 +134,10 @@ audio_player_state_t audio_player_init(uint32_t task_priority){
 #endif
 //#endif
 
+    mp3wrap_init();
+
+//    mp3wrap_deinit();
+
 	return correct_init;
 }
 
@@ -184,14 +189,20 @@ void audio_player_task(void *pvParameters)
 					buffer_availables[i] = false;
 					curr_address += n_bytes_to_cpy;
 					curr_remaining_bytes -= n_bytes_to_cpy;
-//					decompress(buffers[curr_decompressing], decompressed_buffers[curr_decompressing]);
 				}
 			}
 
-//			uda1380_playback(decompressed_buffers[curr_decompressing], AUDIO_PLAYER_DATA_CHUNK);
-			uda1380_playback(buffers[curr_decompressing], n_bytes_to_cpy);
+		    mp3wrap_setdata(buffers[curr_decompressing], AUDIO_PLAYER_DATA_CHUNK*sizeof(buffer1[0]));
+		    int size = 0;
+		    while(!mp3wrap_finished())
+		    {
+		    	size_t bytesread = 0;
+		    	mp3wrap_decode_next(decoded, &bytesread);
+		    	dataout += bytesread;
+		    	size += bytesread;
+		    }
+			uda1380_playback(decoded, size);
 			buffer_availables[curr_decompressing] = true;
-//			uda1380_playback(music, MUSIC_LEN);
 
 			curr_decompressing = (curr_decompressing ==
 					(AUDIO_PLAYER_N_BUFFERS-1)) ? 0 : curr_decompressing + 1;
