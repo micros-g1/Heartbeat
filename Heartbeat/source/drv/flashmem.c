@@ -134,6 +134,7 @@ flashmem_state_t flashmem_program(){
 	uint32_t flashed_sectors_counter = 0;
     uint32_t failAddr, failDat;
 	uint8_t check = 0;
+	uint8_t	result_buff[100];
 
 	UART_WriteBlocking(UART0, "Go\n", strlen("Go\n"));
 
@@ -143,10 +144,16 @@ flashmem_state_t flashmem_program(){
 		file_array[j].length = FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE * n_sectors;
 		file_array[j].start_address = START_ADDRESS + flashed_sectors_counter * FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE;
 		for(int i = 0; i < n_sectors; i++){
-			UART_ReadBlocking(UART0, &temp_buffer, FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE);
-			UART_ReadBlocking(UART0, &check, sizeof(check));
+			UART_ReadBlocking(UART0, temp_buffer, FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE);
 
-			if (flashmem_checksum(temp_buffer, FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE) != check){
+			UART_WriteBlocking(UART0, temp_buffer, FLASH0_FEATURE_PFLASH_BLOCK_SECTOR_SIZE);
+
+			UART_ReadBlocking(UART0, result_buff, 4);
+
+			if (strcmp(result_buff, "ACK") == 0){
+				UART_WriteBlocking(UART0, "OK\n", strlen("OK\n"));
+			} else if(strcmp(result_buff, "NAK") == 0){
+				UART_WriteBlocking(UART0, "NOK\n", strlen("NOK\n"));
 				error_trap();
 			}
 
