@@ -43,10 +43,9 @@
 #include "fsl_debug_console.h"
 
 /* other includes. */
-#include "drv/flashmem.h"
 #include "drv/audio_player.h"
 #include "libs/helix/pub/mp3dec.h"
-#include "mp3_sample.h"
+//#include "mp3_sample.h"
 
 /*******************************************************************************
  * TEST SIGNAL
@@ -92,9 +91,6 @@ int main(void) {
     BOARD_InitDebugConsole();
 #endif
 
-    if(flashmem_init() == FLASHMEM_SUCCESS)
-    	if(flashmem_program() == FLASHMEM_SUCCESS)
-    		PRINTF("INIT CORRECT\r\n");
 
     NVIC_SetPriority(I2C_A_IRQn, 5);
 	NVIC_SetPriority(I2S0_Tx_IRQn, 5);
@@ -117,16 +113,14 @@ int main(void) {
 }
 
 static void example_task(void *pvParameters) {
-	if(audio_player_init(4)==AUDIO_PLAYER_SUCCESS)
+
+	if(audio_player_init(4)==AUDIO_PLAYER_SUCCESS){
+		audio_player_play_audio(AUDIO_PLAYER_BAD_TEMP);
+		vTaskDelay(pdMS_TO_TICKS(2000));
+		audio_player_stop_curr_audio();
+		vTaskDelay(pdMS_TO_TICKS(2000));
 		audio_player_play_audio(AUDIO_PLAYER_BAD_SPO2);
-
-//	vTaskDelay(pdMS_TO_TICKS(2000));
-//	audio_player_stop_curr_audio();
-//
-//	vTaskDelay(pdMS_TO_TICKS(2000));
-//	audio_player_play_audio(AUDIO_PLAYER_BAD_SPO2);
-
-
+	}
 
 	for (;;) {
 		vTaskSuspend(NULL);

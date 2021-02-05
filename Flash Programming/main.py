@@ -41,8 +41,6 @@ if __name__ == '__main__':
     # values[9] = 0b011111  # make last one different so it can be spotted
     bit_w = 8
     f_name = 'data.bin'
-    # print(len(values))
-    # print(values[0:4096])
-    # print(values[4096:])
+
     run_bin_writer(vals=values, bitwidth=bit_w, filename=f_name)
-    send_file(filename=f_name)
+    # send_file(filename=f_name)

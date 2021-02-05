@@ -20,7 +20,8 @@ typedef enum
 {
 	AUDIO_PLAYER_BAD_SPO2 = 0x00,
 	AUDIO_PLAYER_BAD_HR = 0x01,
-	AUDIO_PLAYER_BAD_TEMP = 0x02
+	AUDIO_PLAYER_BAD_TEMP = 0x02,
+	AUDIO_PLAYER_N_AUDIOS = 0x03
 }audio_player_audio_id_t;
 
 audio_player_state_t audio_player_init(uint32_t task_priority);
