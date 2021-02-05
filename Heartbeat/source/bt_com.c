@@ -54,17 +54,17 @@ bt_com_state_t BT_com_set_alarm(sensor_event_type_t source, bool set){
 
 	bt_com_state_t success = BT_COM_FAILURE;
 	if(BT_com_is_connected()){
-		int j = 0;
+		int i = 0;
 		// header
-		for (int i = 0; i < HEADER_LEN; i++){
+		for (i = 0; i < HEADER_LEN; i++)
 			buffer[i] = (uint8_t)'F';
-			j++;
-		}
+
 		//tag
-		buffer[j++] = (uint8_t)'A';
-		buffer[j++] = BT_com_get_tag(source);
-		buffer[j++] = (uint8_t)(set ? 'S' : 'R');
-		UART_RTOS_Send(&UART3_rtos_handle, buffer, j);
+		buffer[i++] = (uint8_t)'A';
+		buffer[i++] = 2;
+		buffer[i++] = BT_com_get_tag(source);
+		buffer[i++] = (uint8_t)(set ? 'S' : 'R');
+		UART_RTOS_Send(&UART3_rtos_handle, buffer, i);
 		success = BT_COM_SUCCESS;
 	}else{
 		success = BT_COM_FAILURE;

@@ -1,6 +1,7 @@
 #include "EkgSensor.h"
 #include "drv/ad8232/ad8232.h"
 
+#define UINT12_MAX	((0x00000001<<10) - 1)
 
 static __volatile__ Sensor sensor;
 
@@ -26,11 +27,11 @@ void ekg_init(uint32_t sampling_rate_ms)
     	PRINTF("AD8232 could not be initialized!\n");
     	return;
     }
-    ad8232_set_sampling_period(sampling_rate_ms * 1000) == AD8232_SUCCESS;
-    if (!sensor.status) {
-		PRINTF("AD8232 sampling period could not be configured!\n");
-		return;
-	}
+//    ad8232_set_sampling_period(sampling_rate_ms * 1000) == AD8232_SUCCESS;
+//    if (!sensor.status) {
+//		PRINTF("AD8232 sampling period could not be configured!\n");
+//		return;
+//	}
 
     set_limits(EVENT_EKG, 0.0, 1.0);
 }
@@ -58,7 +59,8 @@ void ADC0_IRQHANDLER(void)
 		return;
 
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    float sample = ((float)ad8232_get_new_sample()) / (float)UINT32_MAX;
+//    float sample = ((float)ad8232_get_new_sample()) / (float)UINT12_MAX;
+	float sample = ((float)ad8232_get_new_sample());
     sensor.status = write_sample(sample, EVENT_EKG, &xHigherPriorityTaskWoken);
 
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);

@@ -59,8 +59,8 @@ typedef struct {
 #define LOWEST_BPM 	60.0
 #define HIGHEST_BPM 100.0
 
-#define LOWEST_SPO2		0.95
-#define HIGHEST_SPO2	1.00
+#define LOWEST_SPO2		95
+#define HIGHEST_SPO2	100
 
 #define SENSOR_HYSTERESIS 0.025
 

@@ -376,7 +376,7 @@ instance:
     - adc16_config:
       - referenceVoltageSource: 'kADC16_ReferenceVoltageSourceVref'
       - clockSource: 'kADC16_ClockSourceAsynchronousClock'
-      - enableAsynchronousClock: 'true'
+      - enableAsynchronousClock: 'false'
       - clockDivider: 'kADC16_ClockDivider8'
       - resolution: 'kADC16_ResolutionSE12Bit'
       - longSampleMode: 'kADC16_LongSampleDisabled'
@@ -417,7 +417,7 @@ adc16_channel_config_t ADC0_channelsConfig[1] = {
 const adc16_config_t ADC0_config = {
   .referenceVoltageSource = kADC16_ReferenceVoltageSourceVref,
   .clockSource = kADC16_ClockSourceAsynchronousClock,
-  .enableAsynchronousClock = true,
+  .enableAsynchronousClock = false,
   .clockDivider = kADC16_ClockDivider8,
   .resolution = kADC16_ResolutionSE12Bit,
   .longSampleMode = kADC16_LongSampleDisabled,

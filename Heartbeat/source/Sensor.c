@@ -61,8 +61,8 @@ void set_limits(sensor_event_type_t ev, float min, float max)
 		min_values[ev] = min;
 		max_values[ev] = max;
 
-		threshold_low[ev] = min + (max-min)*SENSOR_HYSTERESIS;
-		threshold_high[ev] = max - (max-min)*SENSOR_HYSTERESIS;
+//		threshold_low[ev] = min + (max-min)*SENSOR_HYSTERESIS;
+//		threshold_high[ev] = max - (max-min)*SENSOR_HYSTERESIS;
 
 		range_status[ev] = EVENT_RANGE_OK;
 	}
@@ -75,10 +75,10 @@ uint32_t in_range(sensor_event_t ev)
 		float min = min_values[ev.type];
 		float max = max_values[ev.type];
 
-		if (range_status[ev.type] == EVENT_RANGE_UNDERFLOW)
-			min = threshold_low[ev.type];
-		else if (range_status[ev.type] == EVENT_RANGE_OVERFLOW)
-			max = threshold_high[ev.type];
+//		if (range_status[ev.type] == EVENT_RANGE_UNDERFLOW)
+//			min = threshold_low[ev.type];
+//		else if (range_status[ev.type] == EVENT_RANGE_OVERFLOW)
+//			max = threshold_high[ev.type];
 
 		if (ev.value > max)
 			range_status[ev.type] = EVENT_RANGE_OVERFLOW;

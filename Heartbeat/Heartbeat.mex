@@ -211,7 +211,6 @@
                   <pin peripheral="I2S0" signal="TXD0" pin_num="71" pin_signal="ADC0_SE15/PTC1/LLWU_P6/SPI0_PCS3/UART1_RTS_b/FTM0_CH0/FB_AD13/I2S0_TXD0"/>
                   <pin peripheral="I2S0" signal="TX_FS" pin_num="65" pin_signal="PTB19/CAN0_RX/FTM2_CH1/I2S0_TX_FS/FB_OE_b/FTM2_QD_PHB"/>
                   <pin peripheral="I2S0" signal="MCLK" pin_num="80" pin_signal="ADC1_SE4b/CMP0_IN2/PTC8/FTM3_CH4/I2S0_MCLK/FB_AD7"/>
-                  <pin peripheral="ADC0" signal="DM, 0" pin_num="19" pin_signal="ADC0_DM0/ADC1_DM3"/>
                   <pin peripheral="ADC0" signal="SE, 19" pin_num="19" pin_signal="ADC0_DM0/ADC1_DM3"/>
                   <pin peripheral="ADC0" signal="TRG, A" pin_num="" pin_signal="PIT_trigger_0"/>
                   <pin peripheral="UART3" signal="RX" pin_num="90" pin_signal="PTC16/UART3_RX/ENET0_1588_TMR0/FB_CS5_b/FB_TSIZ1/FB_BE23_16_BLS15_8_b"/>
@@ -221,6 +220,7 @@
                         <pin_feature name="direction" value="INPUT"/>
                      </pin_features>
                   </pin>
+                  <pin peripheral="ADC0" signal="VREFH" pin_num="23" pin_signal="VREFH"/>
                </pins>
             </function>
             <function name="BOARD_InitButtonsPins">
@@ -1292,7 +1292,7 @@
                         <struct name="adc16_config">
                            <setting name="referenceVoltageSource" value="kADC16_ReferenceVoltageSourceVref"/>
                            <setting name="clockSource" value="kADC16_ClockSourceAsynchronousClock"/>
-                           <setting name="enableAsynchronousClock" value="true"/>
+                           <setting name="enableAsynchronousClock" value="false"/>
                            <setting name="clockDivider" value="kADC16_ClockDivider8"/>
                            <setting name="resolution" value="kADC16_ResolutionSE12Bit"/>
                            <setting name="longSampleMode" value="kADC16_LongSampleDisabled"/>
