@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 /**
  * @file    heartbeat.c
  * @brief   Application entry point.
@@ -43,8 +43,11 @@
 #include "fsl_debug_console.h"
 
 /* other includes. */
-#include "drv/audio_player.h"
 #include "drv/flashmem.h"
+#include "drv/audio_player.h"
+#include "libs/helix/pub/mp3dec.h"
+#include "mp3_sample.h"
+
 /*******************************************************************************
  * TEST SIGNAL
  ******************************************************************************/
@@ -77,8 +80,9 @@ static void example_task(void *pvParameters);
  */
 
 
-int main(void) {
 
+
+int main(void) {
   	/* Init board hardware. */
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
@@ -122,9 +126,9 @@ static void example_task(void *pvParameters) {
 //	vTaskDelay(pdMS_TO_TICKS(2000));
 //	audio_player_play_audio(AUDIO_PLAYER_BAD_SPO2);
 
+
+
 	for (;;) {
 		vTaskSuspend(NULL);
 	}
-
 }
-
