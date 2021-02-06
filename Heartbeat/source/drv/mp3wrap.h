@@ -32,8 +32,8 @@ bool mp3wrap_init();
  *
  * This function sets the MP3 data that will be decoded
  *
- * @param pointer to MP3 data
- * @param length in bytes of mp3 data
+ * @param data : pointer to MP3 data
+ * @param datalength : length in bytes of mp3 data
  *
  * @return True if MP3 frame could be found within data.
  */
@@ -45,8 +45,8 @@ bool mp3wrap_setdata(const uint8_t* data, size_t datalength);
  * This function decodes the next frame of MP3 data. The format of the output data will correspond
  * to the format of the MP3 data (stereo data will be decompressed as LRLR bytes)
  *
- * @param pointer to output buffer, with enough space for one MP3 frame
- * @param bytes decoded (number of bytes in outdata). Zero in case the data has been completely decoded.
+ * @param outdata : pointer to output buffer, with enough space for one MP3 frame
+ * @param outbytes : bytes decoded (number of bytes in outdata). Zero in case the data has been completely decoded.
  *
  * @return False if problem while decoding data.
  */

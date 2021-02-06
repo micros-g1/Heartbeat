@@ -348,14 +348,15 @@ typedef enum
 #define MIT_ADC_STAT 0x0004 //Logic 0: decimator has not muted. Logic 1: decimator has muted.
 #define OVERFLOW 0x0001 //Logic 0: no overflow detected (read-out). Logic 1: overflow detected (read-out).
 
-//Default configuration
+//Default configuration for initialization:
+
 //Enable all power
 #define UDA1380_PWRCTR_INIT_VALUE  (PON_PLL | PON_HP | PON_DAC | PON_BIAS | EN_AVC | PON_AVC | PON_LNA | PON_PGAL | PON_ADCL | PON_PGAR | PON_ADCR)
 #define UDA1380_PWRCTR_INIT_MASK (PON_PLL | PON_HP | PON_DAC | PON_BIAS | EN_AVC | PON_AVC | PON_LNA | PON_PGAL | PON_ADCL | PON_PGAR | PON_ADCR)
 //Enable all clocks, WSPLL was enabled, ADC and DAC clocks from WSPLL. PLL Config for 12.5 to 25 KHz
 #define UDA1380_CLK_INIT_VALUE (EN_ADC | EN_DEC | EN_DAC | EN_INT | ADC_CLK | DAC_CLK | PLL_12K5_25K)
 #define UDA1380_CLK_INIT_MASK (EN_ADC | EN_DEC | EN_DAC | EN_INT | ADC_CLK | DAC_CLK | PLL)
-//Use digital mixer, I2S format
+//I2S format
 #define UDA1380_IBUSCFG_INIT_VALUE (SFORI_I2S_BUS | SFORO_I2S_BUS)
 #define UDA1380_IBUSCFG_INIT_MASK (SFORI | SFORO)
 //Analog Mixer, Maximum Gain
@@ -386,7 +387,7 @@ typedef enum
 #define UDA1380_PGA_INIT_VALUE (PGA_GAINCTRLRR_dB(PGA_GAINCTRLRx_dB_MAX) | PGA_GAINCTRLRL_dB(PGA_GAINCTRLRx_dB_MAX))
 #define UDA1380_PGA_INIT_MASK (MT_ADC | PGA_GAINCTRL_R | PGA_GAINCTRL_L)
 //Non Invert, maximum gain, DC Filter Enabled
-#define UDA1380_ADC_INIT_VALUE  (VGA_CTRL_dB(VGA_CTRL_dB_MAX) |SKIP_DCFIL)
+#define UDA1380_ADC_INIT_VALUE  (VGA_CTRL_dB(VGA_CTRL_dB_MAX) | SKIP_DCFIL)
 #define UDA1380_ADC_INIT_MASK (ADCPOL_INV | VGA_CTRL | SKIP_DCFIL)
 
 #endif /* DRV_UDA1380_HW_H_ */

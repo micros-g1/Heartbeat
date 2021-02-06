@@ -190,7 +190,7 @@ max30102_state_t max30102_set_a_full_en(bool a_full_en){
 				MAX30102_SUCCESS : MAX30102_FAILURE;
 }
 
-max30102_state_t max30102_set_fifo_config(max30102_fifo_configuration_t *config){
+max30102_state_t max30102_set_fifo_config(const max30102_fifo_configuration_t *config){
 	if(!i2c) return MAX30102_FAILURE;
 
 	return i2c_write_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_CONFIGURATION_ADDR, config->val)?
@@ -228,7 +228,7 @@ max30102_state_t max30102_set_fifo_smp_ave(max30102_smp_ave_t smp_ave){
 				MAX30102_SUCCESS : MAX30102_FAILURE;
 }
 
-max30102_state_t max30102_set_spo2_config(max30102_spo2_configuration_t *config){
+max30102_state_t max30102_set_spo2_config(const max30102_spo2_configuration_t *config){
 	if(!i2c) return MAX30102_FAILURE;
 	return i2c_write_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_SPO2_CONFIGURATION_ADDR, config->val)?
 					MAX30102_SUCCESS : MAX30102_FAILURE;
@@ -327,7 +327,7 @@ max30102_state_t max30102_get_interrupt_status(max30102_interrupt_status_t *stat
 }
 
 
-max30102_state_t max30102_set_mode_config(max30102_mode_configuration_t *config){
+max30102_state_t max30102_set_mode_config(const max30102_mode_configuration_t *config){
 	if(!i2c) return MAX30102_FAILURE;
 
 	return i2c_write_byte_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_MODE_CONFIGURATION_ADDR, config->val)?

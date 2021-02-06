@@ -8,7 +8,7 @@
 #include "uda1380_hw.h"
 #include "uda1380.h"
 #include <peripherals.h>
-#include "i2c.h"
+#include "i2c/i2c.h"
 
 static i2c_handle_t* i2c = NULL;
 static sai_transfer_t xfer = {0};

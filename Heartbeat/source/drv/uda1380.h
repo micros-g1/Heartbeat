@@ -31,8 +31,8 @@ bool uda1380_init();
 /*!
  * @brief Sends I2S Audio data to UDA1380
  *
- * @param pointer to audio data
- * @param length of audio data
+ * @param data : pointer to audio data
+ * @param data_length : length of audio data
  */
 void uda1380_playback(const uint8_t* data, size_t data_length);
 
@@ -44,7 +44,7 @@ void uda1380_stop();
 /*!
  * @brief Set finished playing callback
  *
- * @param pointer to callback function
+ * @param callback : pointer to callback function
  */
 void uda1380_finished_set_callback(uda1380_callback_t callback);
 
