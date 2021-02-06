@@ -148,3 +148,46 @@ bool i2c_write_bits_addr8(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr
 	//perform write with mask
 	return i2c_write_byte_addr8_mask(dev, devAddress, subAddr, mask, data);
 }
+bool i2c_read_word_addr8(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint16_t *datap)
+{
+	//2 bytes I2C Read
+	//ENDIANNESS FIX
+	uint16_t value;
+	bool result = i2c_read_addr8(dev, devAddress, subAddr, 2, (uint8_t* ) &value);
+	if(result)
+		*datap = (value >> 8) | (value << 8);
+	return result;
+}
+bool i2c_write_word_addr8(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint16_t data)
+{
+	//2 byte I2C write
+	//ENDIANNESS FIX
+	uint16_t value = (data >> 8) | (data << 8);
+	return i2c_write_addr8(dev, devAddress, subAddr, 2, (uint8_t*) &value);
+}
+bool i2c_read_word_addr8_mask(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint16_t mask, uint16_t *datap)
+{
+	//Read word
+	bool success = i2c_read_word_addr8(dev, devAddress, subAddr, datap);
+	if(success)
+		//Apply read mask
+		*datap = *datap & mask;
+	return success;
+}
+bool i2c_write_word_addr8_mask(i2c_handle_t *dev, uint8_t devAddress, uint8_t subAddr, uint16_t mask, uint16_t data)
+{
+	uint16_t newdata = 0;
+	bool success = true;
+	//Any bit to be conserved?
+	if(~mask)
+		//If so, read
+		success = i2c_read_word_addr8_mask(dev, devAddress, subAddr, ~mask, &newdata);
+	if(success)
+	{
+		//Apply mask to incoming data, and or it with old data
+		newdata |= (data & mask);
+		//write
+		success = i2c_write_word_addr8(dev, devAddress, subAddr, newdata);
+	}
+	return true;
+}

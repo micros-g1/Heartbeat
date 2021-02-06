@@ -1,0 +1,7 @@
+ExitOnError 1
+r
+h
+loadfile "C:\Users\Tomas\Desktop\joinedst.bin" 0x3e800 
+qc
+
+qc
