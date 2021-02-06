@@ -11,15 +11,10 @@ HMP3Decoder dec = 0;
 uint8_t* datap = 0;
 int bytesleft = 0;
 
-//TODO: ERROR WHEN DATA DOES NOT MEET THIS CRITERIA
-#define TARGET_SAMPLERATE 16000
-#define TARGET_CHANNELS 1
-#define TARGET_BITS 16
-
-
 bool mp3wrap_init()
 {
 	dec = MP3InitDecoder();
+	//Initialise variables
 	datap = NULL;
 	bytesleft = 0;
 	return dec != 0; // If NULL memory allocation failed.
@@ -27,6 +22,7 @@ bool mp3wrap_init()
 
 bool mp3wrap_setdata(const uint8_t* data, size_t datalength)
 {
+	//Try to find mp3 frame
 	bool framefound = false;
 	datap = (uint8_t*) data;
 	bytesleft = datalength;
@@ -39,18 +35,21 @@ bool mp3wrap_setdata(const uint8_t* data, size_t datalength)
 		bytesleft -= offset;
 		MP3FrameInfo frameInfo;
 		int ercode = MP3GetNextFrameInfo(dec, &frameInfo, datap);
+		//Is mp3 frame valid?
 		if(ercode == ERR_MP3_NONE)
 		{
 			framefound = true;
 		}
 		else
 		{
+			//If no, try next one.
 			datap++;
 			bytesleft--;
 		}
 	}
 	if(!framefound)
 	{
+		//Could not find valid data?
 		datap = NULL;
 		bytesleft = 0;
 	}
@@ -63,10 +62,12 @@ bool mp3wrap_decode_next(uint8_t* outdata, size_t* outbytes)
 	*outbytes = 0;
 	if(bytesleft != 0)
 	{
+		//Decode next data
 		if(MP3Decode(dec, &datap, &bytesleft, (short*) outdata, 0) != ERR_MP3_NONE)
 			success = false;
 		else
 		{
+			//Number of decoded bytes
 			MP3FrameInfo mp3FrameInfo;
 			MP3GetLastFrameInfo(dec, &mp3FrameInfo);
 			*outbytes = mp3FrameInfo.outputSamps*mp3FrameInfo.bitsPerSample/8;
@@ -77,11 +78,13 @@ bool mp3wrap_decode_next(uint8_t* outdata, size_t* outbytes)
 
 bool mp3wrap_finished()
 {
+	//when no bytes left to read, then finished.
 	return bytesleft == 0;
 }
 
 void mp3wrap_deinit()
 {
+	//Deinitialise.
 	MP3FreeDecoder(dec);
 	datap = NULL;
 	bytesleft = 0;
