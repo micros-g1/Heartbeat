@@ -56,7 +56,7 @@ typedef struct {
 #define LOWEST_TEMPERATURE 	35.0
 #define HIGHEST_TEMPERATURE 36.5
 
-#define LOWEST_BPM 	60.0
+#define LOWEST_BPM 	80.0
 #define HIGHEST_BPM 100.0
 
 #define LOWEST_SPO2		95

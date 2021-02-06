@@ -103,6 +103,5 @@ uint8_t BT_com_get_tag(sensor_event_type_t event){
 
 bool BT_com_is_connected(){
 	bool ret = GPIO_PinRead(BOARD_HC05_STATE_GPIO, BOARD_HC05_STATE_PIN);
-//	return (bool)ret;
-	return true;
+	return (bool)ret;
 }

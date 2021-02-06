@@ -10,16 +10,16 @@
  * Included files
  **********************************************************************************************************************/
 #include "fsl_common.h"
+#include "fsl_adc16.h"
 #include "fsl_gpio.h"
 #include "fsl_port.h"
 #include "fsl_i2c.h"
 #include "fsl_i2c_freertos.h"
 #include "fsl_sai.h"
 #include "fsl_clock.h"
+#include "fsl_pit.h"
 #include "fsl_uart.h"
 #include "fsl_uart_freertos.h"
-#include "fsl_adc16.h"
-#include "fsl_pit.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -29,6 +29,14 @@ extern "C" {
  * Definitions
  **********************************************************************************************************************/
 /* Definitions for BOARD_InitPeripherals functional group */
+/* Alias for ADC0 peripheral */
+#define ADC0_PERIPHERAL ADC0
+/* ADC0 interrupt vector ID (number). */
+#define ADC0_IRQN ADC0_IRQn
+/* ADC0 interrupt handler identifier. */
+#define ADC0_IRQHANDLER ADC0_IRQHandler
+/* Channel 0 (SE.19) conversion control group. */
+#define ADC0_CH0_CONTROL_GROUP 0
 /* Alias for GPIOB peripheral */
 #define GPIOB_GPIO GPIOB
 /* Alias for PORTB */
@@ -44,8 +52,6 @@ extern "C" {
 #define I2C0_CLOCK_SOURCE I2C0_CLK_SRC
 /* Definition of the clock source frequency */
 #define I2C0_CLK_FREQ CLOCK_GetFreq(I2C0_CLOCK_SOURCE)
-/* I2C0 interrupt vector ID (number). */
-#define I2C0_IRQN I2C0_IRQn
 /* Definition of peripheral ID */
 #define I2S0_PERIPHERAL I2S0
 /* Master clock source frequency used for calculating the master clock divider, not available on all devices. */
@@ -60,28 +66,6 @@ extern "C" {
 #define I2S0_TX_WORD_WIDTH 16U
 /* Number of words within frame used for calculating the bit clock divider in the TxSetBitClockRate function. */
 #define I2S0_TX_WORDS_PER_FRAME 2U
-/* Definition of peripheral ID */
-#define UART0_PERIPHERAL UART0
-/* Definition of the clock source frequency */
-#define UART0_CLOCK_SOURCE CLOCK_GetFreq(UART0_CLK_SRC)
-/* Definition of peripheral ID */
-#define UART3_PERIPHERAL UART3
-/* Definition of the clock source frequency */
-#define UART3_CLOCK_SOURCE CLOCK_GetFreq(UART3_CLK_SRC)
-/* Definition of the backround buffer size */
-#define UART3_BACKGROUND_BUFFER_SIZE 2000
-/* UART3 interrupt vector ID (number). */
-#define UART3_SERIAL_RX_TX_IRQN UART3_RX_TX_IRQn
-/* UART3 interrupt vector ID (number). */
-#define UART3_SERIAL_ERROR_IRQN UART3_ERR_IRQn
-/* Alias for ADC0 peripheral */
-#define ADC0_PERIPHERAL ADC0
-/* ADC0 interrupt vector ID (number). */
-#define ADC0_IRQN ADC0_IRQn
-/* ADC0 interrupt handler identifier. */
-#define ADC0_IRQHANDLER ADC0_IRQHandler
-/* Channel 0 (SE.19) conversion control group. */
-#define ADC0_CH0_CONTROL_GROUP 0
 /* BOARD_InitPeripherals defines for PIT */
 /* Definition of peripheral ID. */
 #define PIT_PERIPHERAL PIT
@@ -95,28 +79,37 @@ extern "C" {
 #define PIT_CHANNEL_0 kPIT_Chnl_0
 /* Definition of ticks count for channel 0. */
 #define PIT_CHANNEL_0_TICKS 333299U
+/* Definition of peripheral ID */
+#define UART0_PERIPHERAL UART0
+/* Definition of the clock source frequency */
+#define UART0_CLOCK_SOURCE CLOCK_GetFreq(UART0_CLK_SRC)
+/* Definition of peripheral ID */
+#define UART3_PERIPHERAL UART3
+/* Definition of the clock source frequency */
+#define UART3_CLOCK_SOURCE CLOCK_GetFreq(UART3_CLK_SRC)
+/* Definition of the backround buffer size */
+#define UART3_BACKGROUND_BUFFER_SIZE 200
 
 /***********************************************************************************************************************
  * Global variables
  **********************************************************************************************************************/
-extern i2c_rtos_handle_t I2CA_rtosHandle;
-extern const i2c_master_config_t I2C0_config;
-extern sai_transceiver_t I2S0_Tx_config;
-extern sai_handle_t I2S0_Tx_handle;
-extern const uart_config_t UART0_config;
-extern uart_rtos_handle_t UART3_rtos_handle;
-extern uart_handle_t UART3_uart_handle;
-extern uart_rtos_config_t UART3_rtos_config;
 extern adc16_channel_config_t ADC0_channelsConfig[1];
 extern const adc16_config_t ADC0_config;
 extern const adc16_channel_mux_mode_t ADC0_muxMode;
 extern const adc16_hardware_average_mode_t ADC0_hardwareAverageMode;
+extern i2c_rtos_handle_t I2CA_rtosHandle;
+extern const i2c_master_config_t I2C0_config;
+extern sai_transceiver_t I2S0_Tx_config;
+extern sai_handle_t I2S0_Tx_handle;
 extern const pit_config_t PIT_config;
+extern const uart_config_t UART0_config;
+extern uart_rtos_handle_t UART3_rtos_handle;
+extern uart_handle_t UART3_uart_handle;
+extern uart_rtos_config_t UART3_rtos_config;
 
 /***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
-
 void BOARD_InitPeripherals(void);
 
 /***********************************************************************************************************************

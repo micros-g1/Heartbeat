@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding= "UTF-8" ?>
-<configuration name="MK64FN1M0xxx12" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_1.9 http://mcuxpresso.nxp.com/XSD/mex_configuration_1.9.xsd" uuid="56c1caf3-4099-44f4-b5ae-aa6497b9b6a5" version="1.9" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_1.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<configuration name="MK64FN1M0xxx12" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_1.8 http://mcuxpresso.nxp.com/XSD/mex_configuration_1.8.xsd" uuid="56c1caf3-4099-44f4-b5ae-aa6497b9b6a5" version="1.8" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_1.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
    <common>
       <processor>MK64FN1M0xxx12</processor>
       <package>MK64FN1M0VLL12</package>
@@ -16,13 +16,13 @@
       <generate_code_modified_registers_only>false</generate_code_modified_registers_only>
    </preferences>
    <tools>
-      <pins name="Pins" version="9.0" enabled="true" update_project_code="true">
+      <pins name="Pins" version="8.0" enabled="true" update_project_code="true">
          <generated_project_files>
             <file path="board/pin_mux.c" update_enabled="true"/>
             <file path="board/pin_mux.h" update_enabled="true"/>
          </generated_project_files>
          <pins_profile>
-            <processor_version>9.0.0</processor_version>
+            <processor_version>8.0.1</processor_version>
             <pin_labels>
                <pin_label pin_num="90" pin_signal="PTC16/UART3_RX/ENET0_1588_TMR0/FB_CS5_b/FB_TSIZ1/FB_BE23_16_BLS15_8_b" label="J1[2]" identifier="TMR_1588_0"/>
                <pin_label pin_num="91" pin_signal="PTC17/UART3_TX/ENET0_1588_TMR1/FB_CS4_b/FB_TSIZ0/FB_BE31_24_BLS7_0_b" label="J1[4]" identifier="TMR_1588_1"/>
@@ -780,7 +780,7 @@
             <file path="board/clock_config.h" update_enabled="true"/>
          </generated_project_files>
          <clocks_profile>
-            <processor_version>9.0.0</processor_version>
+            <processor_version>8.0.1</processor_version>
          </clocks_profile>
          <clock_configurations>
             <clock_configuration name="BOARD_BootClockRUN">
@@ -913,8 +913,18 @@
          </dcdx_profile>
          <dcdx_configurations/>
       </dcdx>
-      <periphs name="Peripherals" version="9.0" enabled="true" update_project_code="true">
+      <periphs name="Peripherals" version="8.0" enabled="true" update_project_code="true">
          <dependencies>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.adc16" description="ADC16 Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
+               <feature name="enabled" evaluation="equal">
+                  <data type="Boolean">true</data>
+               </feature>
+            </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.adc16" description="Unsupported version of the ADC16 Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
+               <feature name="version" evaluation="equivalent">
+                  <data type="Version">2.1.0</data>
+               </feature>
+            </dependency>
             <dependency resourceType="SWComponent" resourceId="platform.drivers.gpio" description="GPIO Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
                <feature name="enabled" evaluation="equal">
                   <data type="Boolean">true</data>
@@ -945,26 +955,6 @@
                   <data type="Version">2.3.1</data>
                </feature>
             </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.uart" description="UART Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
-               <feature name="enabled" evaluation="equal">
-                  <data type="Boolean">true</data>
-               </feature>
-            </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.uart" description="Unsupported version of the UART Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
-               <feature name="version" evaluation="greaterOrEqual">
-                  <data type="Version">2.2.0</data>
-               </feature>
-            </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.adc16" description="ADC16 Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
-               <feature name="enabled" evaluation="equal">
-                  <data type="Boolean">true</data>
-               </feature>
-            </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.adc16" description="Unsupported version of the ADC16 Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
-               <feature name="version" evaluation="equivalent">
-                  <data type="Version">2.1.0</data>
-               </feature>
-            </dependency>
             <dependency resourceType="SWComponent" resourceId="platform.drivers.pit" description="PIT Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
                <feature name="enabled" evaluation="equal">
                   <data type="Boolean">true</data>
@@ -975,27 +965,38 @@
                   <data type="Version">2.0.0</data>
                </feature>
             </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.uart" description="UART Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
+               <feature name="enabled" evaluation="equal">
+                  <data type="Boolean">true</data>
+               </feature>
+            </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.uart" description="Unsupported version of the UART Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
+               <feature name="version" evaluation="greaterOrEqual">
+                  <data type="Version">2.2.0</data>
+               </feature>
+            </dependency>
          </dependencies>
          <generated_project_files>
             <file path="board/peripherals.c" update_enabled="true"/>
             <file path="board/peripherals.h" update_enabled="true"/>
          </generated_project_files>
          <peripherals_profile>
-            <processor_version>9.0.0</processor_version>
+            <processor_version>8.0.1</processor_version>
          </peripherals_profile>
          <functional_groups>
             <functional_group name="BOARD_InitPeripherals" uuid="5e99aa89-113c-4ea7-8360-300e047a8bb3" called_from_default_init="true" id_prefix="" core="core0">
                <description></description>
                <options/>
                <dependencies>
-                  <dependency resourceType="SWComponent" resourceId="platform.drivers.port" description="The fsl_port driver is missing in the project (required for the GPIO driver)." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
-                     <feature name="enabled" evaluation="equal">
-                        <data type="Boolean">true</data>
+                  <dependency resourceType="Peripheral" resourceId="ADC0" description="At least one of ADC0 hardware triggers (A or B) needs to be routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routedUnifiedSignals" evaluation="includesAny">
+                        <data type="String">ADC0.adc_trigger.A</data>
+                        <data type="String">ADC0.adc_trigger.B</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="SWComponent" resourceId="platform.drivers.port" description="The compatible version of the fsl_port driver is not available in the project (required for the GPIO driver)." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
-                     <feature name="version" evaluation="compatible">
-                        <data type="Version">2.1.0</data>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="ADC0.adc_se.19" description="Signal SE of the channel 19 of the peripheral ADC0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="">
+                        <data type="Boolean">true</data>
                      </feature>
                   </dependency>
                   <dependency resourceType="PeripheralUnifiedSignal" resourceId="I2C0.i2c_scl" description="Signal serial clock of the peripheral I2C0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
@@ -1053,6 +1054,11 @@
                         <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="Bus_clock" description="Bus clock is inactive." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
+                     </feature>
+                  </dependency>
                   <dependency resourceType="ClockOutput" resourceId="System_clock" description="System clock is inactive." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="frequency" evaluation="greaterThan">
                         <data type="Frequency" unit="Hz">0</data>
@@ -1093,201 +1099,9 @@
                         <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="Peripheral" resourceId="ADC0" description="At least one of ADC0 hardware triggers (A or B) needs to be routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
-                     <feature name="routedUnifiedSignals" evaluation="includesAny">
-                        <data type="String">ADC0.adc_trigger.A</data>
-                        <data type="String">ADC0.adc_trigger.B</data>
-                     </feature>
-                  </dependency>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="ADC0.adc_se.19" description="Signal SE of the channel 19 of the peripheral ADC0 is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
-                     <feature name="routed" evaluation="">
-                        <data type="Boolean">true</data>
-                     </feature>
-                  </dependency>
-                  <dependency resourceType="ClockOutput" resourceId="Bus_clock" description="Bus clock is inactive." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
-                     <feature name="frequency" evaluation="greaterThan">
-                        <data type="Frequency" unit="Hz">0</data>
-                     </feature>
-                  </dependency>
                </dependencies>
                <instances>
-                  <instance name="GPIOB" uuid="74a50033-1c87-4fe5-8d66-0e418185eda0" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOB" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
-                     <config_set name="fsl_gpio">
-                        <setting name="enable_irq" value="true"/>
-                        <struct name="port_interrupt">
-                           <setting name="IRQn" value="PORTB_IRQn"/>
-                           <setting name="enable_interrrupt" value="noInit"/>
-                           <setting name="enable_priority" value="false"/>
-                           <setting name="priority" value="0"/>
-                           <setting name="enable_custom_name" value="false"/>
-                        </struct>
-                     </config_set>
-                  </instance>
-                  <instance name="I2C0" uuid="db02f194-a408-4097-80aa-5caaa857b42e" type="i2c" type_id="i2c_2566d7363e7e9aaedabb432110e372d7" mode="freertos" peripheral="I2C0" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
-                     <config_set name="fsl_i2c">
-                        <setting name="i2c_mode" value="kI2C_Master"/>
-                        <setting name="clockSource" value="BusInterfaceClock"/>
-                        <setting name="clockSourceFreq" value="GetFreq"/>
-                        <struct name="rtos_handle">
-                           <setting name="enable_custom_name" value="true"/>
-                           <setting name="handle_custom_name" value="I2CA_rtosHandle"/>
-                        </struct>
-                        <struct name="i2c_master_config">
-                           <setting name="enableMaster" value="true"/>
-                           <setting name="enableStopHold" value="false"/>
-                           <setting name="baudRate_Bps" value="100000"/>
-                           <setting name="glitchFilterWidth" value="0"/>
-                        </struct>
-                        <struct name="interrupt_priority">
-                           <setting name="IRQn" value="I2C0_IRQn"/>
-                           <setting name="enable_priority" value="false"/>
-                           <setting name="priority" value="0"/>
-                        </struct>
-                     </config_set>
-                  </instance>
-                  <instance name="I2S0" uuid="68bbfc94-3f69-4999-b141-5a0ddb295fc7" type="sai" type_id="sai_37a0d4b4ecc2db8ea149dbe2026c6550" mode="transfer" peripheral="I2S0" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
-                     <config_set name="fsl_sai">
-                        <struct name="mclk_config">
-                           <setting name="masterClockSource" value="kSAI_MclkSourceSysclk"/>
-                           <setting name="masterClockSourceFreq" value="BOARD_BootClockRUN"/>
-                           <setting name="masterClockFrequency" value="6.144 MHz"/>
-                           <setting name="init_mclk_config" value="true"/>
-                        </struct>
-                        <struct name="sai_master_clock"/>
-                        <setting name="usage" value="playback"/>
-                        <array name="signal_config">
-                           <struct name="0">
-                              <setting name="sourceTx" value="Tx"/>
-                           </struct>
-                           <struct name="1">
-                              <setting name="sourceTx" value="Tx"/>
-                           </struct>
-                        </array>
-                        <struct name="syncSwapI"/>
-                        <struct name="bclkTxSetting"/>
-                        <struct name="syncTxSetting"/>
-                        <struct name="whole">
-                           <struct name="tx_group">
-                              <struct name="sai_transceiver">
-                                 <struct name="bitClock">
-                                    <setting name="modeM" value="master"/>
-                                    <setting name="bitClockSource" value="kSAI_BclkSourceMclkDiv"/>
-                                    <setting name="bclkPolarityM" value="kSAI_PolarityActiveLow"/>
-                                    <setting name="bclkInputDelayM" value="false"/>
-                                 </struct>
-                                 <struct name="frameSync">
-                                    <setting name="modeM" value="master"/>
-                                    <setting name="frameSyncWidthM" value="16"/>
-                                    <setting name="frameSyncPolarityM" value="kSAI_PolarityActiveLow"/>
-                                    <setting name="frameSyncEarlyM" value="true"/>
-                                 </struct>
-                                 <setting name="sampleRate_Hz" value="kSAI_SampleRate16KHz"/>
-                                 <set name="channelMask">
-                                    <selected>
-                                       <id>kSAI_Channel0Mask</id>
-                                    </selected>
-                                 </set>
-                                 <struct name="serialData">
-                                    <setting name="differentFirstWord" value="false"/>
-                                    <setting name="sameDataWordLengthM" value="kSAI_WordWidth16bits"/>
-                                    <setting name="dataOrder" value="kSAI_DataMSB"/>
-                                    <setting name="dataFirstBitShiftedM" value="16"/>
-                                    <setting name="dataWordNumM" value="2"/>
-                                    <struct name="dataMasked_config">
-                                       <array name="dataMasked_L">
-                                          <setting name="0" value="false"/>
-                                          <setting name="1" value="false"/>
-                                          <setting name="2" value="false"/>
-                                          <setting name="3" value="false"/>
-                                          <setting name="4" value="false"/>
-                                          <setting name="5" value="false"/>
-                                          <setting name="6" value="false"/>
-                                          <setting name="7" value="false"/>
-                                          <setting name="8" value="false"/>
-                                          <setting name="9" value="false"/>
-                                          <setting name="10" value="false"/>
-                                          <setting name="11" value="false"/>
-                                          <setting name="12" value="false"/>
-                                          <setting name="13" value="false"/>
-                                          <setting name="14" value="false"/>
-                                          <setting name="15" value="false"/>
-                                       </array>
-                                       <array name="dataMasked_H">
-                                          <setting name="0" value="false"/>
-                                          <setting name="1" value="false"/>
-                                          <setting name="2" value="false"/>
-                                          <setting name="3" value="false"/>
-                                          <setting name="4" value="false"/>
-                                          <setting name="5" value="false"/>
-                                          <setting name="6" value="false"/>
-                                          <setting name="7" value="false"/>
-                                          <setting name="8" value="false"/>
-                                          <setting name="9" value="false"/>
-                                          <setting name="10" value="false"/>
-                                          <setting name="11" value="false"/>
-                                          <setting name="12" value="false"/>
-                                          <setting name="13" value="false"/>
-                                          <setting name="14" value="false"/>
-                                          <setting name="15" value="false"/>
-                                       </array>
-                                    </struct>
-                                 </struct>
-                                 <struct name="fifo">
-                                    <setting name="fifoWatermarkM" value="7"/>
-                                 </struct>
-                              </struct>
-                              <struct name="transfer_config_group">
-                                 <setting name="init_transfer" value="false"/>
-                                 <struct name="transfer">
-                                    <setting name="dataSize" value="44100"/>
-                                 </struct>
-                                 <setting name="init_callback" value="false"/>
-                                 <setting name="callback_fcn" value=""/>
-                                 <setting name="user_data" value=""/>
-                              </struct>
-                           </struct>
-                        </struct>
-                     </config_set>
-                  </instance>
-                  <instance name="UART0" uuid="3c882834-7c9b-41fa-bc03-03ee323cccc5" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="polling" peripheral="UART0" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
-                     <config_set name="uartConfig_t" quick_selection="QuickSelection1">
-                        <struct name="uartConfig">
-                           <setting name="clockSource" value="BusInterfaceClock"/>
-                           <setting name="clockSourceFreq" value="GetFreq"/>
-                           <setting name="baudRate_Bps" value="115200"/>
-                           <setting name="parityMode" value="kUART_ParityDisabled"/>
-                           <setting name="stopBitCount" value="kUART_OneStopBit"/>
-                           <setting name="txFifoWatermark" value="0"/>
-                           <setting name="rxFifoWatermark" value="1"/>
-                           <setting name="idleType" value="kUART_IdleTypeStartBit"/>
-                           <setting name="enableTx" value="true"/>
-                           <setting name="enableRx" value="true"/>
-                        </struct>
-                     </config_set>
-                  </instance>
-                  <instance name="UART3" uuid="e9bdbc7a-18e8-4403-8e83-37b8051be831" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="freertos" peripheral="UART3" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
-                     <config_set name="fsl_uart_freertos">
-                        <struct name="uart_rtos_configuration">
-                           <setting name="clockSource" value="BusInterfaceClock"/>
-                           <setting name="clockSourceFreq" value="GetFreq"/>
-                           <setting name="baudrate" value="115200"/>
-                           <setting name="parity" value="kUART_ParityDisabled"/>
-                           <setting name="stopbits" value="kUART_OneStopBit"/>
-                           <setting name="buffer_size" value="2000"/>
-                        </struct>
-                        <struct name="interrupt_rx_tx">
-                           <setting name="IRQn" value="UART3_RX_TX_IRQn"/>
-                           <setting name="enable_priority" value="false"/>
-                           <setting name="priority" value="0"/>
-                        </struct>
-                        <struct name="interrupt_err">
-                           <setting name="IRQn" value="UART3_ERR_IRQn"/>
-                           <setting name="enable_priority" value="false"/>
-                           <setting name="priority" value="0"/>
-                        </struct>
-                     </config_set>
-                  </instance>
-                  <instance name="ADC0" uuid="22393b14-f3bf-4c7f-b64d-461acf5f8fba" type="adc16" type_id="adc16_7a29cdeb84266e77f0c7ceac1b49fe2d" mode="ADC" peripheral="ADC0" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
+                  <instance name="ADC0" uuid="22393b14-f3bf-4c7f-b64d-461acf5f8fba" type="adc16" type_id="adc16_7a29cdeb84266e77f0c7ceac1b49fe2d" mode="ADC" peripheral="ADC0" enabled="true" comment="" custom_name_enabled="false">
                      <config_set name="fsl_adc16">
                         <struct name="adc16_config">
                            <setting name="referenceVoltageSource" value="kADC16_ReferenceVoltageSourceVref"/>
@@ -1328,30 +1142,33 @@
                         </array>
                      </config_set>
                   </instance>
-                  <instance name="PIT" uuid="cef4f989-54b5-452f-86df-fbafe52f6025" type="pit" type_id="pit_a4782ba5223c8a2527ba91aeb2bc4159" mode="LPTMR_GENERAL" peripheral="PIT" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
-                     <config_set name="fsl_pit">
-                        <setting name="enableRunInDebug" value="false"/>
-                        <struct name="timingConfig">
-                           <setting name="clockSource" value="BusInterfaceClock"/>
-                           <setting name="clockSourceFreq" value="BOARD_BootClockRUN"/>
+                  <instance name="GPIOB" uuid="74a50033-1c87-4fe5-8d66-0e418185eda0" type="gpio" type_id="gpio_5920c5e026e8e974e6dc54fbd5e22ad7" mode="GPIO" peripheral="GPIOB" enabled="true" comment="" custom_name_enabled="false">
+                     <config_set name="fsl_gpio">
+                        <setting name="enable_irq" value="true"/>
+                        <struct name="port_interrupt">
+                           <setting name="IRQn" value="PORTB_IRQn"/>
+                           <setting name="enable_interrrupt" value="noInit"/>
+                           <setting name="enable_priority" value="false"/>
+                           <setting name="priority" value="0"/>
+                           <setting name="enable_custom_name" value="false"/>
                         </struct>
-                        <array name="channels">
-                           <struct name="0">
-                              <setting name="channel_id" value="CHANNEL_0"/>
-                              <setting name="channelNumber" value="0"/>
-                              <setting name="enableChain" value="false"/>
-                              <setting name="timerPeriod" value="5555"/>
-                              <setting name="startTimer" value="false"/>
-                              <setting name="enableInterrupt" value="false"/>
-                              <struct name="interrupt">
-                                 <setting name="IRQn" value="PIT0_IRQn"/>
-                                 <setting name="enable_interrrupt" value="enabled"/>
-                                 <setting name="enable_priority" value="false"/>
-                                 <setting name="priority" value="0"/>
-                                 <setting name="enable_custom_name" value="false"/>
-                              </struct>
-                           </struct>
-                        </array>
+                     </config_set>
+                  </instance>
+                  <instance name="I2C0" uuid="db02f194-a408-4097-80aa-5caaa857b42e" type="i2c" type_id="i2c_2566d7363e7e9aaedabb432110e372d7" mode="freertos" peripheral="I2C0" enabled="true" comment="" custom_name_enabled="false">
+                     <config_set name="fsl_i2c">
+                        <setting name="i2c_mode" value="kI2C_Master"/>
+                        <setting name="clockSource" value="BusInterfaceClock"/>
+                        <setting name="clockSourceFreq" value="GetFreq"/>
+                        <struct name="rtos_handle">
+                           <setting name="enable_custom_name" value="true"/>
+                           <setting name="handle_custom_name" value="I2CA_rtosHandle"/>
+                        </struct>
+                        <struct name="i2c_master_config">
+                           <setting name="enableMaster" value="true"/>
+                           <setting name="enableStopHold" value="false"/>
+                           <setting name="baudRate_Bps" value="100000"/>
+                           <setting name="glitchFilterWidth" value="0"/>
+                        </struct>
                      </config_set>
                   </instance>
                   <instance name="I2S0" uuid="68bbfc94-3f69-4999-b141-5a0ddb295fc7" type="sai" type_id="sai_37a0d4b4ecc2db8ea149dbe2026c6550" mode="transfer" peripheral="I2S0" enabled="true" comment="" custom_name_enabled="false">
@@ -1458,6 +1275,32 @@
                         </struct>
                      </config_set>
                   </instance>
+                  <instance name="PIT" uuid="cef4f989-54b5-452f-86df-fbafe52f6025" type="pit" type_id="pit_a4782ba5223c8a2527ba91aeb2bc4159" mode="LPTMR_GENERAL" peripheral="PIT" enabled="true" comment="" custom_name_enabled="false">
+                     <config_set name="fsl_pit">
+                        <setting name="enableRunInDebug" value="false"/>
+                        <struct name="timingConfig">
+                           <setting name="clockSource" value="BusInterfaceClock"/>
+                           <setting name="clockSourceFreq" value="BOARD_BootClockRUN"/>
+                        </struct>
+                        <array name="channels">
+                           <struct name="0">
+                              <setting name="channel_id" value="CHANNEL_0"/>
+                              <setting name="channelNumber" value="0"/>
+                              <setting name="enableChain" value="false"/>
+                              <setting name="timerPeriod" value="5555"/>
+                              <setting name="startTimer" value="false"/>
+                              <setting name="enableInterrupt" value="false"/>
+                              <struct name="interrupt">
+                                 <setting name="IRQn" value="PIT0_IRQn"/>
+                                 <setting name="enable_interrrupt" value="enabled"/>
+                                 <setting name="enable_priority" value="false"/>
+                                 <setting name="priority" value="0"/>
+                                 <setting name="enable_custom_name" value="false"/>
+                              </struct>
+                           </struct>
+                        </array>
+                     </config_set>
+                  </instance>
                   <instance name="UART0" uuid="3c882834-7c9b-41fa-bc03-03ee323cccc5" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="polling" peripheral="UART0" enabled="true" comment="" custom_name_enabled="false">
                      <config_set name="uartConfig_t" quick_selection="QuickSelection1">
                         <struct name="uartConfig">
@@ -1471,6 +1314,18 @@
                            <setting name="idleType" value="kUART_IdleTypeStartBit"/>
                            <setting name="enableTx" value="true"/>
                            <setting name="enableRx" value="true"/>
+                        </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="UART3" uuid="e9bdbc7a-18e8-4403-8e83-37b8051be831" type="uart" type_id="uart_88ab1eca0cddb7ee407685775de016d5" mode="freertos" peripheral="UART3" enabled="true" comment="" custom_name_enabled="false">
+                     <config_set name="fsl_uart_freertos">
+                        <struct name="uart_rtos_configuration">
+                           <setting name="clockSource" value="BusInterfaceClock"/>
+                           <setting name="clockSourceFreq" value="GetFreq"/>
+                           <setting name="baudrate" value="115200"/>
+                           <setting name="parity" value="kUART_ParityDisabled"/>
+                           <setting name="stopbits" value="kUART_OneStopBit"/>
+                           <setting name="buffer_size" value="200"/>
                         </struct>
                      </config_set>
                   </instance>
