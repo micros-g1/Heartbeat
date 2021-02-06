@@ -32,16 +32,14 @@ bt_com_state_t BT_com_send_meas(sensor_event_t sens_ev){
 		// header
 		for (i = 0; i < HEADER_LEN; i++)
 			buffer[i] = (uint8_t)'F';
-
 		//tag
 		buffer[i++] = BT_com_get_tag(sens_ev.type);
 		// length
 		buffer[i++] = (uint8_t)sizeof(sens_ev.value);
 		// value
 		memcpy(&buffer[i], &(sens_ev.value), sizeof(sens_ev.value));
-
+		// UART Transmission to HC05.
 		UART_RTOS_Send(&UART3_rtos_handle, buffer, i + sizeof(sens_ev.value));
-
 		success = BT_COM_SUCCESS;
 	}
 	else{
@@ -58,12 +56,13 @@ bt_com_state_t BT_com_set_alarm(sensor_event_type_t source, bool set){
 		// header
 		for (i = 0; i < HEADER_LEN; i++)
 			buffer[i] = (uint8_t)'F';
-
 		//tag
 		buffer[i++] = (uint8_t)'A';
 		buffer[i++] = 2;
+		// Message: Source + Set or Reset.
 		buffer[i++] = BT_com_get_tag(source);
 		buffer[i++] = (uint8_t)(set ? 'S' : 'R');
+		// UART Transmission to HC05
 		UART_RTOS_Send(&UART3_rtos_handle, buffer, i);
 		success = BT_COM_SUCCESS;
 	}else{
@@ -76,7 +75,7 @@ uint8_t BT_com_get_tag(sensor_event_type_t event){
 	uint8_t tag;
 	switch(event){
 		case EVENT_EKG:
-			// EKG signal tag
+			// EKG signal
 			tag = 'E';
 			break;
 		case EVENT_SPO2_EKG:
@@ -92,6 +91,7 @@ uint8_t BT_com_get_tag(sensor_event_type_t event){
 			tag = 'S';
 			break;
 		case EVENT_TEMPERATURE:
+			// Temperature signal
 			tag = 'T';
 			break;
 		default:
