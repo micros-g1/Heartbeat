@@ -92,7 +92,7 @@ int main(void)
 	BOARD_InitBootClocks();
 	BOARD_InitBootPeripherals();
 	#ifndef BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL
-	    /* Init FSL debug console. */
+	/* Init FSL debug console. */
 	BOARD_InitDebugConsole();
 	#endif
 
@@ -101,8 +101,8 @@ int main(void)
     NVIC_SetPriority(ADC0_IRQn, 4);
     NVIC_SetPriority(UART3_RX_TX_IRQn, 5);
 	NVIC_SetPriority(I2S0_Tx_IRQn, 5);
-    //TODO: ver si las inicilaizaciones de sensores van aca o en la sensor_task
 
+	// Set measurements limits to triger alarms
 	set_limits(EVENT_TEMPERATURE, LOWEST_TEMPERATURE, HIGHEST_TEMPERATURE);
 	set_limits(EVENT_SPO2_SPO2, LOWEST_SPO2, HIGHEST_SPO2);
 	set_limits(EVENT_SPO2_BPM, LOWEST_BPM, HIGHEST_BPM);
@@ -113,7 +113,6 @@ int main(void)
 
 	if(correct_init)
 		sensor_init();
-
 
 	if(!correct_init)
 		error_trap();
