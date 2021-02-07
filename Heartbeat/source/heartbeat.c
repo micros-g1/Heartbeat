@@ -164,7 +164,6 @@ void sensors_task(void *pvParameters)
 	while (true) {
 		if (read_sample(&ev)) {
 			BT_com_send_meas(ev);
-
 			uint32_t last_range_status = get_range_status(ev.type);
 			uint32_t new_range_status = in_range(ev);
 
@@ -180,6 +179,10 @@ void sensors_task(void *pvParameters)
 					}
 				}
 			}
+
+//			sensor_event_type_t aux_type = (ev.type == EVENT_SPO2_SPO2_INVALID)? EVENT_SPO2_SPO2 : EVENT_SPO2_BPM;
+//			BT_com_set_alarm(aux_type, false);
+
 		}
 	}
 }
@@ -189,6 +192,7 @@ void alarm_timer_callback(TimerHandle_t xTimer)
 {
 	//Play all alarms
 	uint32_t evtype;
+
 	if((evtype = get_range_status(EVENT_SPO2_SPO2)) != EVENT_RANGE_OK){
 		if(evtype == EVENT_RANGE_OVERFLOW){
 			//UNDEFINED

@@ -38,8 +38,8 @@ audio_player_state_t audio_player_init(uint32_t task_priority);
 /**
  * @brief Initialises AUDIO PLAYER
  *
- * Can not play audio without having previously stopped
- * the currently playing audio (if such audio exists) with audio_player_stop_curr_audio.
+ * If no audio is currently playing, plays given audio.
+ * Otherwise, the function appends the given audio to the playing queue.
  *
  * @param audio_id : ID of the audio to be played.
  *
@@ -57,8 +57,7 @@ bool audio_player_currently_playing();
 /**
  * @brief AUDIO PLAYER STOP CURRENT AUDIO.
  *
- * This function should be called before changing an
- *  audio that is currently being played.
+ * Stops the current audio and removes all other audios from the queue.
  */
 void audio_player_stop_curr_audio();
 
