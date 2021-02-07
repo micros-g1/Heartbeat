@@ -7,9 +7,9 @@
 #include "mp3wrap.h"
 #include "libs/helix/pub/mp3dec.h"
 
-HMP3Decoder dec = 0;
-uint8_t* datap = 0;
-int bytesleft = 0;
+static HMP3Decoder dec = 0;
+static uint8_t* datap = 0;
+static int bytesleft = 0;
 
 bool mp3wrap_init()
 {

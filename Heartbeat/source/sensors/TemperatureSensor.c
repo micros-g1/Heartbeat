@@ -12,7 +12,7 @@ void temperature_stop_sampling(void);
 void temperature_init(uint32_t sampling_rate_ms);
 
 
-Sensor * new_temperature_sensor(void)
+__volatile__ Sensor * new_temperature_sensor(void)
 {
 	sensor.type = SENSOR_TEMPERATURE;
 	sensor.init = temperature_init;

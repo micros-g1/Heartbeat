@@ -4,6 +4,6 @@
 
 #include "Sensor.h"
 
-Sensor * new_spo2_sensor(void);
+__volatile__ Sensor * new_spo2_sensor(void);
 
 #endif

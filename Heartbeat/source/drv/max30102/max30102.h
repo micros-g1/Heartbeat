@@ -18,12 +18,6 @@ typedef enum
 	MAX30102_FAILURE = false
 }max30102_state_t;
 
-
-typedef union{
-	uint8_t bytes[4];
-	uint32_t led_data;
-}__attribute__((__packed__, aligned(1))) max30102_led_data_t;
-
 /**
  * @brief Initialises MAX30102
  * @param initial_mode : specifies mode for initialisation

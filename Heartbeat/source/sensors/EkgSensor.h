@@ -4,6 +4,6 @@
 
 #include "Sensor.h"
 
-Sensor * new_ekg_sensor(void);
+__volatile__ Sensor * new_ekg_sensor(void);
 
 #endif

@@ -3,6 +3,6 @@
 
 #include "Sensor.h"
 
-Sensor * new_temperature_sensor(void);
+__volatile__ Sensor * new_temperature_sensor(void);
 
 #endif

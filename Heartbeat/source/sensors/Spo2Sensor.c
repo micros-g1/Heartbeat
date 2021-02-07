@@ -60,7 +60,7 @@ void spo2_start_sampling(void);
 void spo2_stop_sampling(void);
 
 
-Sensor * new_spo2_sensor(void)
+__volatile__ Sensor * new_spo2_sensor(void)
 {
 	sensor.type = SENSOR_SPO2;
 	sensor.init = spo2_init;
@@ -144,7 +144,7 @@ void spo2_init(uint32_t task_priority)
 		red_led_samples1[i] = 0;
 	}
 
-	set_limits(EVENT_SPO2_EKG, 0.0, 1.0);
+	set_limits(EVENT_SPO2_LED, 0.0, 1.0);
 }
 
 
@@ -202,7 +202,7 @@ void spo2_task(void *pvParameters)
 				ir_buffers[curr_buffer][curr_buffer_n_samples] = aux_sample_ir;
 				red_buffers[curr_buffer][curr_buffer_n_samples] = aux_sample_red;
 
-				write_sample(((float)aux_sample_ir) / ((float)UINT18_MAX), EVENT_SPO2_EKG, NULL);
+				write_sample(((float)aux_sample_ir) / ((float)UINT18_MAX), EVENT_SPO2_LED, NULL);
 
 				curr_buffer_n_samples++;
 

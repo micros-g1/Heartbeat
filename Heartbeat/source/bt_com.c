@@ -78,7 +78,7 @@ uint8_t BT_com_get_tag(sensor_event_type_t event){
 			// EKG signal
 			tag = 'E';
 			break;
-		case EVENT_SPO2_EKG:
+		case EVENT_SPO2_LED:
 			// Oximeter EKG signal
 			tag = 'O';
 			break;

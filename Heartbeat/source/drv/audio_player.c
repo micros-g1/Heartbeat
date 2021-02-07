@@ -30,13 +30,6 @@
 #define AUDIO_PLAYER_ADDR_ID3 (AUDIO_PLAYER_ADDR_ID2 + AUDIO_PLAYER_LEN_ID2)
 #define AUDIO_PLAYER_ADDR_ID4 (AUDIO_PLAYER_ADDR_ID3 + AUDIO_PLAYER_LEN_ID3)
 #define AUDIO_PLAYER_ADDR_ID5 (AUDIO_PLAYER_ADDR_ID4 + AUDIO_PLAYER_LEN_ID4)
-/*
- * Make sure that your code is not (by mistake) re-writing to the Flash
- * the next time that it runs (without first erasing it) since a second write to a phrase,
- * without first erasing the sector that is in, is an invalid operation that can damage the flash
- * and cause it to behave strangely (often causing hard-faults to occur when the corrupted area is read,
- * where debuggers will tend to display the content as "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- ").
- */
 
 static TaskHandle_t xTaskAudioPlayer = NULL;
 static SemaphoreHandle_t xBinarySemaphore = NULL;
@@ -46,17 +39,20 @@ static bool playing = false;
 static uint8_t buffer1[AUDIO_PLAYER_DATA_CHUNK] __attribute__((aligned(4)));
 static uint8_t buffer2[AUDIO_PLAYER_DATA_CHUNK] __attribute__((aligned(4)));
 static uint8_t buffer3[AUDIO_PLAYER_DATA_CHUNK] __attribute__((aligned(4)));
+
 static uint8_t * buffers[AUDIO_PLAYER_N_BUFFERS] = {buffer1, buffer2, buffer3};
 static bool buffer_availables[AUDIO_PLAYER_N_BUFFERS] = {true, true, true};
 static size_t bytesread[AUDIO_PLAYER_N_BUFFERS] = {0, 0, 0};
+
 static int next_playing = 0;
 static int n_used_buffers = 0;
 
 /*callback that is called by uda when a chunk of data
 has almost finished playing.*/
 static void uda_finished_chunk();
+
 //task that decodes data and sends it to uda1380 to play, chunk by chunk
-void audio_player_task(void *pvParameters);
+static void audio_player_task(void *pvParameters);
 
 audio_player_state_t audio_player_init(uint32_t task_priority){
 	audio_player_state_t correct_init = AUDIO_PLAYER_SUCCESS;

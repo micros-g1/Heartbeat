@@ -38,6 +38,7 @@ max30205_state_t max30205_init();
  * @return status indicating if operation was successful
  */
 max30205_state_t max30205_set_config(const max30205_config_t *config);
+
 /**
  * @brief MAX30205 Set One Shot
  *
@@ -50,6 +51,7 @@ max30205_state_t max30205_set_config(const max30205_config_t *config);
  * @return status indicating if operation was successful
  */
 max30205_state_t max30205_set_one_shot(bool one_shot);
+
 /**
  * @brief MAX30205 Set Timeout value
  *
@@ -59,6 +61,7 @@ max30205_state_t max30205_set_one_shot(bool one_shot);
  * @return status indicating if operation was successful
  */
 max30205_state_t max30205_set_not_timeout(bool not_timeout);
+
 /**
  * @brief MAX30205 Set Fault Queue
  *
@@ -67,6 +70,7 @@ max30205_state_t max30205_set_not_timeout(bool not_timeout);
  * @return status indicating if operation was successful
  */
 max30205_state_t max30205_set_fault_queue(max30205_fault_queue_t fault_queue);
+
 /**
  * @brief MAX30205 Set Overtemperature Shutdown (OS) Polarity
  * OS is an open-drain output under all conditions and requires
@@ -78,6 +82,7 @@ max30205_state_t max30205_set_fault_queue(max30205_fault_queue_t fault_queue);
  * @return status indicating if operation was successful
  */
 max30205_state_t max30205_set_os_polarity(bool os_polarity);
+
 /**
  * @brief MAX30205 Set Comparator / Interrupt mode
  * In comparator mode, OS is asserted when the temperature rises above the
@@ -91,6 +96,7 @@ max30205_state_t max30205_set_os_polarity(bool os_polarity);
  * @return status indicating if operation was successful
  */
 max30205_state_t max30205_not_comparator_interrupt(bool not_comparator_interrupt);
+
 /**
  * @brief MAX30205 Set Shutdown value
  *
@@ -104,6 +110,7 @@ max30205_state_t max30205_not_comparator_interrupt(bool not_comparator_interrupt
  */
 max30205_state_t max30205_shutdown(bool shutdown);
 
+
 /**
  * @brief Sets MAX30205 temperature hysteresis
  * @param float : new hysteresis value
@@ -111,6 +118,7 @@ max30205_state_t max30205_shutdown(bool shutdown);
  * @return status indicating if operation was successful
  */
 max30205_state_t max30205_set_thyst(float thyst);
+
 /**
  * @brief Gets MAX30205 temperature hysteresis
  * @param float : pointer to float where the current
@@ -120,6 +128,7 @@ max30205_state_t max30205_set_thyst(float thyst);
  */
 max30205_state_t max30205_get_thyst(float *thyst);
 
+
 /**
  * @brief Sets MAX30205 overtemperature shutdown value
  * @param tos : new overtemperature shutdown value
@@ -127,6 +136,7 @@ max30205_state_t max30205_get_thyst(float *thyst);
  * @return status indicating if operation was successful
  */
 max30205_state_t max30205_set_tos(float tos);
+
 /**
  * @brief Gets MAX30205 overtemperature shutdown
  * @param tos : pointer to variable where the current
@@ -135,6 +145,7 @@ max30205_state_t max30205_set_tos(float tos);
  * @return status indicating if operation was successful
  */
 max30205_state_t max30205_get_tos(float *tos);
+
 
 /**
  * @brief MAX30205 get temperature reading

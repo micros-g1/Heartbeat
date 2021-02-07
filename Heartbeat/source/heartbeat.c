@@ -61,20 +61,24 @@
 #include "bt_com.h"
 
 
+#define alarm_period_ms 10000
+
 QueueHandle_t xSensorQueue = NULL;
 QueueHandle_t xCommsQueue = NULL;
 
-TimerHandle_t xTemperatureSensorTimer = NULL;
+TimerHandle_t xAlarmTimer = NULL;
+
 void * pvTemperatureSensorId = NULL;
 
 
-static Sensor * sensors[3];
-static bool alarm_set = false;
+static Sensor __volatile__ * sensors[3];
+
 static bool correct_init;
 
 static void error_trap();
-void handle_alarms(sensor_event_t ev);
+void play_alarm(sensor_event_t ev);
 void sensors_task(void *pvParameters);
+void alarm_timer_callback(TimerHandle_t xTimer);
 
 /*******************************************************************************
  * Code
@@ -121,45 +125,24 @@ int main(void)
 
 	xTaskCreate(sensors_task, "sensor task", configMINIMAL_STACK_SIZE + 166, NULL, SENSOR_TASK_PRIORITY, NULL);
 
+	xAlarmTimer = xTimerCreate(
+		"audio_alarm_timer", 		// name for debugging purposes only
+		pdMS_TO_TICKS(alarm_period_ms),	// period
+		pdTRUE,					// auto-reload timer (as opposed to one-shot)
+		NULL,	            	// timer id. it can be NULL if we don't want to use it
+		alarm_timer_callback					// callback
+	);
+	if (xAlarmTimer == NULL) {
+		PRINTF("Alarm timer could not be initialized!\n");
+	}
 	vTaskStartScheduler();
 	while (true) ;
 }
 
-
-void handle_alarms(sensor_event_t ev){
-	if(!alarm_set) return;
-
-	audio_player_audio_id_t audio_id;
-
-	switch(ev.type){
-	case EVENT_SPO2_BPM:
-		if(ev.value < LOWEST_BPM)
-			audio_id = AUDIO_PLAYER_LOW_HR;
-		else if(ev.value > HIGHEST_BPM)
-			audio_id= AUDIO_PLAYER_HIGH_HR;
-		break;
-	case EVENT_SPO2_SPO2:
-		if(ev.value < LOWEST_SPO2)
-			audio_id = AUDIO_PLAYER_LOW_SPO2;
-		break;
-	case EVENT_TEMPERATURE:
-		if(ev.value < LOWEST_TEMPERATURE)
-			audio_id = AUDIO_PLAYER_LOW_TEMP;
-		else if(ev.value < HIGHEST_TEMPERATURE)
-			audio_id = AUDIO_PLAYER_HIGH_TEMP;
-		break;
-	default:
-		audio_id = AUDIO_PLAYER_N_AUDIOS;
-		break;
-	}
-
-	if(!audio_player_currently_playing())
-		audio_player_play_audio(audio_id);
-}
 void sensors_task(void *pvParameters)
 {
 	NVIC_EnableIRQ(PORTB_IRQn);
-
+	xTimerStart(xAlarmTimer, 0);
 	sensors[0] = new_temperature_sensor();
 	sensors[0]->init(TEMP_SAMPLING_PERIOD_MS);
 
@@ -182,24 +165,56 @@ void sensors_task(void *pvParameters)
 		if (read_sample(&ev)) {
 			BT_com_send_meas(ev);
 
-//			uint32_t last_range_status = get_range_status(ev.type);
+			uint32_t last_range_status = get_range_status(ev.type);
 			uint32_t new_range_status = in_range(ev);
 
-//			if (new_range_status != last_range_status) {
-//				ev.type = new_range_status == EVENT_RANGE_OK ? ev.type+N_SENSOR_EVENTS+1 : ev.type+EVENTS_OUT+1;
-//				if (ev.type >= N_SENSOR_EVENTS && ev.type < EVENTS_IN)
-			if(ev.type == EVENT_SPO2_BPM || ev.type == EVENT_SPO2_SPO2){
-				if(new_range_status == EVENT_RANGE_OVERFLOW || new_range_status == EVENT_RANGE_UNDERFLOW){
-					alarm_set = true;
-					BT_com_set_alarm(ev.type, ev.type < EVENTS_OUT);
+			if (new_range_status != last_range_status){
+				if(ev.type == EVENT_SPO2_BPM || ev.type == EVENT_SPO2_SPO2 || ev.type == EVENT_TEMPERATURE){
+					if(new_range_status == EVENT_RANGE_OVERFLOW || new_range_status == EVENT_RANGE_UNDERFLOW){
+						BT_com_set_alarm(ev.type, true);
+						xTimerStart(xAlarmTimer,0);
+						alarm_timer_callback(xAlarmTimer);
+					}
+					else if(new_range_status == EVENT_RANGE_OK){
+						BT_com_set_alarm(ev.type, false);
+					}
 				}
-				else
-					alarm_set = false;
 			}
-			handle_alarms(ev);
 		}
 	}
 }
+
+// temperature sensor timer callback
+void alarm_timer_callback(TimerHandle_t xTimer)
+{
+	//Play all alarms
+	uint32_t evtype;
+	if((evtype = get_range_status(EVENT_SPO2_SPO2)) != EVENT_RANGE_OK){
+		if(evtype == EVENT_RANGE_OVERFLOW){
+			//UNDEFINED
+		}
+		if(evtype == EVENT_RANGE_UNDERFLOW){
+			audio_player_play_audio(AUDIO_PLAYER_LOW_SPO2);
+		}
+	}
+	if((evtype = get_range_status(EVENT_TEMPERATURE)) != EVENT_RANGE_OK){
+		if(evtype == EVENT_RANGE_OVERFLOW){
+			audio_player_play_audio(AUDIO_PLAYER_HIGH_TEMP);
+		}
+		if(evtype == EVENT_RANGE_UNDERFLOW){
+			audio_player_play_audio(AUDIO_PLAYER_LOW_TEMP);
+		}
+	}
+	if((evtype = get_range_status(EVENT_SPO2_BPM)) != EVENT_RANGE_OK){
+		if(evtype == EVENT_RANGE_OVERFLOW){
+			audio_player_play_audio(AUDIO_PLAYER_HIGH_HR);
+		}
+		if(evtype == EVENT_RANGE_UNDERFLOW){
+			audio_player_play_audio(AUDIO_PLAYER_LOW_HR);
+		}
+	}
+}
+
 
 static void error_trap(){
 	while(1){

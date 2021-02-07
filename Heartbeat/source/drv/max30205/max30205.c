@@ -15,6 +15,7 @@
 #define MAX30205_THYST_N_BYTES 2
 
 static i2c_handle_t* i2c = NULL;
+
 max30205_state_t max30205_init(){
 
 	//Power-On Reset Value

@@ -10,7 +10,7 @@ void ekg_start_sampling(void);
 void ekg_stop_sampling(void);
 
 
-Sensor * new_ekg_sensor(void)
+__volatile__ Sensor *new_ekg_sensor(void)
 {
 	sensor.type = SENSOR_EKG;
 	sensor.init = ekg_init;
