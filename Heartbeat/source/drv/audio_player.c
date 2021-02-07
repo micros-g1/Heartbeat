@@ -88,7 +88,10 @@ audio_player_state_t audio_player_init(uint32_t task_priority){
 }
 
 audio_player_state_t audio_player_play_audio(audio_player_audio_id_t audio_id){
-	if(in_pointer != out_pointer-1){
+	int out_pointer_minus_one = out_pointer-1;
+	if(out_pointer_minus_one < 0)
+		out_pointer_minus_one += AUDIO_PLAYER_QUEUE_LENGTH;
+	if(in_pointer != out_pointer_minus_one){
 		//Add audio to queue
 		audio_player_queue[in_pointer++] = audio_id;
 		if(in_pointer == AUDIO_PLAYER_QUEUE_LENGTH)
