@@ -230,11 +230,11 @@ bool audio_player_is_audio_in_queue(audio_player_audio_id_t id)
 {
 	int o_p = out_pointer;
 	int i_p = in_pointer;
-	int o_p_unwrap = out_pointer + (out_pointer < in_pointer ? AUDIO_PLAYER_QUEUE_LENGTH : 0);
-	int n = o_p_unwrap - i_p;
+	int i_p_unwrap = i_p + (i_p < o_p ? AUDIO_PLAYER_QUEUE_LENGTH : 0);
+	int n = i_p_unwrap - o_p;
 	for(int i = 0 ; i < n ; i++)
 	{
-		int p = i_p + i;
+		int p = o_p + i;
 		if(p >= AUDIO_PLAYER_QUEUE_LENGTH)
 			p -= AUDIO_PLAYER_QUEUE_LENGTH;
 		if(audio_player_queue[p] == id)
