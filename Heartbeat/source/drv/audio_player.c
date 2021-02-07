@@ -226,6 +226,24 @@ static void audio_player_set_mp3wrap_audio(audio_player_audio_id_t id)
 	mp3wrap_setdata(start_addr, len);
 }
 
+bool audio_player_is_audio_in_queue(audio_player_audio_id_t id)
+{
+	int o_p = out_pointer;
+	int i_p = in_pointer;
+	int o_p_unwrap = out_pointer + (out_pointer < in_pointer ? AUDIO_PLAYER_QUEUE_LENGTH : 0);
+	int n = o_p_unwrap - i_p;
+	for(int i = 0 ; i < n ; i++)
+	{
+		int p = i_p + i;
+		if(p >= AUDIO_PLAYER_QUEUE_LENGTH)
+			p -= AUDIO_PLAYER_QUEUE_LENGTH;
+		if(audio_player_queue[p] == id)
+			return true;
+	}
+	return false;
+}
+
+
 //called inside an interrupt
 static void uda_finished_chunk(){
 	BaseType_t xHigherPriorityTaskWoken;

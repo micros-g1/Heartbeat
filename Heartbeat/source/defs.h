@@ -52,13 +52,13 @@ typedef struct {
 } sensor_event_t;
 
 
-#define LOWEST_TEMPERATURE 	35.0
-#define HIGHEST_TEMPERATURE 36.5
+#define LOWEST_TEMPERATURE 	27.0
+#define HIGHEST_TEMPERATURE 31.0
 
-#define LOWEST_BPM 	80.0
-#define HIGHEST_BPM 100.0
+#define LOWEST_BPM 	45.0
+#define HIGHEST_BPM 65.0
 
-#define LOWEST_SPO2		95
+#define LOWEST_SPO2		95.0
 #define HIGHEST_SPO2	100
 
 #define SENSOR_HYSTERESIS 0.025

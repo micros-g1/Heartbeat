@@ -65,7 +65,7 @@ void set_limits(sensor_event_type_t ev, float min, float max)
 uint32_t in_range(sensor_event_t ev)
 {
 
-	if (ev.type < N_SENSOR_EVENTS && range_status[ev.type] != EVENT_RANGE_ERROR) {
+	if (ev.type < N_SENSOR_EVENTS) {
 
 		float min = min_values[ev.type];
 		float max = max_values[ev.type];

@@ -50,4 +50,14 @@ bt_com_state_t BT_com_send_meas(sensor_event_t sens_ev);
  */
 bt_com_state_t BT_com_set_alarm(sensor_event_type_t source, bool set);
 
+
+/*!
+ * @brief Sends error event over BT.
+ *
+ * @param source : Source of the alarm
+ *
+ * @return BT_COM_SUCCESS if error was sent correctly, BT_COM_FAILURE otherwise.
+ */
+bt_com_state_t BT_com_send_error(sensor_event_type_t source);
+
 #endif

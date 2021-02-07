@@ -163,26 +163,34 @@ void sensors_task(void *pvParameters)
 
 	while (true) {
 		if (read_sample(&ev)) {
-			BT_com_send_meas(ev);
+
 			uint32_t last_range_status = get_range_status(ev.type);
 			uint32_t new_range_status = in_range(ev);
 
-			if (new_range_status != last_range_status){
+			if(ev.type < N_SENSOR_EVENTS){
+				BT_com_send_meas(ev);
+
 				if(ev.type == EVENT_SPO2_BPM || ev.type == EVENT_SPO2_SPO2 || ev.type == EVENT_TEMPERATURE){
 					if(new_range_status == EVENT_RANGE_OVERFLOW || new_range_status == EVENT_RANGE_UNDERFLOW){
-						BT_com_set_alarm(ev.type, true);
-						xTimerStart(xAlarmTimer,0);
-						alarm_timer_callback(xAlarmTimer);
+							BT_com_set_alarm(ev.type, true);
+							if (new_range_status != last_range_status){
+								xTimerStart(xAlarmTimer,0);
+								alarm_timer_callback(xAlarmTimer);
+							}
 					}
 					else if(new_range_status == EVENT_RANGE_OK){
 						BT_com_set_alarm(ev.type, false);
 					}
 				}
 			}
-
-//			sensor_event_type_t aux_type = (ev.type == EVENT_SPO2_SPO2_INVALID)? EVENT_SPO2_SPO2 : EVENT_SPO2_BPM;
-//			BT_com_set_alarm(aux_type, false);
-
+			else if(ev.type == EVENT_SPO2_BPM_NOT_VALID){
+				BT_com_send_error(EVENT_SPO2_BPM);
+				BT_com_set_alarm(EVENT_SPO2_BPM, false);
+			}
+			else if(ev.type == EVENT_SPO2_SPO2_NOT_VALID){
+				BT_com_send_error(EVENT_SPO2_SPO2);
+				BT_com_set_alarm(EVENT_SPO2_SPO2, false);
+			}
 		}
 	}
 }
@@ -197,23 +205,28 @@ void alarm_timer_callback(TimerHandle_t xTimer)
 		if(evtype == EVENT_RANGE_OVERFLOW){
 			//UNDEFINED
 		}
-		if(evtype == EVENT_RANGE_UNDERFLOW){
+		else if(evtype == EVENT_RANGE_UNDERFLOW &&
+				!audio_player_is_audio_in_queue(AUDIO_PLAYER_LOW_SPO2)){
 			audio_player_play_audio(AUDIO_PLAYER_LOW_SPO2);
 		}
 	}
 	if((evtype = get_range_status(EVENT_TEMPERATURE)) != EVENT_RANGE_OK){
-		if(evtype == EVENT_RANGE_OVERFLOW){
+		if(evtype == EVENT_RANGE_OVERFLOW &&
+				!audio_player_is_audio_in_queue(AUDIO_PLAYER_HIGH_TEMP)){
 			audio_player_play_audio(AUDIO_PLAYER_HIGH_TEMP);
 		}
-		if(evtype == EVENT_RANGE_UNDERFLOW){
+		else if(evtype == EVENT_RANGE_UNDERFLOW &&
+				!audio_player_is_audio_in_queue(AUDIO_PLAYER_LOW_TEMP)){
 			audio_player_play_audio(AUDIO_PLAYER_LOW_TEMP);
 		}
 	}
 	if((evtype = get_range_status(EVENT_SPO2_BPM)) != EVENT_RANGE_OK){
-		if(evtype == EVENT_RANGE_OVERFLOW){
+		if(evtype == EVENT_RANGE_OVERFLOW &&
+				!audio_player_is_audio_in_queue(AUDIO_PLAYER_HIGH_HR)){
 			audio_player_play_audio(AUDIO_PLAYER_HIGH_HR);
 		}
-		if(evtype == EVENT_RANGE_UNDERFLOW){
+		else if(evtype == EVENT_RANGE_UNDERFLOW &&
+				!audio_player_is_audio_in_queue(AUDIO_PLAYER_LOW_HR)){
 			audio_player_play_audio(AUDIO_PLAYER_LOW_HR);
 		}
 	}

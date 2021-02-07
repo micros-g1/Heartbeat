@@ -61,4 +61,11 @@ bool audio_player_currently_playing();
  */
 void audio_player_stop_curr_audio();
 
+/**
+ * @brief AUDIO PLAYER CHECK IF AUDIO IS IN QUEUE.
+ *
+ * @return true if audio is already in queue, false otherwise.
+ */
+bool audio_player_is_audio_in_queue(audio_player_audio_id_t id);
+
 #endif /* DRV_AUDIO_PLAYER_H_ */

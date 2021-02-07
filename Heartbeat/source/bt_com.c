@@ -105,3 +105,24 @@ bool BT_com_is_connected(){
 	bool ret = GPIO_PinRead(BOARD_HC05_STATE_GPIO, BOARD_HC05_STATE_PIN);
 	return (bool)ret;
 }
+
+bt_com_state_t BT_com_send_error(sensor_event_type_t source){
+	bt_com_state_t success = BT_COM_FAILURE;
+	if(BT_com_is_connected()){
+		int i = 0;
+		// header
+		for (i = 0; i < HEADER_LEN; i++)
+			buffer[i] = (uint8_t)'F';
+		//tag
+		buffer[i++] = (uint8_t)'W';
+		buffer[i++] = 1;
+		// Message: Source + Set or Reset.
+		buffer[i++] = BT_com_get_tag(source);
+		// UART Transmission to HC05
+		UART_RTOS_Send(&UART3_rtos_handle, buffer, i);
+		success = BT_COM_SUCCESS;
+	}else{
+		success = BT_COM_FAILURE;
+	}
+	return success;
+}
