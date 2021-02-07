@@ -80,7 +80,7 @@ max30102_state_t max30102_set_ppg_rdy_en(bool ppg_rdy_en);
  *
  * @return status indicating if operation was successful
  */
-max30102_state_t max30102_set_a_full_en(bool a_full_en);								//checked
+max30102_state_t max30102_set_a_full_en(bool a_full_en);
 
 /**
  * @brief Requests interrupt status
@@ -152,7 +152,7 @@ max30102_state_t max30102_set_fifo_roll_over_en(bool roll_over_en);
  *
  * @return status indicating if operation was successful
  */
-max30102_state_t max30102_set_fifo_smp_ave(max30102_smp_ave_t smp_ave);					//checked
+max30102_state_t max30102_set_fifo_smp_ave(max30102_smp_ave_t smp_ave);
 
 /**
  * @brief Configures LED Current
@@ -186,7 +186,7 @@ max30102_state_t max30102_is_temp_read_ready(bool* rdy);
 max30102_state_t max30102_wait_temp_read_ready();
 
 /**
- * @brief Gets temperature measurement, in centigrads
+ * @brief Gets temperature measurement, in degree Celsius
  * @param temp : pointer to value where to store temperature
  *
  * @return status indicating if operation was successful
@@ -202,7 +202,7 @@ max30102_state_t max30102_get_temperature_c(float* temp);
 max30102_state_t max30102_set_spo2_config(const max30102_spo2_configuration_t *config);
 
 /**
- * @brief Sets SPO2 ADC range
+ * @brief Sets MAX30102 SPO2 ADC range
  * @param spo2_adc_rge : value indicating ADC range
  *
  * @return status indicating if operation was successful
@@ -210,7 +210,7 @@ max30102_state_t max30102_set_spo2_config(const max30102_spo2_configuration_t *c
 max30102_state_t max30102_set_spo2_adc_rge(max30102_spo2_adc_resolution_t spo2_adc_rge);
 
 /**
- * @brief Sets SPO2 sampling rate
+ * @brief Sets MAX30102 SPO2 sampling rate
  * @param spo2_sample_rate : Value indicating sampling rate to use
  *
  * @return status indicating if operation was successful
@@ -226,14 +226,14 @@ max30102_state_t max30102_set_sr(max30102_spo2_sample_rate_t spo2_sample_rate);
 max30102_state_t max30102_set_led_pw(max30102_led_pw_t led_pw);
 
 /**
- * @brief Triggers SPO2 reading
+ * @brief Triggers MAX30102 SPO2 readings (start sampling)
  *
  * @return status indicating if operation was successful
  */
 max30102_state_t max30102_trigger_spo2_reads();
 
 /**
- * @brief Read samples
+ * @brief Read MAX30102 samples
  *
  * @param ir_data : pointer to variable where to store IR measurement data
  * @param red_data : pointer to variable where to store RED measurement data

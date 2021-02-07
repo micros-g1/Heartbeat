@@ -23,7 +23,7 @@ ad8232_state_t ad8232_init(){
 }
 
 ad8232_state_t ad8232_set_sampling_period(uint64_t micro_segs){
-
+	//set PIT sampling period
 	PIT_SetTimerPeriod(PIT_PERIPHERAL, PIT_CHANNEL_0,
 			(uint64_t)((micro_segs * CLOCK_GetFreq(BUS_CLK)) / 1000000U));
 	return AD8232_SUCCESS;
@@ -35,7 +35,7 @@ ad8232_state_t ad8232_trigger_reads(){
 	return AD8232_SUCCESS;
 }
 ad8232_state_t ad8232_stop_reading(){
-
+	//stop PIT and hence stop sampling
 	PIT_StopTimer(PIT_PERIPHERAL, PIT_CHANNEL_0);
 	return AD8232_SUCCESS;
 }

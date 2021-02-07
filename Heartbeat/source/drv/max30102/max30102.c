@@ -26,7 +26,7 @@ static max30102_state_t max30102_wait_reset_ready();
 max30102_state_t max30102_init(max30102_mode_t initial_mode)
 {
 	i2c = &I2CA_rtosHandle;
-	i2c_init(i2c);
+	if(!i2c_init(i2c)) return MAX30102_FAILURE;
 
 	uint8_t part_id;
 	max30102_state_t state = max30102_get_part_id(&part_id);
@@ -34,7 +34,7 @@ max30102_state_t max30102_init(max30102_mode_t initial_mode)
 	state = state == MAX30102_SUCCESS? max30102_hard_reset() : state;
 	state = state == MAX30102_SUCCESS? max30102_wait_reset_ready() : state;
 
-	uint8_t data[1]={0x00};
+	uint8_t data[1] = {0x00};
 	i2c_write_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_INTERRUPT_ENABLE_2_ADDR, 1, data);
 	i2c_write_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_FIFO_WRITE_POINTER_ADDR, 1, data);
 	i2c_write_addr8(i2c, MAX30102_I2C_ADDRESS, MAX30102_OVERFLOW_COUNTER_ADDR, 1, data);
@@ -89,7 +89,7 @@ max30102_state_t max30102_get_temperature_c(float* temp)
 	{
 		uint8_t integer = MAX30102_RECOVER_BITSTART_LENGTH(t_data[0],MAX30102_DIE_TEMP_INTEGER_BIT_START,MAX30102_DIE_TEMP_INTEGER_LENGTH);
 		uint8_t frac = MAX30102_RECOVER_BITSTART_LENGTH(t_data[1],MAX30102_DIE_TEMP_FRACTION_BIT_START,MAX30102_DIE_TEMP_FRACTION_LENGTH);
-		*temp = MAX30102_CALCULATE_TEMP_C(integer,frac);
+		*temp = MAX30102_CALCULATE_TEMP_C(integer, frac);
 	}
 	return state;
 }

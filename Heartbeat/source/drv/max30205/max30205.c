@@ -50,7 +50,7 @@ max30205_state_t max30205_temp_read(float *temp){
 }
 
 
-max30205_state_t max30205_set_config(max30205_config_t *config){
+max30205_state_t max30205_set_config(const max30205_config_t *config){
 	if(!i2c) return MAX30205_FAILURE;
 
 	return i2c_write_byte_addr8(i2c, MAX30205_I2C_ADDRESS, MAX30205_CONFIG_ADDR, config->val)?
@@ -78,17 +78,7 @@ max30205_state_t max30205_set_not_timeout(bool not_timeout){
 	return i2c_write_byte_addr8_mask(i2c, MAX30205_I2C_ADDRESS, MAX30205_CONFIG_ADDR, mask, config.val)?
 				MAX30205_SUCCESS : MAX30205_FAILURE;
 }
-max30205_state_t max30205_set_data_format(bool data_format){
-	if(!i2c) return MAX30205_FAILURE;
 
-	max30205_config_t config;
-	memset(&config, 0, sizeof(config));
-	config.data_format = data_format;
-
-	uint8_t mask = MAX30205_MASK_GENERATE(MAX30205_DATA_FORMAT_BIT_START, MAX30205_DATA_FORMAT_BIT_LENGTH);
-	return i2c_write_byte_addr8_mask(i2c, MAX30205_I2C_ADDRESS, MAX30205_CONFIG_ADDR, mask, config.val)?
-				MAX30205_SUCCESS : MAX30205_FAILURE;
-}
 max30205_state_t max30205_set_fault_queue(max30205_fault_queue_t fault_queue){
 	if(!i2c) return MAX30205_FAILURE;
 

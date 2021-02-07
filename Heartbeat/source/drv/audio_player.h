@@ -2,7 +2,7 @@
  * audio_player.h
  *
  *  Created on: 15 ene. 2021
- *      Author: Tomas
+ *      Author: taomasgonzalez
  */
 
 #ifndef DRV_AUDIO_PLAYER_H_
@@ -26,11 +26,38 @@ typedef enum
 	AUDIO_PLAYER_N_AUDIOS
 }audio_player_audio_id_t;
 
+/**
+ * @brief Initialises AUDIO PLAYER
+ *
+ * @param task_priority: priority of the task that plays audio.
+ *
+ * @return status indicating if operation was successful
+ */
 audio_player_state_t audio_player_init(uint32_t task_priority);
-/*can't play audio without having previously stopped
-the currently playing audio (if such exists) with audio_player_stop_curr_audio*/
+
+/**
+ * @brief Initialises AUDIO PLAYER
+ *
+ * Can not play audio without having previously stopped
+ * the currently playing audio (if such audio exists) with audio_player_stop_curr_audio.
+ *
+ * @param audio_id: ID of the audio to be played.
+ *
+ * @return status indicating if operation was successful.
+ */
 audio_player_state_t audio_player_play_audio(audio_player_audio_id_t audio_id);
+/**
+ * @brief AUDIO PLAYER CURRENTLY PLAYING
+ *
+ * @return true if the AUDIO PLAYER is currently playing audio. false otherwise.
+ */
 bool audio_player_currently_playing();
+/**
+ * @brief AUDIO PLAYER STOP CURRENT AUDIO.
+ *
+ * This function should be called before changing an
+ *  audio that is currently being played.
+ */
 void audio_player_stop_curr_audio();
 
 #endif /* DRV_AUDIO_PLAYER_H_ */
