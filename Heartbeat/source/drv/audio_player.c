@@ -31,6 +31,11 @@
 #define AUDIO_PLAYER_ADDR_ID4 (AUDIO_PLAYER_ADDR_ID3 + AUDIO_PLAYER_LEN_ID3)
 #define AUDIO_PLAYER_ADDR_ID5 (AUDIO_PLAYER_ADDR_ID4 + AUDIO_PLAYER_LEN_ID4)
 
+#define AUDIO_PLAYER_QUEUE_LENGTH 10
+static volatile audio_player_audio_id_t audio_player_queue[AUDIO_PLAYER_QUEUE_LENGTH];
+static volatile int in_pointer = 0;
+static volatile int out_pointer = 0;
+
 static TaskHandle_t xTaskAudioPlayer = NULL;
 static SemaphoreHandle_t xBinarySemaphore = NULL;
 
@@ -53,6 +58,7 @@ static void uda_finished_chunk();
 
 //task that decodes data and sends it to uda1380 to play, chunk by chunk
 static void audio_player_task(void *pvParameters);
+static void audio_player_set_mp3wrap_audio(audio_player_audio_id_t id);
 
 audio_player_state_t audio_player_init(uint32_t task_priority){
 	audio_player_state_t correct_init = AUDIO_PLAYER_SUCCESS;
@@ -82,41 +88,19 @@ audio_player_state_t audio_player_init(uint32_t task_priority){
 }
 
 audio_player_state_t audio_player_play_audio(audio_player_audio_id_t audio_id){
-	if(!playing){
-		playing = true;
-		uint8_t *start_addr;
-		size_t len;
-		switch(audio_id){
-		case AUDIO_PLAYER_LOW_HR:
-			start_addr = AUDIO_PLAYER_ADDR_ID1;
-			len = AUDIO_PLAYER_LEN_ID1;
-			break;
-		case AUDIO_PLAYER_HIGH_HR:
-			start_addr = AUDIO_PLAYER_ADDR_ID2;
-			len = AUDIO_PLAYER_LEN_ID2;
-			break;
-		case AUDIO_PLAYER_LOW_TEMP:
-			start_addr = AUDIO_PLAYER_ADDR_ID3;
-			len = AUDIO_PLAYER_LEN_ID3;
-			break;
-		case AUDIO_PLAYER_HIGH_TEMP:
-			start_addr = AUDIO_PLAYER_ADDR_ID4;
-			len = AUDIO_PLAYER_LEN_ID4;
-			break;
-		case AUDIO_PLAYER_LOW_SPO2:
-			start_addr = AUDIO_PLAYER_ADDR_ID5;
-			len = AUDIO_PLAYER_LEN_ID5;
-			break;
-		default:
-			start_addr = NULL;
-			len = 0;
-			break;
+	if(in_pointer != out_pointer-1){
+		//Add audio to queue
+		audio_player_queue[in_pointer++] = audio_id;
+		if(in_pointer == AUDIO_PLAYER_QUEUE_LENGTH)
+			in_pointer = 0;
+		if(!playing){
+			//Start playing audio
+			xSemaphoreGive(xBinarySemaphore);
 		}
-	    mp3wrap_setdata(start_addr, len);
-		xSemaphoreGive(xBinarySemaphore);
 		return AUDIO_PLAYER_SUCCESS;
 	}
 	else
+		//Queue is full
 		return AUDIO_PLAYER_FAILURE;
 }
 
@@ -126,6 +110,8 @@ bool audio_player_currently_playing(){
 
 void audio_player_stop_curr_audio(){
 	uda1380_stop();
+	playing = false;
+	in_pointer = out_pointer = 0;
 	//reset variables
 	for(int i = 0; i < AUDIO_PLAYER_N_BUFFERS; i++){
 		buffer_availables[i] = true;
@@ -133,7 +119,6 @@ void audio_player_stop_curr_audio(){
 	}
 	next_playing = 0;
 	n_used_buffers = 0;
-	playing = false;
 }
 
 
@@ -141,8 +126,18 @@ void audio_player_task(void *pvParameters)
 {
 	while(true) {
 		xSemaphoreTake(xBinarySemaphore, portMAX_DELAY);
-
+		//If not playing or queue is not empty
+		if(!playing && (in_pointer != out_pointer))
+		{
+			audio_player_set_mp3wrap_audio(audio_player_queue[out_pointer++]);
+			if(out_pointer == AUDIO_PLAYER_QUEUE_LENGTH)
+				out_pointer = 0;
+			if(!mp3wrap_finished()) // Make sure it's valid
+				playing = true;
+		}
+		//Is playing audio?
 		if(playing){
+
 			// if this is the first time the data is being played, fill the first buffer
 			if(n_used_buffers == 0){
 		    	mp3wrap_decode_next(buffers[0], &bytesread[0]);
@@ -168,7 +163,19 @@ void audio_player_task(void *pvParameters)
 		    else{ // play decoded data and
 		    	uda1380_playback(buffers[next_playing], bytesread[next_playing]);
 		    	//decode data on available buffer
-				for(int i = 0; i < AUDIO_PLAYER_N_BUFFERS && !mp3wrap_finished(); i++){
+				for(int i = 0; i < AUDIO_PLAYER_N_BUFFERS; i++){
+					if(mp3wrap_finished()) //If finished but still audio in queue
+					{
+						while(mp3wrap_finished() && in_pointer != out_pointer) //Try to read more audio
+						{
+							audio_player_set_mp3wrap_audio(audio_player_queue[out_pointer++]);
+							if(out_pointer == AUDIO_PLAYER_QUEUE_LENGTH)
+								out_pointer = 0;
+						}
+						//Is there any audio?
+						if(mp3wrap_finished())
+							break; //Break loop if no
+					}
 					if(buffer_availables[i]){
 						mp3wrap_decode_next(buffers[i], &bytesread[i]);
 						buffer_availables[i] = false;
@@ -181,6 +188,39 @@ void audio_player_task(void *pvParameters)
 		    }
 		}
 	}
+}
+
+static void audio_player_set_mp3wrap_audio(audio_player_audio_id_t id)
+{
+	uint8_t *start_addr;
+	size_t len;
+	switch(id){
+	case AUDIO_PLAYER_LOW_HR:
+		start_addr = AUDIO_PLAYER_ADDR_ID1;
+		len = AUDIO_PLAYER_LEN_ID1;
+		break;
+	case AUDIO_PLAYER_HIGH_HR:
+		start_addr = AUDIO_PLAYER_ADDR_ID2;
+		len = AUDIO_PLAYER_LEN_ID2;
+		break;
+	case AUDIO_PLAYER_LOW_TEMP:
+		start_addr = AUDIO_PLAYER_ADDR_ID3;
+		len = AUDIO_PLAYER_LEN_ID3;
+		break;
+	case AUDIO_PLAYER_HIGH_TEMP:
+		start_addr = AUDIO_PLAYER_ADDR_ID4;
+		len = AUDIO_PLAYER_LEN_ID4;
+		break;
+	case AUDIO_PLAYER_LOW_SPO2:
+		start_addr = AUDIO_PLAYER_ADDR_ID5;
+		len = AUDIO_PLAYER_LEN_ID5;
+		break;
+	default:
+		start_addr = NULL;
+		len = 0;
+		break;
+	}
+	mp3wrap_setdata(start_addr, len);
 }
 
 //called inside an interrupt

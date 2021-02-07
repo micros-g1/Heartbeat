@@ -26,27 +26,28 @@ bool mp3wrap_setdata(const uint8_t* data, size_t datalength)
 	bool framefound = false;
 	datap = (uint8_t*) data;
 	bytesleft = datalength;
-	while(!framefound && bytesleft > 0)
-	{
-		int offset = MP3FindSyncWord(datap,  bytesleft);
-		if(offset < 0)
-			break; //Sync word not found, or error.
-		datap+= offset;
-		bytesleft -= offset;
-		MP3FrameInfo frameInfo;
-		int ercode = MP3GetNextFrameInfo(dec, &frameInfo, datap);
-		//Is mp3 frame valid?
-		if(ercode == ERR_MP3_NONE)
+	if(data != NULL)
+		while(!framefound && bytesleft > 0)
 		{
-			framefound = true;
+			int offset = MP3FindSyncWord(datap,  bytesleft);
+			if(offset < 0)
+				break; //Sync word not found, or error.
+			datap+= offset;
+			bytesleft -= offset;
+			MP3FrameInfo frameInfo;
+			int ercode = MP3GetNextFrameInfo(dec, &frameInfo, datap);
+			//Is mp3 frame valid?
+			if(ercode == ERR_MP3_NONE)
+			{
+				framefound = true;
+			}
+			else
+			{
+				//If no, try next one.
+				datap++;
+				bytesleft--;
+			}
 		}
-		else
-		{
-			//If no, try next one.
-			datap++;
-			bytesleft--;
-		}
-	}
 	if(!framefound)
 	{
 		//Could not find valid data?
