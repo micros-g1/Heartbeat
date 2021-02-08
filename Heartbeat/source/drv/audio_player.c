@@ -12,7 +12,6 @@
 #include <stddef.h>
 #include "semphr.h"
 #include "task.h"
-#include "music.h"
 #include "drv/mp3wrap.h"
 
 #define AUDIO_PLAYER_DATA_CHUNK 10000
