@@ -20,6 +20,7 @@
 #include "fsl_pit.h"
 #include "fsl_uart.h"
 #include "fsl_uart_freertos.h"
+#include "fsl_ftm.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -52,6 +53,8 @@ extern "C" {
 #define I2C0_CLOCK_SOURCE I2C0_CLK_SRC
 /* Definition of the clock source frequency */
 #define I2C0_CLK_FREQ CLOCK_GetFreq(I2C0_CLOCK_SOURCE)
+/* I2C0 interrupt vector ID (number). */
+#define I2C0_IRQN I2C0_IRQn
 /* Definition of peripheral ID */
 #define I2S0_PERIPHERAL I2S0
 /* Master clock source frequency used for calculating the master clock divider, not available on all devices. */
@@ -89,6 +92,18 @@ extern "C" {
 #define UART3_CLOCK_SOURCE CLOCK_GetFreq(UART3_CLK_SRC)
 /* Definition of the backround buffer size */
 #define UART3_BACKGROUND_BUFFER_SIZE 200
+/* UART3 interrupt vector ID (number). */
+#define UART3_SERIAL_RX_TX_IRQN UART3_RX_TX_IRQn
+/* UART3 interrupt vector ID (number). */
+#define UART3_SERIAL_ERROR_IRQN UART3_ERR_IRQn
+/* Definition of peripheral ID */
+#define FTM0_PERIPHERAL FTM0
+/* Definition of the clock source frequency */
+#define FTM0_CLOCK_SOURCE CLOCK_GetFreq(kCLOCK_BusClk)
+/* FTM0 interrupt vector ID (number). */
+#define FTM0_IRQN FTM0_IRQn
+/* FTM0 interrupt handler identifier. */
+#define FTM0_IRQHANDLER FTM0_IRQHandler
 
 /***********************************************************************************************************************
  * Global variables
@@ -106,10 +121,12 @@ extern const uart_config_t UART0_config;
 extern uart_rtos_handle_t UART3_rtos_handle;
 extern uart_handle_t UART3_uart_handle;
 extern uart_rtos_config_t UART3_rtos_config;
+extern const ftm_config_t FTM0_config;
 
 /***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
+
 void BOARD_InitPeripherals(void);
 
 /***********************************************************************************************************************

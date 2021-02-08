@@ -6,11 +6,11 @@
 /* clang-format off */
 /* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 !!GlobalInfo
-product: Peripherals v8.0
+product: Peripherals v9.0
 processor: MK64FN1M0xxx12
 package_id: MK64FN1M0VLL12
 mcu_data: ksdk2_0
-processor_version: 8.0.1
+processor_version: 9.0.0
 board: FRDM-K64F
 functionalGroups:
 - name: BOARD_InitPeripherals
@@ -57,7 +57,7 @@ instance:
       - clockSource: 'kADC16_ClockSourceAsynchronousClock'
       - enableAsynchronousClock: 'false'
       - clockDivider: 'kADC16_ClockDivider8'
-      - resolution: 'kADC16_ResolutionSE12Bit'
+      - resolution: 'kADC16_ResolutionSE16Bit'
       - longSampleMode: 'kADC16_LongSampleDisabled'
       - enableHighSpeed: 'false'
       - enableLowPower: 'false'
@@ -68,7 +68,7 @@ instance:
     - doAutoCalibration: 'false'
     - offset: '0'
     - trigger: 'true'
-    - hardwareAverageConfiguration: 'kADC16_HardwareAverageDisabled'
+    - hardwareAverageConfiguration: 'kADC16_HardwareAverageCount32'
     - enable_dma: 'false'
     - enable_irq: 'true'
     - adc_interrupt:
@@ -98,14 +98,14 @@ const adc16_config_t ADC0_config = {
   .clockSource = kADC16_ClockSourceAsynchronousClock,
   .enableAsynchronousClock = false,
   .clockDivider = kADC16_ClockDivider8,
-  .resolution = kADC16_ResolutionSE12Bit,
+  .resolution = kADC16_ResolutionSE16Bit,
   .longSampleMode = kADC16_LongSampleDisabled,
   .enableHighSpeed = false,
   .enableLowPower = false,
   .enableContinuousConversion = false
 };
 const adc16_channel_mux_mode_t ADC0_muxMode = kADC16_ChannelMuxA;
-const adc16_hardware_average_mode_t ADC0_hardwareAverageMode = kADC16_HardwareAverageDisabled;
+const adc16_hardware_average_mode_t ADC0_hardwareAverageMode = kADC16_HardwareAverageCount32;
 
 static void ADC0_init(void) {
   /* Initialize ADC16 converter */
@@ -118,7 +118,7 @@ static void ADC0_init(void) {
   ADC16_SetChannelMuxMode(ADC0_PERIPHERAL, ADC0_muxMode);
   /* Initialize channel */
   ADC16_SetChannelConfig(ADC0_PERIPHERAL, ADC0_CH0_CONTROL_GROUP, &ADC0_channelsConfig[0]);
-  /* Enable interrupt ADC0_IRQN request in the NVIC */
+  /* Enable interrupt ADC0_IRQn request in the NVIC. */
   EnableIRQ(ADC0_IRQN);
 }
 
@@ -150,7 +150,7 @@ instance:
 static void GPIOB_init(void) {
   /* Make sure, the clock gate for port B is enabled (e. g. in pin_mux.c) */
   /* Interrupt PORTB_IRQn request in the NVIC is not initialized (disabled by default). */
-  /* It can be enabled later by EnableIRQ(PORTB_IRQn); function call. */
+  /* It can be enabled later by EnableIRQ(GPIOB_IRQN);  function call. */
 }
 
 /***********************************************************************************************************************
@@ -179,6 +179,10 @@ instance:
       - enableStopHold: 'false'
       - baudRate_Bps: '100000'
       - glitchFilterWidth: '0'
+    - interrupt_priority:
+      - IRQn: 'I2C0_IRQn'
+      - enable_priority: 'false'
+      - priority: '0'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 i2c_rtos_handle_t I2CA_rtosHandle;
@@ -456,6 +460,14 @@ instance:
       - parity: 'kUART_ParityDisabled'
       - stopbits: 'kUART_OneStopBit'
       - buffer_size: '200'
+    - interrupt_rx_tx:
+      - IRQn: 'UART3_RX_TX_IRQn'
+      - enable_priority: 'false'
+      - priority: '0'
+    - interrupt_err:
+      - IRQn: 'UART3_ERR_IRQn'
+      - enable_priority: 'false'
+      - priority: '0'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 uart_rtos_handle_t UART3_rtos_handle;
@@ -478,6 +490,72 @@ static void UART3_init(void) {
 }
 
 /***********************************************************************************************************************
+ * FTM0 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'FTM0'
+- type: 'ftm'
+- mode: 'EdgeAligned'
+- custom_name_enabled: 'false'
+- type_id: 'ftm_04a15ae4af2b404bf2ae403c3dbe98b3'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'FTM0'
+- config_sets:
+  - ftm_main_config:
+    - ftm_config:
+      - clockSource: 'kFTM_SystemClock'
+      - clockSourceFreq: 'GetFreq'
+      - prescale: 'kFTM_Prescale_Divide_1'
+      - timerFrequency: '10000'
+      - bdmMode: 'kFTM_BdmMode_0'
+      - pwmSyncMode: 'kFTM_SoftwareTrigger'
+      - reloadPoints: ''
+      - faultMode: 'kFTM_Fault_Disable'
+      - faultFilterValue: '0'
+      - deadTimePrescale: 'kFTM_Deadtime_Prescale_1'
+      - deadTimeValue: '0'
+      - extTriggers: ''
+      - chnlInitState: ''
+      - chnlPolarity: ''
+      - useGlobalTimeBase: 'false'
+    - timer_interrupts: 'kFTM_TimeOverflowInterruptEnable'
+    - enable_irq: 'false'
+    - ftm_interrupt:
+      - IRQn: 'FTM0_IRQn'
+      - enable_interrrupt: 'enabled'
+      - enable_priority: 'false'
+      - priority: '0'
+      - enable_custom_name: 'false'
+    - EnableTimerInInit: 'true'
+  - ftm_edge_aligned_mode:
+    - ftm_edge_aligned_channels_config: []
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const ftm_config_t FTM0_config = {
+  .prescale = kFTM_Prescale_Divide_1,
+  .bdmMode = kFTM_BdmMode_0,
+  .pwmSyncMode = kFTM_SoftwareTrigger,
+  .reloadPoints = 0,
+  .faultMode = kFTM_Fault_Disable,
+  .faultFilterValue = 0U,
+  .deadTimePrescale = kFTM_Deadtime_Prescale_1,
+  .deadTimeValue = 0UL,
+  .extTriggers = 0,
+  .chnlInitState = 0,
+  .chnlPolarity = 0,
+  .useGlobalTimeBase = false
+};
+
+static void FTM0_init(void) {
+  FTM_Init(FTM0_PERIPHERAL, &FTM0_config);
+  FTM_SetTimerPeriod(FTM0_PERIPHERAL, ((FTM0_CLOCK_SOURCE/ (1U << (FTM0_PERIPHERAL->SC & FTM_SC_PS_MASK))) / 10000) + 1);
+  FTM_EnableInterrupts(FTM0_PERIPHERAL, kFTM_TimeOverflowInterruptEnable);
+  FTM_StartTimer(FTM0_PERIPHERAL, kFTM_SystemClock);
+}
+
+/***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
 void BOARD_InitPeripherals(void)
@@ -490,6 +568,7 @@ void BOARD_InitPeripherals(void)
   PIT_init();
   UART0_init();
   UART3_init();
+  FTM0_init();
 }
 
 /***********************************************************************************************************************

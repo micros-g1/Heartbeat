@@ -59,6 +59,7 @@
 #include "sensors/TemperatureSensor.h"
 #include "drv/audio_player.h"
 #include "bt_com.h"
+#include "fsl_ftm.h"
 
 
 #define alarm_period_ms 10000
@@ -237,4 +238,21 @@ static void error_trap(){
 	while(1){
 		;
 	}
+}
+
+static uint32_t RTOS_RunTimeCounter; /* runtime counter, used for configGENERATE_RUNTIME_STATS */
+
+void FTM0_IRQHandler(void) {
+  /* Clear interrupt flag.*/
+  FTM_ClearStatusFlags(FTM0, kFTM_TimeOverflowFlag);
+  RTOS_RunTimeCounter++; /* increment runtime counter */
+}
+
+void RTOS_AppConfigureTimerForRuntimeStats(void) {
+  RTOS_RunTimeCounter = 0;
+  EnableIRQ(FTM0_IRQn);
+}
+
+uint32_t RTOS_AppGetRuntimeCounterValueFromISR(void) {
+  return RTOS_RunTimeCounter;
 }

@@ -793,7 +793,7 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle( void ) PRIVILEGED_FUNCTION;
  *
  * A version of xTimerStart() that can be called from an interrupt service
  * routine.
- *x
+ *
  * @param xTimer The handle of the timer being started/restarted.
  *
  * @param pxHigherPriorityTaskWoken The timer service/daemon task spends most
